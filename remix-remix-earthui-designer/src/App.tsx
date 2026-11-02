@@ -8,6 +8,8 @@ import { MetaDeepIntelligenceConsole } from './components/MetaDeepIntelligenceCo
 import { LiquidTimeline } from './components/LiquidTimeline';
 import { BottomCardsRow } from './components/BottomCardsRow';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
+import { MissionAlertsModal } from './components/MissionAlertsModal';
+import { CommanderProfileModal } from './components/CommanderProfileModal';
 import Galaxy from './components/Galaxy';
 import {
   NavTab,
@@ -90,6 +92,8 @@ export default function App() {
   >('tri-agent-swarm');
   const [isModelMenuOpen, setIsModelMenuOpen] = useState<boolean>(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState<boolean>(false);
+  const [isAlertsModalOpen, setIsAlertsModalOpen] = useState<boolean>(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
   const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
   const [liveFirmsPoints, setLiveFirmsPoints] = useState<FirmsAnomalyPoint[]>([]);
   const [liveIncidents, setLiveIncidents] = useState<LiveIncidentItem[]>([]);
@@ -1203,12 +1207,20 @@ export default function App() {
               setCustomGeocodedPlace(null);
               setIsSearchSubmitted(false);
               setLiveAiDispatchState(null);
+              globeRef.current?.pointOfView({ lat: 20, lng: 0, altitude: 2.8 }, 1200);
+            } else if (tab === 'SATELLITES') {
+              globeRef.current?.pointOfView({ lat: 28.57, lng: -80.65, altitude: 2.45 }, 1200);
+            } else if (tab === 'ORBITS') {
+              setAdjustOrbitEnabled(true);
+              globeRef.current?.pointOfView({ lat: 14.8, lng: 88.5, altitude: 3.1 }, 1200);
+            } else if (tab === 'RELEASES') {
+              document.querySelector('section[aria-label="Upcoming Releases"]')?.scrollIntoView({ behavior: 'smooth' });
             }
           }}
           onFocusSearch={handleFocusSearch}
-          onOpenNotifications={() => {}}
+          onOpenNotifications={() => setIsAlertsModalOpen(true)}
           githubUrl="https://github.com"
-          onOpenProfile={() => {}}
+          onOpenProfile={() => setIsProfileModalOpen(true)}
           onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
           unreadAlertsCount={temporalState.activeHeatSpots}
         >

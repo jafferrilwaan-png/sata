@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Bell, Github, Keyboard } from 'lucide-react';
+import { Bell, Github, Keyboard, User } from 'lucide-react';
 import { NavTab } from '../utils/telemetryLogic';
 
 interface TopNavbarProps {
@@ -167,14 +167,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           type="button"
           onClick={onOpenProfile}
           aria-label="Commander Profile"
-          className="w-[clamp(30px,2.9vw,44px)] h-[clamp(30px,2.9vw,44px)] rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all shrink-0 cursor-pointer ml-0.5 bg-white"
+          title="Flight Controller Profile"
+          className="sata-icon-btn w-[clamp(30px,2.8vw,42px)] h-[clamp(30px,2.8vw,42px)] rounded-full flex items-center justify-center text-[#e4e4e7] hover:text-white transition-all cursor-pointer shrink-0"
         >
-          <img
-            src="/assets/ui/avatar.png"
-            alt="Commander Profile"
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover scale-110"
-          />
+          <User className="w-[clamp(14px,1.25vw,18px)] h-[clamp(14px,1.25vw,18px)] stroke-[1.8]" />
         </button>
       </div>
     </header>
