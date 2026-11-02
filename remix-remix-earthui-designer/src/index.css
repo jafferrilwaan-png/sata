@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+    user-select: none;
+  }
+
+  html,
+  body,
+  #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #02050a;
+    color: #f1f5f9;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* High-Liquidity Neutral iOS Frosted Glass Surfaces */
+.sata-glass-card {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 20px 48px -12px rgba(0, 0, 0, 0.50),
+    inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sata-glass-card:hover {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 24px 56px -10px rgba(0, 0, 0, 0.60),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.35);
+}
+
+.sata-sidebar-glass {
+  background: rgba(14, 18, 28, 0.42);
+  backdrop-filter: blur(36px) saturate(170%);
+  -webkit-backdrop-filter: blur(36px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.55),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.22);
+}
+
+.sata-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+.sata-sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.sata-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sata-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+}
+.sata-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.sata-ai-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.20),
+    0 8px 24px -4px rgba(0, 0, 0, 0.35);
+}
+
+.sata-search-bar {
+  background: rgba(14, 18, 28, 0.42);
+  backdrop-filter: blur(36px) saturate(170%);
+  -webkit-backdrop-filter: blur(36px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.55),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.22);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sata-search-bar:focus-within {
+  border-color: rgba(255, 255, 255, 0.30);
+  background: rgba(22, 28, 42, 0.55);
+  box-shadow:
+    0 24px 56px rgba(0, 0, 0, 0.65),
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.35);
+}
+
+.sata-home-pill {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.42);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+.sata-icon-btn {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  transition: all 0.15s ease;
+}
+.sata-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.38);
+  transform: translateY(-1px);
+}
+.sata-icon-btn:active {
+  transform: scale(0.96);
+}
+
+.sata-arrow-btn {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: all 0.15s ease;
+}
+.sata-arrow-btn:hover {
+  background: rgba(255, 255, 255, 0.20);
+  border-color: rgba(255, 255, 255, 0.38);
+  transform: scale(1.05);
+}
+.sata-arrow-btn:active {
+  transform: scale(0.95);
+}
+
+.sata-glass-btn {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px) saturate(220%);
+  -webkit-backdrop-filter: blur(24px) saturate(220%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sata-glass-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.40);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.30), inset 0 1px 1.5px rgba(255, 255, 255, 0.55);
+}
+.sata-glass-btn:active {
+  transform: scale(0.96);
+}
+
+.sata-date-pill {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.25),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.45),
+    inset 0 -0.5px 0.5px rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  color: #ffffff;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sata-date-pill:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.sata-status-pill {
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.20),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  color: #f1f5f9;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sata-status-pill:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Adaptive inverse text contrast for bottom row cards (RECENT ACCIDENTS, RELEASES, SENSOR TELEMETRY body text only) */
+[data-adaptive-text="true"] {
+  transition: color 0.24s ease, text-shadow 0.24s ease;
+}
+
+[data-adaptive-text="true"][data-contrast-mode="dark"] .sata-adaptive-primary,
+[data-adaptive-text="true"][data-contrast-mode="dark"].sata-adaptive-primary {
+  color: #090d16 !important;
+  font-weight: 500;
+  text-shadow: 0 1px 6px rgba(255, 255, 255, 0.45);
+}
+
+[data-adaptive-text="true"][data-contrast-mode="dark"] .sata-adaptive-secondary,
+[data-adaptive-text="true"][data-contrast-mode="dark"].sata-adaptive-secondary {
+  color: #1e293b !important;
+  font-weight: 500;
+  text-shadow: 0 1px 5px rgba(255, 255, 255, 0.38);
+}
+

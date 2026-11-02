@@ -1,0 +1,6 @@
+{
+  "summary":  "Implementation plan for integrating NASA GIBS/FIRMS 84 thermal anomalies, pointOfView({ lat, lng, altitude }, 2000) autonomous camera fly-to controller, and 3D raycast hotspot selection while preserving 100% of the SATA obsidian glass UI.",
+  "updatedAt":  "2026-10-30T03:55:05.488970875Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

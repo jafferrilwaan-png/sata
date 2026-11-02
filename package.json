@@ -1,0 +1,25 @@
+{
+  "name": "sata-sentinel-backend",
+  "version": "1.0.0",
+  "description": "SATA (SataQuery Sentinel) - Autonomous Geospatial Reasoning & NASA Earth Observation Backend Engine for Meta Global AI Hackathon 2026",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3005",
+    "build": "next build",
+    "start": "next start -p 3005",
+    "lint": "next lint",
+    "test:m1": "tsx --test src/utils/live-credentials.test.ts"
+  },
+  "dependencies": {
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.4.5"
+  }
+}

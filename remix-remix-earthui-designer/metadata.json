@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix EarthUI Designer",
+  "description": "A precise UI kit featuring 3D GLB viewers, glassmorphism aesthetics, and dark-themed components for exact interface replication.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
