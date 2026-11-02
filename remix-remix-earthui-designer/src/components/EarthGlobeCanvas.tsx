@@ -290,12 +290,12 @@ export const EarthGlobeCanvas = forwardRef<
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;
       controls.enableZoom = true;
-      controls.minDistance = 2.45;
-      controls.maxDistance = 5.2;
+      controls.minDistance = 1.15;
+      controls.maxDistance = 6.2;
       controls.enableDamping = !isSoftwareGl;
       controls.dampingFactor = 0.07;
       controls.rotateSpeed = 0.6;
-      controls.zoomSpeed = 1.35;
+      controls.zoomSpeed = 1.6;
 
       const onStart = () => {
         userInteractingRef.current = true;
@@ -329,7 +329,7 @@ export const EarthGlobeCanvas = forwardRef<
       // Double-click on globe smoothly toggles zoom in / reset
       const onDoubleClick = () => {
         const curDist = camera.position.length();
-        const targetDist = curDist > 3.2 ? 2.55 : 4.22;
+        const targetDist = curDist > 2.0 ? 1.25 : 4.22;
         povAnimRef.current = {
           ...povAnimRef.current,
           active: true,
@@ -924,6 +924,18 @@ export const EarthGlobeCanvas = forwardRef<
               }
             }
 
+            // Dynamic High-Resolution Satellite Surface Blend
+            if (uHasHighRes > 0.5 && uHighResAlpha > 0.01) {
+              vec2 dUv = (vUv - uHighResCenterUv) / max(uHighResRadius, 0.001);
+              if (abs(dUv.x) <= 0.5 && abs(dUv.y) <= 0.5) {
+                vec2 tileUv = clamp(dUv + 0.5, 0.0, 1.0);
+                vec4 highResTex = texture2D(uHighResMap, tileUv);
+                float edgeMask = smoothstep(0.50, 0.40, max(abs(dUv.x), abs(dUv.y)));
+                float blendAlpha = uHighResAlpha * edgeMask * highResTex.a;
+                finalCol = mix(finalCol, highResTex.rgb, blendAlpha);
+              }
+            }
+
             gl_FragColor = vec4(finalCol, 1.0);
           }
         `,
@@ -1279,7 +1291,7 @@ export const EarthGlobeCanvas = forwardRef<
 
         // Preserve user's manual zoom if they already zoomed in closer, otherwise keep clean 4.22 framing (clamped above minDistance)
         const currentDist = camera.position.length();
-        const targetDist = pov.altitude ? Math.max(2.45, Math.min(3.8, pov.altitude)) : 2.65;
+        const targetDist = pov.altitude ? Math.max(1.15, Math.min(4.5, pov.altitude)) : 1.35;
 
         povAnimRef.current = {
           active: true,
@@ -1756,6 +1768,14 @@ export const EarthGlobeCanvas = forwardRef<
           (gpuLod.displacementScale - earthSurfaceMat.uniforms.uDisplacementScale.value) * 0.14;
         earthSurfaceMat.uniforms.uModisTrueColorBlend.value +=
           (gpuLod.modisTrueColorBlend - earthSurfaceMat.uniforms.uModisTrueColorBlend.value) * 0.14;
+
+        // Drive high-resolution satellite alpha as camera approaches Earth
+        const highResAlpha = Math.max(0.0, Math.min(1.0, (2.6 - camDist) / 1.4));
+        earthSurfaceMat.uniforms.uHighResAlpha.value = highResAlpha;
+        if (earthSurfaceMat.uniforms.uHasHighRes.value < 0.5 && earthDayTex) {
+          earthSurfaceMat.uniforms.uHighResMap.value = earthDayTex;
+          earthSurfaceMat.uniforms.uHasHighRes.value = 1.0;
+        }
 
         // Real-Time Atmospheric Cloud Circulation Physics modulated by satellite telemetry
         const cloudPhysics = computeAtmosphericCloudPhysics({
