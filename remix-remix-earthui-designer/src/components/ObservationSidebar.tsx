@@ -164,14 +164,21 @@ export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
             SATELLITE ORBIT STATUS
           </h3>
 
-          <div className="relative rounded-[20px] sm:rounded-[22px] border border-white/15 bg-white/[0.04] backdrop-blur-2xl flex flex-col p-3 sm:p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.22),0_12px_36px_rgba(0,0,0,0.4)]">
+          <div
+            onClick={() => onSelectOrbitSatellite?.(currentSat)}
+            title={`View ${currentSat.satellite_name} telemetry`}
+            className="relative rounded-[20px] sm:rounded-[22px] border border-white/15 bg-white/[0.04] backdrop-blur-2xl flex flex-col p-3 sm:p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.22),0_12px_36px_rgba(0,0,0,0.4)] cursor-pointer hover:border-white/35 transition-all"
+          >
             <div className="relative z-10 flex items-center justify-between">
               <span className="sata-date-pill px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[9.5px] sm:text-[10px] tracking-wider uppercase font-medium text-white shadow-[0_2px_10px_rgba(56,189,248,0.25)]">
                 {currentSat.agency} {currentSat.altitude_km.toFixed(0)} KM PASS
               </span>
               <button
                 type="button"
-                onClick={handleCycleSatellite}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCycleSatellite();
+                }}
                 title="Switch active satellite"
                 aria-label="Orbital Telemetry Action"
                 className="sata-arrow-btn w-7 h-7 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-colors cursor-pointer shrink-0 border border-white/25 bg-white/10 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.35)]"

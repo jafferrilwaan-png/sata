@@ -10,6 +10,7 @@ import { BottomCardsRow } from './components/BottomCardsRow';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
 import { MissionAlertsModal } from './components/MissionAlertsModal';
 import { CommanderProfileModal } from './components/CommanderProfileModal';
+import { SatelliteTelemetryModal } from './components/SatelliteTelemetryModal';
 import Galaxy from './components/Galaxy';
 import {
   NavTab,
@@ -94,6 +95,7 @@ export default function App() {
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState<boolean>(false);
   const [isAlertsModalOpen, setIsAlertsModalOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const [selectedSatellite, setSelectedSatellite] = useState<LiveOrbitPass | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
   const [liveFirmsPoints, setLiveFirmsPoints] = useState<FirmsAnomalyPoint[]>([]);
   const [liveIncidents, setLiveIncidents] = useState<LiveIncidentItem[]>([]);
@@ -1209,7 +1211,20 @@ export default function App() {
               setLiveAiDispatchState(null);
               globeRef.current?.pointOfView({ lat: 20, lng: 0, altitude: 2.8 }, 1200);
             } else if (tab === 'SATELLITES') {
-              globeRef.current?.pointOfView({ lat: 28.57, lng: -80.65, altitude: 2.45 }, 1200);
+              const defaultSat: LiveOrbitPass = {
+                id: 'sat-cartosat-3',
+                satellite_name: 'Cartosat-3',
+                mission: 'ISRO Earth Observation Sun-Synchronous LEO',
+                agency: 'ISRO',
+                pass_time: '2026-10-28 08:42 UTC',
+                altitude_km: 505,
+                velocity_kms: 7.59,
+                inclination_deg: 97.5,
+                status: 'TRACKING',
+              };
+              const activeSat = liveOrbits[0] || defaultSat;
+              setSelectedSatellite(activeSat);
+              globeRef.current?.pointOfView({ lat: 21.15, lng: 79.08, altitude: 2.1, label: activeSat.satellite_name }, 1200);
             } else if (tab === 'ORBITS') {
               setAdjustOrbitEnabled(true);
               globeRef.current?.pointOfView({ lat: 14.8, lng: 88.5, altitude: 3.1 }, 1200);
@@ -1356,9 +1371,17 @@ export default function App() {
                   }
                   liveOrbits={liveOrbits}
                   onSelectOrbitSatellite={(sat) => {
+                    setSelectedSatellite(sat);
+                    const satCoords: Record<string, { lat: number; lon: number }> = {
+                      'Cartosat-3': { lat: 21.15, lon: 79.08 },
+                      'Sentinel-3': { lat: 43.71, lon: 10.40 },
+                      'NOAA-20': { lat: 28.57, lon: -80.65 },
+                      'ISS (ZARYA)': { lat: 14.80, lon: 88.50 },
+                    };
+                    const c = satCoords[sat.satellite_name] || { lat: 20, lon: 78 };
                     globeRef.current?.pointOfView(
-                      { lat: 20, lng: 78, altitude: 2.4, label: sat.satellite_name },
-                      2000
+                      { lat: c.lat, lng: c.lon, altitude: 2.1, label: sat.satellite_name },
+                      1500
                     );
                   }}
                   liveIncidents={currentDisplayedIncidents}
@@ -1376,6 +1399,34 @@ export default function App() {
       <KeyboardShortcutsModal
         isOpen={isShortcutsModalOpen}
         onClose={() => setIsShortcutsModalOpen(false)}
+      />
+
+      <MissionAlertsModal
+        isOpen={isAlertsModalOpen}
+        onClose={() => setIsAlertsModalOpen(false)}
+        activeHeatSpots={temporalState.activeHeatSpots}
+      />
+
+      <CommanderProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
+
+      <SatelliteTelemetryModal
+        satellite={selectedSatellite}
+        onClose={() => setSelectedSatellite(null)}
+        onNextSatellite={() => {
+          const defaultSats = [
+            { id: 'sat-cartosat-3', satellite_name: 'Cartosat-3', mission: 'ISRO Earth Observation Sun-Synchronous LEO', agency: 'ISRO', pass_time: '2026-10-28 08:42 UTC', altitude_km: 505, velocity_kms: 7.59, inclination_deg: 97.5, status: 'TRACKING' },
+            { id: 'sat-sentinel-3', satellite_name: 'Sentinel-3', mission: 'Copernicus Ocean and Land Surface Mission', agency: 'ESA', pass_time: '2026-10-28 09:15 UTC', altitude_km: 814, velocity_kms: 7.44, inclination_deg: 98.65, status: 'ORBITING' },
+            { id: 'sat-noaa-20', satellite_name: 'NOAA-20', mission: 'JPSS Polar Environmental Satellite VIIRS/CrIS', agency: 'NOAA', pass_time: '2026-10-28 09:38 UTC', altitude_km: 824, velocity_kms: 7.43, inclination_deg: 98.7, status: 'TRACKING' },
+            { id: 'sat-iss', satellite_name: 'ISS (ZARYA)', mission: 'International Space Station Microgravity Lab', agency: 'NASA', pass_time: '2026-10-28 10:04 UTC', altitude_km: 418, velocity_kms: 7.66, inclination_deg: 51.64, status: 'TRACKING' },
+          ];
+          const list = liveOrbits.length > 0 ? liveOrbits : defaultSats;
+          const currIdx = selectedSatellite ? list.findIndex(s => s.satellite_name === selectedSatellite.satellite_name) : 0;
+          const nextSat = list[(currIdx + 1) % list.length];
+          setSelectedSatellite(nextSat);
+        }}
       />
     </div>
   </LayoutGroup>
