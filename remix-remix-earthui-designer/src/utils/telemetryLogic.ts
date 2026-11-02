@@ -66,9 +66,10 @@ export interface ReleaseItem {
   providerLine1: string;
   providerLine2: string;
   statusText: string;
-  launchpad: string;
-  orbitType: string;
-  payloadCount: number;
+  launchpad?: string;
+  orbitType?: string;
+  payloadCount?: number;
+  title?: string;
 }
 
 export interface TelemetrySensorRow {
@@ -77,6 +78,7 @@ export interface TelemetrySensorRow {
   valueText: string;
   statusText: string;
   glbKey?: 'terra' | 'hubble' | 'starlink';
+  sensor?: string;
 }
 
 export interface GlbModelAsset {

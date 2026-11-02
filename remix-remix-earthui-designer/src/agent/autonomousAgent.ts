@@ -419,8 +419,7 @@ export function runImplementSubagent(
     ? nearestNode.intensitySpots
     : 18 + (Math.abs(Math.round(resolvedLocation.lat * 5 + resolvedLocation.lon * 3)) % 56);
 
-  const hasRain = typeof atmosphere.precipitationMm === 'number' && atmosphere.precipitationMm > 0;
-  const rainNote = hasRain ? `, ${atmosphere.precipitationMm.toFixed(1)} mm rain` : '';
+  const rainNote = typeof atmosphere.precipitationMm === 'number' && atmosphere.precipitationMm > 0 ? `, ${atmosphere.precipitationMm.toFixed(1)} mm rain` : '';
   const aiInsightBody = isDefaultHome
     ? 'Real-time VIIRS & MODIS orbital scan detects active thermal anomalies. SGP4 telemetry synchronized across all orbital passes.'
     : `${resolvedLocation.name} [${localSolar.phaseLabel}, ${atmosphere.temperatureC}°C, ${atmosphere.cloudCoverPct}% cloud${rainNote}]: Verified ${activeHeatSpots} thermal signatures and live solar-terrestrial sync.`;
