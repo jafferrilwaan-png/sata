@@ -32,6 +32,86 @@ export interface MetaDeepIntelligenceConsoleProps {
   onClose: () => void;
 }
 
+
+const RichTelemetryText: React.FC<{ content: string }> = ({ content }) => {
+  const lines = content.split('\n');
+  const elements: React.ReactNode[] = [];
+  let tableRows: string[][] = [];
+  let inTable = false;
+
+  const flushTable = (key: number) => {
+    if (tableRows.length === 0) return null;
+    const header = tableRows[0];
+    const rows = tableRows.slice(1);
+    tableRows = [];
+    return (
+      <div key={`tbl-${key}`} className="my-2.5 overflow-x-auto rounded-[14px] border border-white/15 bg-white/[0.03]">
+        <table className="w-full text-left text-[10.5px] border-collapse font-mono">
+          <thead>
+            <tr className="border-b border-white/12 bg-white/[0.06] text-white/80">
+              {header.map((cell, idx) => (
+                <th key={idx} className="p-2 font-medium tracking-wider uppercase whitespace-nowrap">{cell}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rIdx) => (
+              <tr key={rIdx} className="border-b border-white/8 hover:bg-white/[0.04] transition-colors text-white/90">
+                {row.map((cell, cIdx) => (
+                  <td key={cIdx} className="p-2 whitespace-nowrap">{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+      if (trimmed.includes('---')) return; // skip markdown divider
+      inTable = true;
+      const cells = trimmed.slice(1, -1).split('|').map((c) => c.trim());
+      tableRows.push(cells);
+    } else {
+      if (inTable) {
+        elements.push(flushTable(idx));
+        inTable = false;
+      }
+      if (!trimmed) {
+        elements.push(<div key={`sp-${idx}`} className="h-2" />);
+      } else if (trimmed.startsWith('###') || trimmed.startsWith('##')) {
+        elements.push(
+          <h4 key={`h-${idx}`} className="text-[12.5px] font-semibold text-white tracking-wide mt-2 mb-1">
+            {trimmed.replace(/^#+\s*/, '')}
+          </h4>
+        );
+      } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        elements.push(
+          <div key={`li-${idx}`} className="flex items-start gap-1.5 text-white/85 text-[12px] leading-relaxed my-0.5">
+            <span className="text-white/40 mt-1">•</span>
+            <span>{trimmed.replace(/^[-*]\s*/, '')}</span>
+          </div>
+        );
+      } else {
+        elements.push(
+          <p key={`p-${idx}`} className="text-white/90 font-light leading-relaxed text-[12.5px] my-1">
+            {trimmed}
+          </p>
+        );
+      }
+    }
+  });
+
+  if (inTable) {
+    elements.push(flushTable(9999));
+  }
+
+  return <div className="space-y-0.5 w-full">{elements}</div>;
+};
+
 export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsoleProps> = ({
   targetName,
   lat,
@@ -386,7 +466,7 @@ Analyze the user's inquiry directly. If the inquiry relates to weather, atmosphe
                     )}
 
                     {/* Clean Observation Text */}
-                    <p className="text-white/90 font-light leading-relaxed text-[12.5px]">{m.text}</p>
+                    <RichTelemetryText content={m.text} />
                   </div>
                 )}
 
