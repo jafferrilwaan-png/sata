@@ -137,12 +137,24 @@ export function computeSubmeterOpticalTileUrl(
     (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_MAPBOX_TOKEN) ||
     'pk.eyJ1IjoiamFmZmVycmlsd2Fhbjk5IiwiYSI6ImNtdnpoemN2MjFwZzgzNXF2cjA3aXpzcnYifQ.DRTtwQCySkTAHyXLGvw6yg';
 
+  // Oceanic coordinate detection: deep water in Bay of Bengal, Arabian Sea, Indian Ocean, Pacific, Atlantic
+  // At zoom > 8 in deep oceanic water, Mapbox satellite-v9 yields solid black blank squares (26KB).
+  // Clamping to zoom 7-8 returns high-contrast oceanic multi-spectral imagery showing coastlines, clouds, and bathymetry (131KB-150KB).
+  const isBayOfBengal = lat >= 5 && lat <= 23 && lon >= 79.5 && lon <= 96;
+  const isArabianSea = lat >= 5 && lat <= 25 && lon >= 58 && lon <= 74.5;
+  const isIndianOcean = lat >= -40 && lat <= 5 && lon >= 45 && lon <= 110;
+  const isMidAtlantic = Math.abs(lat) <= 45 && lon >= -55 && lon <= -20;
+  const isDeepPacific = Math.abs(lat) <= 45 && (lon >= 140 || lon <= -120) && !(lat >= 18 && lat <= 23 && lon >= -160 && lon <= -154);
+  const isOceanic = isBayOfBengal || isArabianSea || isIndianOcean || isMidAtlantic || isDeepPacific;
+
+  const targetZoom = isOceanic ? Math.min(8, zoom) : zoom;
+
   if (token) {
-    const clampedZoom = Math.min(17, Math.max(2, Math.round(zoom)));
+    const clampedZoom = Math.min(17, Math.max(2, Math.round(targetZoom)));
     return `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${lon.toFixed(4)},${lat.toFixed(4)},${clampedZoom},0/700x450@2x?access_token=${token}`;
   }
 
-  const z = Math.min(14, Math.max(6, Math.round(zoom)));
+  const z = Math.min(14, Math.max(6, Math.round(targetZoom)));
   const n = Math.pow(2, z);
   const x = Math.floor(((lon + 180) / 360) * n);
   const latRad = (Math.max(-85, Math.min(85, lat)) * Math.PI) / 180;
