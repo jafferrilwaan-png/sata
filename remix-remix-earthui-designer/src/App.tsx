@@ -918,7 +918,7 @@ export default function App() {
           body: JSON.stringify({
             model: 'muse-spark-1.3',
             messages: [{ role: 'system', content: prompt }, { role: 'user', content: q }],
-            max_tokens: 800,
+            max_tokens: 3500,
             temperature: 0.2,
           }),
         });

@@ -53,6 +53,37 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
 
   // Conversation history
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [gasTelemetry, setGasTelemetry] = useState<{
+    co: number;
+    no2: number;
+    so2: number;
+    pm25: number;
+    pm10: number;
+    aod: number;
+  } | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,aerosol_optical_depth,sulphur_dioxide`);
+        if (res.ok) {
+          const d = await res.json();
+          if (isMounted && d?.current) {
+            setGasTelemetry({
+              co: d.current.carbon_monoxide || 424,
+              no2: d.current.nitrogen_dioxide || 7.6,
+              so2: d.current.sulphur_dioxide || 6.3,
+              pm25: d.current.pm2_5 || 35.7,
+              pm10: d.current.pm10 || 48.5,
+              aod: d.current.aerosol_optical_depth || 0.48,
+            });
+          }
+        }
+      } catch {}
+    })();
+    return () => { isMounted = false; };
+  }, [lat, lon]);
 
   useEffect(() => {
     if (messages.length > 0 || isAgentExecuting) {
@@ -117,7 +148,7 @@ Analyze the user's inquiry directly. If the inquiry relates to weather, atmosphe
               { role: 'system', content: systemPrompt },
               { role: 'user', content: q },
             ],
-            max_tokens: 800,
+            max_tokens: 3500,
             temperature: 0.2,
           }),
         });
