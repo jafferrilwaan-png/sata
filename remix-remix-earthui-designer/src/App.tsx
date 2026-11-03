@@ -796,7 +796,7 @@ export default function App() {
       layerType: matchedIncident ? matchedIncident.category : 'THERMAL',
       briefingLead: 'Observation Analysis:',
       briefingBody: selectedMetaModel === 'tri-agent-swarm'
-        ? `Gathering multi-spectral telemetry and environmental data for "${q}"...`
+        ? `Meta AI Tri-Agent Swarm actively reasoning over atmospheric chemistry and satellite telemetry for "${q}"...`
         : `Retrieving satellite coordinates and thermal observations for "${q}"...`,
       telemetry: {
         viirsPoints: matchedIncident ? 42 : 0,
@@ -912,19 +912,59 @@ export default function App() {
       try {
         const apiKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_META_API_KEY) || 'LLM_2207748566818315_UsqKa7V6H8nCNmeOK-9i03yjt9k';
         const prompt = 'You are SATA Aerospace Copilot powered by Meta AI (muse-spark-1.3). Provide rigorous, physics-grounded satellite telemetry analysis for user search: ' + q + ' over ' + (matchedIncident ? matchedIncident.title : q) + ' [' + targetLat.toFixed(2) + ', ' + targetLon.toFixed(2) + ']. Evaluate thermal hotspots, atmospheric conditions, and satellite passes under 120 words.';
+        const earthTools = [
+          {
+            type: 'function',
+            function: {
+              name: 'control_3d_earth',
+              description: 'Controls 3D Earth digital twin rendering and layers',
+              parameters: {
+                type: 'object',
+                properties: {
+                  action: { type: 'string' },
+                  layer: { type: 'string', enum: ['VIIRS_NIGHT_THERMAL', 'ATMOSPHERIC_AOD_CLOUDS', 'TRUE_COLOR_DAY', 'MODIS_TRUE_COLOR_TERRAIN'] },
+                  target_name: { type: 'string' },
+                  lat: { type: 'number' },
+                  lon: { type: 'number' },
+                  zoom_altitude: { type: 'number' }
+                },
+                required: ['action']
+              }
+            }
+          }
+        ];
         const directRes = await fetch('https://api.meta.ai/v1/chat/completions', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: 'muse-spark-1.3',
             messages: [{ role: 'system', content: prompt }, { role: 'user', content: q }],
+            tools: earthTools,
+            tool_choice: 'auto',
             max_tokens: 3500,
             temperature: 0.2,
           }),
         });
         if (directRes.ok) {
           const dj = await directRes.json();
-          const directText = dj.choices?.[0]?.message?.content || '';
+          const choice = dj.choices?.[0]?.message;
+          const directText = choice?.content || '';
+
+          if (choice?.tool_calls && Array.isArray(choice.tool_calls)) {
+            for (const tc of choice.tool_calls) {
+              if (tc.function?.name === 'control_3d_earth') {
+                try {
+                  const args = JSON.parse(tc.function.arguments);
+                  if (args.layer) setActiveLayerMode(args.layer);
+                  if (typeof args.lat === 'number' && typeof args.lon === 'number') {
+                    const alt = args.zoom_altitude && args.zoom_altitude < 10 ? args.zoom_altitude : (args.zoom_altitude ? 1.6 : 1.8);
+                    globeRef.current?.pointOfView({ lat: args.lat, lng: args.lon, altitude: alt, label: args.target_name || q }, 2000);
+                  }
+                } catch (e) {}
+              }
+            }
+          }
+
           if (directText) {
             setLiveAiDispatchState((prev) => prev ? {
               ...prev,
