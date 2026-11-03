@@ -670,22 +670,16 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
               </div>
             ))}
 
-            {/* Pure Apple iOS Frosted Glass Thinking / Observation Retrieval Indicator */}
+            {/* Minimalist Meta Reasoning State — Clean Unboxed Typography matching "Running grouped actions.." */}
             {isAgentExecuting && (
-              <div className="flex items-center gap-3 px-4 py-3 rounded-[20px] bg-white/[0.04] border border-white/10 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-white/50 animate-pulse [animation-delay:200ms]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-white/30 animate-pulse [animation-delay:400ms]" />
-                </div>
-                <div className="flex items-center justify-between flex-1 gap-2 min-w-0">
-                  <span className="text-[11px] font-normal tracking-wide text-white/80 truncate">
-                    Retrieving live satellite observations...
-                  </span>
-                  <span className="text-[9.5px] font-mono text-white/40 shrink-0">
-                    {selectedMetaModel}
-                  </span>
-                </div>
+              <div className="flex items-center gap-2.5 py-1.5 px-1 text-[13px] text-white/90 select-none">
+                <span className="inline-block w-2 h-2 rounded-full bg-white/70 animate-pulse" />
+                <span className="font-medium tracking-wide">
+                  Running grouped actions..
+                </span>
+                <span className="text-[11px] font-mono text-white/40">
+                  (Retrieving live satellite observations...)
+                </span>
               </div>
             )}
             <div ref={messagesEndRef} />
