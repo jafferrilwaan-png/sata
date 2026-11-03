@@ -318,7 +318,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            query: isGlobalOrLocateQuery ? q : `${q} for ${targetName} [${latStr}, ${lonStr}]`,
+            query: q,
             selectedMetaModel,
           }),
         })
@@ -334,8 +334,13 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
 
         // AUTONOMOUS AGENT ACTION: Fly camera & zoom 3D globe to resolved target
         if (metaData && typeof metaData.lat === 'number' && typeof metaData.lon === 'number' && (metaData.lat !== 0 || metaData.lon !== 0)) {
+          resolvedLat = metaData.lat;
+          resolvedLon = metaData.lon;
+          if (metaData.targetName) {
+            resolvedTargetName = metaData.targetName;
+          }
           const targetAltitude = wantsZoom || wantsCloseUp ? 1.35 : (metaData.zoomAltitude || 1.6);
-          onNavigateTo?.(metaData.targetName || targetName, metaData.lat, metaData.lon, targetAltitude);
+          onNavigateTo?.(resolvedTargetName, resolvedLat, resolvedLon, targetAltitude);
         }
 
         // AUTONOMOUS 3D GLOBE SHADER ACTION: Apply requested sensor layer (e.g. VIIRS Infrared Thermal)

@@ -596,7 +596,14 @@ export default function App() {
 
   // Imperatively drive `globeRef.current?.pointOfView({ lat, lng, altitude, label }, 2000)` on target change
   useEffect(() => {
-    const pov = observationData.targetPointOfView;
+    const pov = liveAiDispatchState
+      ? {
+          lat: liveAiDispatchState.lat,
+          lng: liveAiDispatchState.lon,
+          altitude: liveAiDispatchState.zoomAltitude || 1.8,
+          label: liveAiDispatchState.targetName,
+        }
+      : observationData.targetPointOfView;
     if (pov) {
       globeRef.current?.pointOfView(
         {
@@ -607,10 +614,10 @@ export default function App() {
         },
         2000
       );
-    } else {
+    } else if (!isSearchSubmitted) {
       globeRef.current?.pointOfView(null, 1800);
     }
-  }, [observationData.targetPointOfView]);
+  }, [liveAiDispatchState?.lat, liveAiDispatchState?.lon, observationData.targetPointOfView]);
 
   // Real-Time NASA FIRMS Telemetry Sync via Official NASA Map Key
   useEffect(() => {
