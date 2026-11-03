@@ -436,47 +436,20 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
     <aside
       aria-label="Satellite Intelligence Dossier"
       style={{ transform: 'translateZ(0)', willChange: 'transform' }}
-      className="pointer-events-auto w-full h-full sm:min-h-0 rounded-[28px] p-4 sm:p-5 flex flex-col overflow-hidden select-none border border-white/14 bg-black/45 backdrop-blur-[36px] saturate-[170%] shadow-[0_32px_80px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.22)] text-white"
+      className="pointer-events-auto w-full h-full sm:min-h-0 rounded-[28px] p-4 sm:p-5 flex flex-col overflow-hidden border border-white/14 bg-black/45 backdrop-blur-[36px] saturate-[170%] shadow-[0_32px_80px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.25)] text-white"
     >
-      {/* 1. Header: Clean Minimal Title, Coordinates, Close Button — NO SVG ICONS, NO BLUE TEXT */}
+      {/* 1. Header: Ultra-Clean Minimal Title & Coordinates (Zero Jargon, Zero Clutter) */}
       <div className="flex items-start justify-between pb-3 border-b border-white/10 shrink-0 gap-3">
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-medium uppercase tracking-wider text-white/50 mb-0.5">
-            SATA Intelligence Dossier
-          </div>
-          <h2 className="text-[18px] sm:text-[21px] font-semibold tracking-tight text-white truncate">
+          <h2 className="text-[19px] sm:text-[22px] font-semibold tracking-tight text-white truncate">
             {targetName}
           </h2>
-          <div className="flex items-center gap-2 text-[11px] sm:text-[12px] text-white/60 font-mono mt-0.5">
+          <div className="flex items-center gap-2 text-[11px] sm:text-[12px] text-white/70 font-mono mt-0.5">
             <span>{latStr}</span>
-            <span className="text-white/20">|</span>
+            <span className="text-white/25">|</span>
             <span>{lonStr}</span>
-            <span className="text-white/20">|</span>
-            <span className="text-white/80 font-sans text-[11px]">Orbital Track Locked</span>
-          </div>
-
-          {/* Real Meta AI Model Switcher */}
-          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-            <span className="text-[10px] uppercase font-mono tracking-wider text-white/50">Model:</span>
-            {[
-              { id: 'tri-agent-swarm', label: 'Swarm Consensus' },
-              { id: 'muse-spark-1.3', label: 'Muse Spark 1.3' },
-              { id: 'muse-wonder-1.0', label: 'Muse Wonder 1.0' },
-              { id: 'muse-spark-1.2', label: 'Muse Spark 1.2' },
-            ].map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => onSelectMetaModel?.(m.id as any)}
-                className={`px-2.5 py-0.5 rounded-full text-[9.5px] transition-all cursor-pointer ${
-                  selectedMetaModel === m.id
-                    ? 'bg-white/20 border border-white/30 text-white font-medium shadow-[0_0_12px_rgba(255,255,255,0.15)]'
-                    : 'bg-white/[0.05] hover:bg-white/10 text-white/70 hover:text-white border border-white/10'
-                }`}
-              >
-                {m.label}
-              </button>
-            ))}
+            <span className="text-white/25">|</span>
+            <span className="text-emerald-400/90 font-sans text-[11px] font-medium">Orbital Track Locked</span>
           </div>
         </div>
 
@@ -485,7 +458,7 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
           onClick={onClose}
           aria-label="Close"
           title="Return to Home Overview"
-          className="w-8 h-8 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 border border-white/15 transition-all cursor-pointer shrink-0"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-white/60 hover:text-white bg-white/5 hover:bg-white/10 border border-white/15 transition-all cursor-pointer shrink-0 active:scale-95"
         >
           <X className="w-4 h-4 stroke-[1.75]" />
         </button>
@@ -750,8 +723,10 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => e.stopPropagation()}
+            onPaste={(e) => e.stopPropagation()}
             placeholder="Ask about satellite telemetry or observations..."
-            className="flex-1 bg-transparent border-none outline-none text-[12px] text-white placeholder-white/40 min-w-0"
+            className="flex-1 bg-transparent border-none outline-none text-[12.5px] text-white placeholder-white/40 min-w-0 select-text"
           />
 
           <button

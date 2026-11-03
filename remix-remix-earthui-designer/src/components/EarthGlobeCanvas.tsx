@@ -1784,6 +1784,11 @@ export const EarthGlobeCanvas = forwardRef<
         earthSurfaceMat.uniforms.uModisTrueColorBlend.value +=
           (gpuLod.modisTrueColorBlend - earthSurfaceMat.uniforms.uModisTrueColorBlend.value) * 0.14;
 
+        // Smooth GPU False-Color Infrared / Thermal Radiometry transition (VIIRS / Sentinel-3 SLSTR)
+        const targetIr = mode === 'VIIRS_NIGHT_THERMAL' ? 1.0 : 0.0;
+        earthSurfaceMat.uniforms.uIrThermalMode.value +=
+          (targetIr - earthSurfaceMat.uniforms.uIrThermalMode.value) * 0.15;
+
         // Drive high-resolution satellite alpha as camera approaches Earth
         const highResAlpha = Math.max(0.0, Math.min(1.0, (2.6 - camDist) / 1.4));
         earthSurfaceMat.uniforms.uHighResAlpha.value = highResAlpha;
