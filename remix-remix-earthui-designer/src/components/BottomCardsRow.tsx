@@ -47,11 +47,11 @@ export const BottomCardsRow: React.FC<BottomCardsRowProps> = ({
         ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-2.5 lg:gap-4 w-full">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-2.5 lg:gap-4 w-full">
       {/* Card 1: LIVE GLOBAL DISASTERS (NASA EONET v3 + Unique Genuine Satellite Imagery) */}
       <section
         aria-label="Live Global Hazards"
-        className="sm:col-span-4 sata-glass-card rounded-[20px] lg:rounded-[22px] px-3.5 sm:px-2.5 lg:px-4 pt-3 sm:pt-2.5 lg:pt-3.5 pb-3 sm:pb-2.5 lg:pb-3.5 flex flex-col justify-between min-w-0 overflow-hidden"
+        className="sata-glass-card rounded-[20px] lg:rounded-[22px] px-3.5 sm:px-2.5 lg:px-4 pt-3 sm:pt-2.5 lg:pt-3.5 pb-3 sm:pb-2.5 lg:pb-3.5 flex flex-col justify-between min-w-0 overflow-hidden"
       >
         <div>
           <div className="flex items-center justify-between pb-1.5 lg:pb-2 border-b border-white/10 gap-1">
@@ -130,7 +130,7 @@ export const BottomCardsRow: React.FC<BottomCardsRowProps> = ({
       {/* Card 2: RELEASES (Original Pristine Design) */}
       <section
         aria-label="Upcoming Releases"
-        className="sm:col-span-4 sata-glass-card rounded-[20px] lg:rounded-[22px] px-3.5 sm:px-2.5 xl:px-4 pt-3 sm:pt-2.5 lg:pt-3.5 pb-3 sm:pb-2.5 lg:pb-3.5 flex flex-col justify-between min-w-0 overflow-hidden"
+        className="sata-glass-card rounded-[20px] lg:rounded-[22px] px-3.5 sm:px-2.5 xl:px-4 pt-3 sm:pt-2.5 lg:pt-3.5 pb-3 sm:pb-2.5 lg:pb-3.5 flex flex-col justify-between min-w-0 overflow-hidden"
       >
         <div className="flex items-center justify-between pb-1.5 lg:pb-2 border-b border-white/10 gap-1">
           <h2 className="text-[12px] sm:text-[clamp(11px,0.95vw,14.5px)] font-normal tracking-[0.06em] text-[#e4e4e7] uppercase truncate">
@@ -193,7 +193,7 @@ export const BottomCardsRow: React.FC<BottomCardsRowProps> = ({
       {/* Card 3: SENSOR TELEMETRY (Original Pristine Design) */}
       <section
         aria-label="Sensor Telemetry"
-        className="sm:col-span-4 sata-glass-card rounded-[20px] lg:rounded-[22px] px-3.5 sm:px-2.5 lg:px-4 pt-3 sm:pt-2.5 lg:pt-3.5 pb-3 sm:pb-2.5 lg:pb-3.5 flex flex-col justify-between min-w-0 overflow-hidden"
+        className="sata-glass-card rounded-[20px] lg:rounded-[22px] px-3.5 sm:px-2.5 lg:px-4 pt-3 sm:pt-2.5 lg:pt-3.5 pb-3 sm:pb-2.5 lg:pb-3.5 flex flex-col justify-between min-w-0 overflow-hidden"
       >
         <div className="flex items-center justify-between pb-1.5 lg:pb-2 border-b border-white/10 gap-1">
           <h2 className="text-[12px] sm:text-[clamp(11px,0.95vw,14.5px)] font-normal tracking-[0.06em] text-[#e4e4e7] uppercase truncate">

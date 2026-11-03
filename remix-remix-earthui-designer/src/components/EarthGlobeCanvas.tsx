@@ -849,21 +849,24 @@ export const EarthGlobeCanvas = forwardRef<
               // Strictly mask thermal & city emissions to landMask so coastal waters stay 100% clean
               float landEmissionMask = mix(1.0, landMask, smoothstep(0.08, 0.32, uZoomDetail));
 
+              float cityZoomFade = 1.0 - smoothstep(0.12, 0.48, uZoomDetail);
               goldLight =
                 (vec3(1.0, 0.56, 0.16) * cityHalo * 0.72 * haloScale * thermalBoost +
                  vec3(1.0, 0.90, 0.64) * refinedCore * 1.48 * thermalBoost) *
                 landEmissionMask *
-                terminatorNightBoost;
+                terminatorNightBoost *
+                cityZoomFade;
               finalCol += goldLight;
             }
 
             // Smooth transition between low-zoom orbital view and high-zoom NASA GIBS MODIS True Color terrain,
-            // modulated by the real-time UTC day/night terminator
+            // modulated by the real-time UTC day/night terminator and zoom inspection level
             if (uHasDay > 0.5) {
+              float zoomDayBoost = smoothstep(0.10, 0.55, uZoomDetail);
               float effectiveDayMix = clamp(
-                max(uModisTrueColorBlend, realTimeDaylight * uSunlitRadiance),
+                max(max(uModisTrueColorBlend, realTimeDaylight * uSunlitRadiance), zoomDayBoost),
                 0.0,
-                0.88
+                0.98
               );
               // Restore natural emerald-olive canopy hue where Blue Marble has dark bluish atmospheric haze over tropical rainforests
               float canopyMask = clamp((dayCol.b - dayCol.r) * 6.0, 0.0, 1.0) * landMask;

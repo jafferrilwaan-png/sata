@@ -86,7 +86,6 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
         {/* Glass Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
             <div className="min-w-0">
               <h2 className="text-[15px] font-semibold tracking-wide text-white truncate">
                 {targetName}
@@ -115,19 +114,14 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
         {/* Genuine NASA Satellite Downlink Sensor Feed */}
         <div className="relative w-full h-[165px] sm:h-[185px] overflow-hidden border-b border-white/10 shrink-0 bg-black/60">
           <img
-            src={
-              isCyclone
-                ? '/assets/ui/real_cyclone.png'
-                : computeSubmeterOpticalTileUrl(lat, lon, 11)
-            }
+            src={computeSubmeterOpticalTileUrl(lat, lon, 11)}
             alt={targetName}
             className="w-full h-full object-cover select-none"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#070e22] via-transparent to-black/20 pointer-events-none" />
 
           {/* Live Downlink Badge */}
-          <div className="absolute bottom-3 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#00f2fe] text-black text-[10px] font-semibold tracking-wider shadow-lg">
-            <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
+          <div className="absolute bottom-3 left-4 flex items-center px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium tracking-wider shadow-lg">
             <span>LIVE DOWNLINK</span>
           </div>
 

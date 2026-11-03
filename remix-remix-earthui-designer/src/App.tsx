@@ -755,54 +755,17 @@ export default function App() {
       return;
     }
 
-    const isKennedy = qLower.includes('kennedy') || qLower.includes('cape canaveral');
-    if (isKennedy) {
-      setLiveAiDispatchState({
-        targetName: 'Kennedy Space Center, Florida',
-        lat: 28.57,
-        lon: -80.65,
-        zoomAltitude: 2.65,
-        activeHeatSpots: 0,
-        layerType: 'Spaceport Facility',
-        briefingLead: 'Meta AI Intelligence Overview:',
-        briefingBody: "Kennedy Space Center is NASA's primary spaceport located on Merritt Island, Florida. Real-time satellite imagery from NOAA GOES-East monitors coastal cloud formations and local atmospheric stability. Current conditions show clear skies with optimal visibility and calm sea breezes along the Space Coast.",
-        telemetry: {
-          viirsPoints: 0,
-          modisPoints: 0,
-          aodStatus: 'STABLE',
-          cloudCoverPct: 15,
-        },
-        source: 'meta-live',
-        latencyMs: 340,
-      });
-      globeRef.current?.pointOfView({ lat: 28.57, lng: -80.65, altitude: 2.65, label: 'Kennedy Space Center' }, 2000);
-      setIsAiReasoning(false);
-      return;
-    }
+    // Autonomous Layer & Physics Mode Dispatch from query intent
+    const isThermalQuery = qLower.includes('fire') || qLower.includes('thermal') || qLower.includes('heat') || qLower.includes('firms') || qLower.includes('radiation') || qLower.includes('ir') || qLower.includes('abnormal');
+    const isStormQuery = qLower.includes('storm') || qLower.includes('cyclone') || qLower.includes('rain') || qLower.includes('radar') || qLower.includes('weather');
+    const isOpticalQuery = qLower.includes('optical') || qLower.includes('day') || qLower.includes('satellite') || qLower.includes('clear') || qLower.includes('true color');
 
-    const isBengal = qLower.includes('bengal') || qLower.includes('cyclone') || qLower.includes('bay');
-    if (isBengal) {
-      setLiveAiDispatchState({
-        targetName: 'Bay of Bengal Cyclonic Basin',
-        lat: 14.8,
-        lon: 88.5,
-        zoomAltitude: 2.65,
-        activeHeatSpots: 0,
-        layerType: 'Cyclonic Storm',
-        briefingLead: 'Meta AI Analysis:',
-        briefingBody: 'Satellite surveillance monitors cyclonic convective clouds over the Bay of Bengal. Orbiters track cloud formations heading toward the eastern coastline, with weather radar confirming elevated ocean wave conditions in the central basin.',
-        telemetry: {
-          viirsPoints: 0,
-          modisPoints: 0,
-          aodStatus: 'STABLE',
-          cloudCoverPct: 92,
-        },
-        source: 'meta-live',
-        latencyMs: 410,
-      });
-      globeRef.current?.pointOfView({ lat: 14.8, lng: 88.5, altitude: 2.65, label: 'Bay of Bengal Cyclone' }, 2000);
-      setIsAiReasoning(false);
-      return;
+    if (isThermalQuery) {
+      setActiveLayerMode('VIIRS_NIGHT_THERMAL');
+    } else if (isStormQuery) {
+      setActiveLayerMode('ATMOSPHERIC_AOD_CLOUDS');
+    } else if (isOpticalQuery) {
+      setActiveLayerMode('TRUE_COLOR_DAY');
     }
 
     const matchedIncident = liveIncidents.find((inc) =>
@@ -944,8 +907,36 @@ export default function App() {
           );
         }
       }
-    } catch {
-      // Handled by client geocoding fallback
+    } catch (fetchErr) {
+      console.warn('Backend proxy /api/llama-reason failed, triggering direct client Meta AI reasoning:', fetchErr);
+      try {
+        const apiKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_META_API_KEY) || 'LLM_2207748566818315_UsqKa7V6H8nCNmeOK-9i03yjt9k';
+        const prompt = 'You are SATA Aerospace Copilot powered by Meta AI (muse-spark-1.3). Provide rigorous, physics-grounded satellite telemetry analysis for user search: ' + q + ' over ' + (matchedIncident ? matchedIncident.title : q) + ' [' + targetLat.toFixed(2) + ', ' + targetLon.toFixed(2) + ']. Evaluate thermal hotspots, atmospheric conditions, and satellite passes under 120 words.';
+        const directRes = await fetch('https://api.meta.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'muse-spark-1.3',
+            messages: [{ role: 'system', content: prompt }, { role: 'user', content: q }],
+            max_tokens: 800,
+            temperature: 0.2,
+          }),
+        });
+        if (directRes.ok) {
+          const dj = await directRes.json();
+          const directText = dj.choices?.[0]?.message?.content || '';
+          if (directText) {
+            setLiveAiDispatchState((prev) => prev ? {
+              ...prev,
+              briefingLead: 'Meta AI (muse-spark-1.3):',
+              briefingBody: directText,
+              source: 'meta-live',
+            } : null);
+          }
+        }
+      } catch (clientErr) {
+        console.error('Direct client Meta AI error:', clientErr);
+      }
     } finally {
       setIsAiReasoning(false);
     }
@@ -1315,6 +1306,13 @@ export default function App() {
                   lon={liveAiDispatchState?.lon || 78}
                   briefingLead={liveAiDispatchState?.briefingLead || displayObservationData.aiInsightLead}
                   briefingBody={liveAiDispatchState?.briefingBody || displayObservationData.aiInsightBody}
+                  onApplyLayer={(layer) => {
+                    setActiveLayerMode(layer);
+                  }}
+                  onNavigateTo={(targetName, lat, lon, altitude) => {
+                    setCustomGeocodedPlace({ name: targetName, region: 'SECTOR TARGET', lat, lon });
+                    globeRef.current?.pointOfView({ lat, lng: lon, altitude: altitude || 1.8, label: targetName }, 2000);
+                  }}
                   onClose={() => {
                     setIsSearchSubmitted(false);
                     setSearchQuery('');

@@ -380,21 +380,21 @@ Analyze the user's inquiry directly. If the inquiry relates to weather, atmosphe
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 shrink-0">
         <button
           type="button"
-          onClick={() => executeObservationQuery('Weather Radar Observation')}
+          onClick={() => { onApplyLayer?.('ATMOSPHERIC_AOD_CLOUDS'); executeObservationQuery('Weather Radar Observation'); }}
           className="px-3 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/12 text-[10.5px] text-white/90 whitespace-nowrap transition-all cursor-pointer shrink-0"
         >
           Weather Radar
         </button>
         <button
           type="button"
-          onClick={() => executeObservationQuery('Thermal Heat Sensor Check')}
+          onClick={() => { onApplyLayer?.('VIIRS_NIGHT_THERMAL'); executeObservationQuery('Thermal Heat Sensor Check'); }}
           className="px-3 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/12 text-[10.5px] text-white/90 whitespace-nowrap transition-all cursor-pointer shrink-0"
         >
           Thermal Sensor Scan
         </button>
         <button
           type="button"
-          onClick={() => executeObservationQuery('High-Resolution Optical Pass')}
+          onClick={() => { onApplyLayer?.('TRUE_COLOR_DAY'); executeObservationQuery('High-Resolution Optical Pass'); }}
           className="px-3 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/12 text-[10.5px] text-white/90 whitespace-nowrap transition-all cursor-pointer shrink-0"
         >
           High-Res Optical
