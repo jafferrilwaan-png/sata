@@ -750,17 +750,27 @@ export default function App() {
     setIsAiReasoning(true);
 
     const qLower = q.toLowerCase();
-    const isGreeting = qLower.includes('hey meta') || qLower === 'hello' || qLower === 'hi' || qLower === 'hey' || qLower.includes('who are you') || qLower.includes('help');
+    const isGreeting =
+      qLower.includes('hi meta') ||
+      qLower.includes('hey meta') ||
+      qLower.includes('hello meta') ||
+      qLower === 'hi' ||
+      qLower === 'hello' ||
+      qLower === 'hey' ||
+      qLower.includes('who are you') ||
+      qLower.includes('what can you do') ||
+      qLower.includes('help');
+
     if (isGreeting) {
       setLiveAiDispatchState({
-        targetName: 'Meta AI Aerospace Copilot',
-        lat: 20.0,
-        lon: 78.0,
-        zoomAltitude: 2.65,
+        targetName: 'SATA Aerospace Command • Meta AI Swarm',
+        lat: 25.0,
+        lon: 10.0,
+        zoomAltitude: 2.8,
         activeHeatSpots: 0,
-        layerType: 'Conversational Copilot',
-        briefingLead: 'Meta AI Assistant:',
-        briefingBody: 'Hello! I am your SATA aerospace intelligence copilot powered by Meta AI. I am monitoring global orbital satellite downlinks, real-time NASA FIRMS thermal hotspots, and NOAA weather streams. You can ask me to inspect any global location, track active cyclonic systems, analyze wildfires, or upload satellite imagery.',
+        layerType: 'Autonomous Operations Swarm',
+        briefingLead: 'Meta AI Operations Commander:',
+        briefingBody: 'SATA Aerospace Sentinel online. Real-time satellite downlinks, NASA FIRMS thermal telemetry, and multi-spectral atmospheric chemistry sensors are synchronized and ready for tasking. You can command me to inspect any global coordinates, run hazard dispersion simulations, evaluate moisture levels, or analyze thermal hotspots.',
         telemetry: {
           viirsPoints: 0,
           modisPoints: 0,
@@ -770,7 +780,7 @@ export default function App() {
         source: 'meta-copilot',
         latencyMs: 120,
       });
-      globeRef.current?.pointOfView({ lat: 20, lng: 78, altitude: 2.65, label: 'Global Orbit' }, 2000);
+      globeRef.current?.pointOfView({ lat: 25, lng: 10, altitude: 2.8, label: 'Global Space Operations Orbit' }, 2000);
       setIsAiReasoning(false);
       return;
     }
