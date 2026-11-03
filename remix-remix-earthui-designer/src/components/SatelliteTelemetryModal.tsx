@@ -55,7 +55,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 20 }}
           transition={{ type: 'spring', damping: 28, stiffness: 340 }}
-          className="relative z-10 w-full max-w-xl rounded-[28px] p-5 sm:p-6 border border-white/20 bg-black/80 backdrop-blur-[42px] shadow-[0_32px_90px_rgba(0,0,0,0.9),inset_0_1px_1.5px_rgba(255,255,255,0.25)] text-white overflow-hidden flex flex-col gap-4"
+          className="relative z-10 w-full max-w-xl rounded-[28px] p-5 sm:p-6 border border-white/20 bg-black/45 backdrop-blur-[48px] shadow-[0_32px_90px_rgba(0,0,0,0.9),inset_0_1px_1.5px_rgba(255,255,255,0.25)] text-white overflow-hidden flex flex-col gap-4"
         >
           {/* Header */}
           <div className="flex items-start justify-between pb-3 border-b border-white/10 gap-3">
@@ -68,7 +68,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
                   <span className="text-[10px] font-mono uppercase tracking-widest text-white/50">
                     {satellite.agency} • {satellite.status}
                   </span>
-                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  
                 </div>
                 <h2 className="text-[19px] sm:text-[22px] font-semibold text-white tracking-tight truncate">
                   {satellite.satellite_name}
@@ -110,9 +110,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
                   {latStr}, {lonStr}
                 </div>
               </div>
-              <span className="text-[10px] font-mono bg-white/15 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 text-white">
-                0.28m Ground Resolution
-              </span>
+              <span className="whitespace-nowrap text-[11px] font-medium tracking-wide bg-white/10 backdrop-blur-xl px-3 py-1 rounded-full border border-white/20 text-white shadow-sm">0.28m Ground Resolution</span>
             </div>
           </div>
 

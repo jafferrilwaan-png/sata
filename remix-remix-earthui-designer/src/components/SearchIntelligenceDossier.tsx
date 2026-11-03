@@ -118,9 +118,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
             src={
               isCyclone
                 ? '/assets/ui/real_cyclone.png'
-                : catLower.includes('volcano')
-                ? '/assets/ui/real_fire_disaster.jpg'
-                : '/assets/ui/real_wildfire.png'
+                : computeSubmeterOpticalTileUrl(lat, lon, 11)
             }
             alt={targetName}
             className="w-full h-full object-cover select-none"

@@ -35,7 +35,7 @@ export const MissionAlertsModal: React.FC<MissionAlertsModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 16 }}
             transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-            className="relative z-10 w-full max-w-lg rounded-[28px] p-6 border border-white/15 bg-black/80 backdrop-blur-[40px] shadow-[0_32px_80px_rgba(0,0,0,0.85)] text-white overflow-hidden"
+            className="relative z-10 w-full max-w-lg rounded-[28px] p-6 border border-white/15 bg-black/45 backdrop-blur-[48px] shadow-[0_32px_80px_rgba(0,0,0,0.85)] text-white overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
@@ -66,7 +66,7 @@ export const MissionAlertsModal: React.FC<MissionAlertsModalProps> = ({
             <div className="mt-4 space-y-3 max-h-[360px] overflow-y-auto pr-1">
               {/* Alert 1 */}
               <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400 mt-0.5">
+                <div className="p-2 rounded-xl bg-white/10 text-white/90 mt-0.5">
                   <Flame className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -82,7 +82,7 @@ export const MissionAlertsModal: React.FC<MissionAlertsModalProps> = ({
 
               {/* Alert 2 */}
               <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-blue-500/20 text-blue-300 mt-0.5">
+                <div className="p-2 rounded-xl bg-white/10 text-white/90 mt-0.5">
                   <CloudRain className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -98,13 +98,13 @@ export const MissionAlertsModal: React.FC<MissionAlertsModalProps> = ({
 
               {/* Alert 3 */}
               <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-300 mt-0.5">
+                <div className="p-2 rounded-xl bg-white/10 text-white/90 mt-0.5">
                   <Satellite className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-white">Satellite Constellation Health</span>
-                    <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                    <span className="text-[10px] text-white/80 font-mono flex items-center gap-1">
                       <CheckCircle className="w-3 h-3 inline" /> 100% NOMINAL
                     </span>
                   </div>

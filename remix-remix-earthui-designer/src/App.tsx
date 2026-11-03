@@ -1131,7 +1131,7 @@ export default function App() {
           {isModelMenuOpen && (
             <div
               onMouseDown={(e) => e.stopPropagation()}
-              className="absolute right-0 top-full mt-2 w-[220px] rounded-[18px] border border-white/15 bg-black/60 backdrop-blur-2xl p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.65),inset_0_1px_1px_rgba(255,255,255,0.22)] z-50 flex flex-col gap-1 text-white"
+              className="absolute right-0 bottom-full mb-2 w-[220px] rounded-[18px] border border-white/15 bg-black/60 backdrop-blur-2xl p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.65),inset_0_1px_1px_rgba(255,255,255,0.22)] z-50 flex flex-col gap-1 text-white"
             >
               {[
                 { id: 'tri-agent-swarm', label: 'Multi-Sensor Consensus', desc: 'Parallel multi-spectral analysis' },

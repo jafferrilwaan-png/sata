@@ -1757,7 +1757,7 @@ export const EarthGlobeCanvas = forwardRef<
             ? 0.75
             : mode === 'HYBRID_ALL_LAYERS'
             ? 0.55
-            : Math.min(0.65, zoomFactor * 0.65);
+            : Math.min(0.92, 0.40 + zoomFactor * 0.55);
         earthSurfaceMat.uniforms.uDayMix.value +=
           (targetDayMix - earthSurfaceMat.uniforms.uDayMix.value) * 0.1;
         earthSurfaceMat.uniforms.uZoomDetail.value +=
