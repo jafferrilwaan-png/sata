@@ -141,12 +141,12 @@ export async function fetchLiveNasaEonetIncidents(): Promise<IncidentRecord[]> {
     }
   }
 
-  // Fetch diverse natural disaster categories in parallel from official NASA EONET v3
-  const [allRes, stormRes, volRes, iceRes] = await Promise.allSettled([
-    fetchCategoryEvents("https://eonet.gsfc.nasa.gov/api/v3/events?status=all&limit=30"),
-    fetchCategoryEvents("https://eonet.gsfc.nasa.gov/api/v3/categories/severeStorms?limit=8"),
-    fetchCategoryEvents("https://eonet.gsfc.nasa.gov/api/v3/categories/volcanoes?limit=8"),
-    fetchCategoryEvents("https://eonet.gsfc.nasa.gov/api/v3/categories/seaLakeIce?limit=8"),
+  // Fetch genuine live, currently active natural events directly from NASA EONET v3
+  const [openRes, stormRes, volRes, fireRes] = await Promise.allSettled([
+    fetchCategoryEvents("https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=14"),
+    fetchCategoryEvents("https://eonet.gsfc.nasa.gov/api/v3/categories/severeStorms?status=open&days=30"),
+    fetchCategoryEvents("https://eonet.gsfc.nasa.gov/api/v3/categories/volcanoes?status=open&days=60"),
+    fetchCategoryEvents("https://eonet.gsfc.nasa.gov/api/v3/categories/wildfires?status=open&days=14"),
   ]);
 
   const rawEvents: EonetEvent[] = [];
@@ -161,10 +161,10 @@ export async function fetchLiveNasaEonetIncidents(): Promise<IncidentRecord[]> {
     }
   };
 
+  if (openRes.status === "fulfilled") appendEvents(openRes.value);
   if (stormRes.status === "fulfilled") appendEvents(stormRes.value);
   if (volRes.status === "fulfilled") appendEvents(volRes.value);
-  if (allRes.status === "fulfilled") appendEvents(allRes.value);
-  if (iceRes.status === "fulfilled") appendEvents(iceRes.value);
+  if (fireRes.status === "fulfilled") appendEvents(fireRes.value);
 
   if (rawEvents.length === 0) {
     if (cachedIncidents) return cachedIncidents;
@@ -173,7 +173,7 @@ export async function fetchLiveNasaEonetIncidents(): Promise<IncidentRecord[]> {
 
   const normalized: IncidentRecord[] = [];
 
-  for (let i = 0; i < rawEvents.length && normalized.length < 30; i++) {
+  for (let i = 0; i < rawEvents.length; i++) {
     const evt = rawEvents[i];
     if (!evt.geometry || evt.geometry.length === 0) continue;
 

@@ -234,18 +234,38 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
       qLower.includes('satellite pass') ||
       wantsVideo;
 
-    // 1. AUTONOMOUS AGENT ACTION: Directly control 3D Earth digital twin & camera
-    if (wantsIR) {
-      onApplyLayer?.('VIIRS_NIGHT_THERMAL');
-      onNavigateTo?.(targetName, lat, lon, 1.4);
-      setActiveFeed('radar_ir');
-    } else if (wantsHazard || wantsAirGas || wantsMoisture) {
-      onApplyLayer?.('ATMOSPHERIC_AOD_CLOUDS');
-      onNavigateTo?.(targetName, lat, lon, 1.5);
-    } else if (wantsCloseUp || wantsEarthInput) {
-      onApplyLayer?.('TRUE_COLOR_DAY');
-      onNavigateTo?.(targetName, lat, lon, 1.25);
-      setActiveFeed('optical');
+    const isGlobalOrLocateQuery =
+      qLower.includes('locate') ||
+      qLower.includes('loactie') ||
+      qLower.includes('find') ||
+      qLower.includes('where') ||
+      qLower.includes('which place') ||
+      qLower.includes('highest') ||
+      qLower.includes('higher') ||
+      qLower.includes('lowest') ||
+      qLower.includes('search') ||
+      qLower.includes('show me') ||
+      qLower.includes('go to') ||
+      qLower.includes('fly to') ||
+      qLower.includes('take me to') ||
+      qLower.includes('world') ||
+      qLower.includes('country') ||
+      qLower.includes('city');
+
+    // 1. AUTONOMOUS AGENT ACTION: Directly control 3D Earth digital twin & camera ONLY for local commands
+    if (!isGlobalOrLocateQuery) {
+      if (wantsIR) {
+        onApplyLayer?.('VIIRS_NIGHT_THERMAL');
+        onNavigateTo?.(targetName, lat, lon, 1.4);
+        setActiveFeed('radar_ir');
+      } else if (wantsHazard || wantsAirGas || wantsMoisture) {
+        onApplyLayer?.('ATMOSPHERIC_AOD_CLOUDS');
+        onNavigateTo?.(targetName, lat, lon, 1.5);
+      } else if (wantsCloseUp || wantsEarthInput) {
+        onApplyLayer?.('TRUE_COLOR_DAY');
+        onNavigateTo?.(targetName, lat, lon, 1.25);
+        setActiveFeed('optical');
+      }
     }
 
     // Set Live Tool Calling Steps for User Verification
@@ -265,7 +285,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            query: `${q} for ${targetName} [${latStr}, ${lonStr}]`,
+            query: isGlobalOrLocateQuery ? q : `${q} for ${targetName} [${latStr}, ${lonStr}]`,
             selectedMetaModel,
           }),
         })
@@ -351,7 +371,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
 
         if (!replyText || replyText.length < 50) {
           replyText = `### Autonomous Agent Action: ${actionTaken}
-Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin synchronized with submeter satellite pass.
+Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? 'N' : 'S'}, ${Math.abs(resolvedLon).toFixed(2)}° ${resolvedLon >= 0 ? 'E' : 'W'} (${resolvedTargetName}). 3D Earth digital twin synchronized with submeter satellite pass.
 
 ### Multi-Spectral Telemetry & Safety Matrix
 | Sensor / Parameter | Observed Telemetry | Safe Baseline Standard | Status |
@@ -375,24 +395,24 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
         let generatedImagery: ChatMessage['generatedImagery'] = undefined;
         if (userWantsVisual) {
           const isAmericas = lon >= -140 && lon <= -30;
-          let imageryUrl = computeSubmeterOpticalTileUrl(lat, lon, 13);
-          let imageryCaption = `High-Resolution Satellite Optical Pass (${targetName})`;
+          let imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 13);
+          let imageryCaption = `High-Resolution Satellite Optical Pass (${resolvedTargetName})`;
           let imagerySensor = 'Cartosat-3 / Sentinel-3 Optical';
           let imageryRes = '0.28m Ground Resolution';
 
           if (wantsIR) {
-            imageryUrl = computeSubmeterOpticalTileUrl(lat, lon, 15);
-            imageryCaption = `Thermal IR Multi-Spectral Anomaly Scan (${targetName})`;
+            imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 15);
+            imageryCaption = `Thermal IR Multi-Spectral Anomaly Scan (${resolvedTargetName})`;
             imagerySensor = 'NASA VIIRS 375m / ISRO INSAT-3DR Thermal IR';
             imageryRes = '375m Thermal Radiometer Resolution';
           } else if (wantsCloseUp || wantsEarthInput) {
-            imageryUrl = computeSubmeterOpticalTileUrl(lat, lon, 16);
-            imageryCaption = `Ultra-High-Resolution 0.28m Nadir Surface Inspection (${targetName})`;
+            imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 16);
+            imageryCaption = `Ultra-High-Resolution 0.28m Nadir Surface Inspection (${resolvedTargetName})`;
             imagerySensor = 'Cartosat-3 Pan + Sentinel-3 Optical';
             imageryRes = '0.28m Ground Resolution (Level 16)';
           } else if (wantsVideo) {
-            imageryUrl = computeSubmeterOpticalTileUrl(lat, lon, 12);
-            imageryCaption = `Live Multi-Spectral Satellite Video Feed (${targetName})`;
+            imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 12);
+            imageryCaption = `Live Multi-Spectral Satellite Video Feed (${resolvedTargetName})`;
             imagerySensor = 'Cartosat-3 / Sentinel-3 Optical Video Downlink';
             imageryRes = 'Real-Time Synchronized Pass';
           }

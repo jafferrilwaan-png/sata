@@ -1383,6 +1383,24 @@ export default function App() {
                   }}
                   onNavigateTo={(targetName, lat, lon, altitude) => {
                     setCustomGeocodedPlace({ name: targetName, region: 'SECTOR TARGET', lat, lon });
+                    setLiveAiDispatchState((prev) =>
+                      prev
+                        ? { ...prev, targetName, lat, lon, zoomAltitude: altitude || 1.8 }
+                        : ({
+                            targetName,
+                            lat,
+                            lon,
+                            zoomAltitude: altitude || 1.8,
+                            layerType: 'ORBITAL',
+                            briefingSummary: '',
+                            briefingLead: 'Meta AI Consensus',
+                            briefingBody: '',
+                            severity: 'STABLE',
+                            phenomenon: 'THERMAL',
+                            source: 'meta-live',
+                            latencyMs: 0,
+                          } as any)
+                    );
                     globeRef.current?.pointOfView({ lat, lng: lon, altitude: altitude || 1.8, label: targetName }, 2000);
                   }}
                   onClose={() => {
