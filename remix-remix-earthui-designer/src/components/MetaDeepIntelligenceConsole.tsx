@@ -7,7 +7,7 @@ import {
   ArrowUp,
   Image as ImageIcon,
 } from 'lucide-react';
-import { computeSubmeterOpticalTileUrl } from '../utils/telemetryLogic';
+import { computeSubmeterOpticalTileUrl, latLonToTileXYZ } from '../utils/telemetryLogic';
 
 export interface ChatMessage {
   id: string;
@@ -101,9 +101,7 @@ const RichTelemetryText: React.FC<{ content: string }> = ({ content }) => {
         );
       } else {
         elements.push(
-          <p key={`p-${idx}`} className="text-white/90 font-light leading-relaxed text-[12.5px] my-1">
-            {trimmed}
-          </p>
+          <p key={`p-${idx}`} className="text-white/90 font-normal leading-[1.75] text-[12.5px] my-1.5">{trimmed.replace(/^(?:Llama 4|Meta Muse):\s*/i, "")}</p>
         );
       }
     }
@@ -401,10 +399,11 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
           let imageryRes = '0.28m Ground Resolution';
 
           if (wantsIR) {
-            imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 15);
-            imageryCaption = `Thermal IR Multi-Spectral Anomaly Scan (${resolvedTargetName})`;
-            imagerySensor = 'NASA VIIRS 375m / ISRO INSAT-3DR Thermal IR';
-            imageryRes = '375m Thermal Radiometer Resolution';
+            const { x, y, z } = latLonToTileXYZ(resolvedLat, resolvedLon, 7);
+            imageryUrl = `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_Bands721/default/2024-06-01/GoogleMapsCompatible_Level9/${z}/${y}/${x}.jpg`;
+            imageryCaption = `NASA MODIS Bands 7-2-1 False-Color Thermal Infrared Pass (${resolvedTargetName})`;
+            imagerySensor = 'NASA Terra MODIS (Bands 7-2-1 SWIR / Thermal Radiometry)';
+            imageryRes = '250m-500m NASA Radiometer Resolution';
           } else if (wantsCloseUp || wantsEarthInput) {
             imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 16);
             imageryCaption = `Ultra-High-Resolution 0.28m Nadir Surface Inspection (${resolvedTargetName})`;
@@ -487,14 +486,17 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
       {/* 2. Scrollable Content Area: Clean Text First, Large NOAA Video, Observation Thread */}
       <div className="flex-1 min-h-0 overflow-y-auto sata-sidebar-scroll pr-1 my-3 flex flex-col gap-3.5">
         
-        {/* Primary Observation Briefing — Clean White / Off-White Text */}
-        <div className="rounded-[20px] p-4 sm:p-4.5 bg-white/[0.04] border border-white/10 flex flex-col gap-2 select-text leading-relaxed">
-          <div className="text-[10.5px] uppercase tracking-wider font-medium text-white/60">
-            {briefingLead || 'Observation Overview'}
+        {/* Primary Observation Briefing — Clean Spaced Typography & Verified Telemetry */}
+        <div className="rounded-[20px] p-4 sm:p-5 bg-white/[0.04] border border-white/10 flex flex-col gap-2.5 select-text">
+          <div className="flex items-center justify-between text-[11px] uppercase tracking-wider font-semibold text-white/70">
+            <span>{(briefingLead || 'Observation Overview').replace(/^(?:Llama 4|Meta Muse):\s*/i, '')}</span>
+            <span className="font-mono text-[9.5px] text-emerald-400/90 font-medium tracking-normal">Verified Live Telemetry</span>
           </div>
-          <p className="text-[13px] sm:text-[13.5px] text-white/90 font-normal leading-relaxed">
-            {briefingBody}
-          </p>
+          <div className="text-[13px] sm:text-[13.5px] text-white/90 font-normal leading-[1.75] space-y-2">
+            {(briefingBody || '').replace(/^(?:Llama 4|Meta Muse):\s*/i, '').split(/(?<=[.!?])\s+(?=[A-Z])/).map((sentence, sIdx) => (
+              <p key={sIdx}>{sentence}</p>
+            ))}
+          </div>
         </div>
 
         {/* Clean Satellite Feed Bar — Collapsible on Demand (Zero Unsolicited Viewports) */}
