@@ -1055,7 +1055,7 @@ export default function App() {
   }, [liveIncidents, liveAiDispatchState]);
 
   const renderSearchBar = (inputId: string = 'sata-command-search-input') => (
-    <motion.form
+    <form
       layout
       layoutId="sata-command-search-bar"
       transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
@@ -1226,7 +1226,7 @@ export default function App() {
           )}
         </div>
       </div>
-    </motion.form>
+    </form>
   );
 
   return (
@@ -1248,6 +1248,7 @@ export default function App() {
             dpr={0.75}
             mouseInteraction={false}
             mouseRepulsion={false}
+            disableAnimation={isSearchSubmitted}
             repulsionStrength={0}
             transparent={true}
             backgroundColor="#000000"
@@ -1474,7 +1475,7 @@ export default function App() {
                   }}
                   liveIncidents={currentDisplayedIncidents}
                   onSelectIncident={handleSelectIncident}
-                  detectedCount={liveAiDispatchState ? liveAiDispatchState.activeHeatSpots : liveIncidents.length}
+                  detectedCount={liveIncidents.length}
                 />
               </div>
             </motion.div>

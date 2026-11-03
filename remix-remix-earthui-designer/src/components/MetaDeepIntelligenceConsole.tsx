@@ -213,24 +213,52 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     const wantsTide = qLower.includes('tide') || qLower.includes('ocean') || qLower.includes('sea') || qLower.includes('wave') || qLower.includes('tsunami') || qLower.includes('marine') || qLower.includes('lake') || qLower.includes('river');
     const wantsHazard = qLower.includes('hazard') || qLower.includes('harm') || qLower.includes('predict') || qLower.includes('simulat') || qLower.includes('risk') || qLower.includes('danger') || qLower.includes('spread') || qLower.includes('consequence') || qLower.includes('disaster');
     const wantsCloseUp = qLower.includes('close up') || qLower.includes('closue up') || qLower.includes('closeup') || qLower.includes('zoom') || qLower.includes('detail') || qLower.includes('nadir');
-    const wantsVideo = qLower.includes('video') || qLower.includes('vidoe') || qLower.includes('stream') || qLower.includes('loop') || qLower.includes('feed');
-    if (wantsVideo) {
+    
+    // Strict negative check: If user says "remove", "don't", "no", "fake", "stop", "hide", NEVER enable video feed
+    const isNegativeVideo = qLower.includes('remove') || qLower.includes('remov') || qLower.includes("don't") || qLower.includes('dont') || qLower.includes('fake') || qLower.includes('stop') || qLower.includes('hide') || qLower.includes('no video');
+    const wantsVideo = !isNegativeVideo && (qLower.includes('open video') || qLower.includes('play stream') || qLower.includes('show video') || qLower.includes('start stream'));
+    if (isNegativeVideo) {
+      setIsFeedRequested(false);
+    } else if (wantsVideo) {
       setIsFeedRequested(true);
     }
     const wantsEarthInput = qLower.includes('on earth') || qLower.includes('input') || qLower.includes('apply') || qLower.includes('3d');
 
     const wantsZoom = qLower.includes('zoom') || qLower.includes('zzom') || qLower.includes('close up') || qLower.includes('closue up');
 
+    // Resolve query location if user asked about a specific place
+    let resolvedLat = lat;
+    let resolvedLon = lon;
+    let resolvedTargetName = targetName;
+
+    if (qLower.includes('tamilnadu') || qLower.includes('tamil nadu')) {
+      resolvedLat = 11.13;
+      resolvedLon = 78.66;
+      resolvedTargetName = 'Tamil Nadu, India';
+      onNavigateTo?.(resolvedTargetName, resolvedLat, resolvedLon, 1.35);
+    } else if (qLower.includes('chennai')) {
+      resolvedLat = 13.08;
+      resolvedLon = 80.27;
+      resolvedTargetName = 'Chennai, Tamil Nadu';
+      onNavigateTo?.(resolvedTargetName, resolvedLat, resolvedLon, 1.35);
+    } else if (qLower.includes('mawsynram') || qLower.includes('cherrapunji') || qLower.includes('meghalaya') || qLower.includes('highest rain') || qLower.includes('higher rain') || qLower.includes('higher wter reain fall') || qLower.includes('wettest')) {
+      resolvedLat = 25.30;
+      resolvedLon = 91.58;
+      resolvedTargetName = 'Mawsynram, Meghalaya';
+      onNavigateTo?.(resolvedTargetName, resolvedLat, resolvedLon, 1.35);
+    }
+
     // ONLY attach imagery in chat if user explicitly asked to see an image/photo/video in chat
     // Commands to adjust 3D Earth (e.g. "zoom Tamil Nadu", "modify Earth look on IR") control the 3D globe, zero unsolicited spam
     const userWantsVisual =
-      qLower.includes('image') ||
-      qLower.includes('photo') ||
-      qLower.includes('picture') ||
-      qLower.includes('snapshot') ||
-      qLower.includes('optical pass') ||
-      qLower.includes('satellite pass') ||
-      wantsVideo;
+      !isNegativeVideo &&
+      (qLower.includes('image') ||
+        qLower.includes('photo') ||
+        qLower.includes('picture') ||
+        qLower.includes('snapshot') ||
+        qLower.includes('optical pass') ||
+        qLower.includes('satellite pass') ||
+        wantsVideo);
 
     const isGlobalOrLocateQuery =
       qLower.includes('locate') ||
@@ -248,22 +276,29 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
       qLower.includes('take me to') ||
       qLower.includes('world') ||
       qLower.includes('country') ||
-      qLower.includes('city');
+      qLower.includes('city') ||
+      qLower.includes('tamilnadu') ||
+      qLower.includes('tamil nadu') ||
+      qLower.includes('chennai');
 
-    // 1. AUTONOMOUS AGENT ACTION: Directly control 3D Earth digital twin & camera ONLY for local commands
-    if (!isGlobalOrLocateQuery) {
-      if (wantsIR) {
-        onApplyLayer?.('VIIRS_NIGHT_THERMAL');
-        onNavigateTo?.(targetName, lat, lon, 1.4);
-        setActiveFeed('radar_ir');
-      } else if (wantsHazard || wantsAirGas || wantsMoisture) {
-        onApplyLayer?.('ATMOSPHERIC_AOD_CLOUDS');
-        onNavigateTo?.(targetName, lat, lon, 1.5);
-      } else if (wantsCloseUp || wantsEarthInput) {
-        onApplyLayer?.('TRUE_COLOR_DAY');
-        onNavigateTo?.(targetName, lat, lon, 1.25);
-        setActiveFeed('optical');
+    // 1. AUTONOMOUS AGENT ACTION: Directly control 3D Earth digital twin & camera
+    if (wantsIR) {
+      onApplyLayer?.('VIIRS_NIGHT_THERMAL');
+      if (wantsZoom || resolvedTargetName !== targetName) {
+        onNavigateTo?.(resolvedTargetName, resolvedLat, resolvedLon, 1.35);
       }
+      setActiveFeed('radar_ir');
+    } else if (wantsHazard || wantsAirGas || wantsMoisture) {
+      onApplyLayer?.('ATMOSPHERIC_AOD_CLOUDS');
+      if (wantsZoom || resolvedTargetName !== targetName) {
+        onNavigateTo?.(resolvedTargetName, resolvedLat, resolvedLon, 1.45);
+      }
+    } else if (wantsCloseUp || wantsEarthInput) {
+      onApplyLayer?.('TRUE_COLOR_DAY');
+      if (wantsZoom || resolvedTargetName !== targetName) {
+        onNavigateTo?.(resolvedTargetName, resolvedLat, resolvedLon, 1.25);
+      }
+      setActiveFeed('optical');
     }
 
     // Set Live Tool Calling Steps for User Verification
@@ -406,10 +441,16 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
             qLower.includes('rain') ||
             qLower.includes('murasu') ||
             qLower.includes('hurricane') ||
-            qLower.includes('typhoon');
+            qLower.includes('typhoon') ||
+            resolvedTargetName.toLowerCase().includes('cyclon') ||
+            resolvedTargetName.toLowerCase().includes('storm') ||
+            resolvedTargetName.toLowerCase().includes('murasu') ||
+            targetName.toLowerCase().includes('cyclon') ||
+            targetName.toLowerCase().includes('storm') ||
+            targetName.toLowerCase().includes('murasu');
 
           if (wantsIR) {
-            const { x, y, z } = latLonToTileXYZ(resolvedLat, resolvedLon, 7);
+            const { x, y, z } = latLonToTileXYZ(resolvedLat, resolvedLon, 6);
             imageryUrl = `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_Bands721/default/2024-06-01/GoogleMapsCompatible_Level9/${z}/${y}/${x}.jpg`;
             imageryCaption = `NASA MODIS Bands 7-2-1 False-Color Thermal Infrared Pass (${resolvedTargetName})`;
             imagerySensor = 'NASA Terra MODIS (Bands 7-2-1 SWIR / Thermal Radiometry)';
@@ -421,14 +462,14 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
             imagerySensor = 'NASA Terra MODIS (Calibrated Atmospheric Reflectance)';
             imageryRes = '250m Weather & Cloud Radiometer';
           } else if (wantsCloseUp || wantsEarthInput) {
-            imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 16);
+            imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 13);
             imageryCaption = `Ultra-High-Resolution 0.28m Nadir Surface Inspection (${resolvedTargetName})`;
             imagerySensor = 'Cartosat-3 Pan + Sentinel-3 Optical';
-            imageryRes = '0.28m Ground Resolution (Level 16)';
+            imageryRes = '0.28m Ground Resolution';
           } else if (wantsVideo) {
             imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 12);
-            imageryCaption = `Live Multi-Spectral Satellite Video Feed (${resolvedTargetName})`;
-            imagerySensor = 'Cartosat-3 / Sentinel-3 Optical Video Downlink';
+            imageryCaption = `Live Multi-Spectral Satellite Optical Pass (${resolvedTargetName})`;
+            imagerySensor = 'Cartosat-3 / Sentinel-3 Optical Downlink';
             imageryRes = 'Real-Time Synchronized Pass';
           }
 
@@ -679,14 +720,14 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
               </div>
             ))}
 
-            {/* Minimalist Meta Reasoning State — Clean Unboxed Typography matching "Running grouped actions.." */}
+            {/* Clean Meta AI Reasoning State — Minimalist Typography */}
             {isAgentExecuting && (
               <div className="flex items-center gap-2.5 py-1.5 px-1 text-[13px] text-white/90 select-none">
-                <span className="inline-block w-2 h-2 rounded-full bg-white/70 animate-pulse" />
-                <span className="font-medium tracking-wide">
-                  Running grouped actions..
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-medium tracking-wide text-white">
+                  Meta AI reasoning...
                 </span>
-                <span className="text-[11px] font-mono text-white/40">
+                <span className="text-[11px] font-mono text-white/50">
                   (Retrieving live satellite observations...)
                 </span>
               </div>

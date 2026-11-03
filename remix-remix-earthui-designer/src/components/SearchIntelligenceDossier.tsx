@@ -115,14 +115,18 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
         <div className="flex flex-col border-b border-white/10 shrink-0">
           <div className="relative w-full h-[165px] sm:h-[185px] overflow-hidden bg-black/80">
             <img
-              src={computeSubmeterOpticalTileUrl(lat, lon, 11)}
+              src={
+                isCyclone
+                  ? `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2024-06-01/GoogleMapsCompatible_Level9/6/${Math.floor(((1 - Math.asinh(Math.tan((Math.max(-85, Math.min(85, lat)) * Math.PI) / 180)) / Math.PI) / 2) * 64)}/${Math.floor(((lon + 180) / 360) * 64)}.jpg`
+                  : computeSubmeterOpticalTileUrl(lat, lon, 11)
+              }
               alt={targetName}
               referrerPolicy="no-referrer"
               loading="eager"
               onError={(e) => {
                 const target = e.currentTarget;
                 target.onerror = null;
-                target.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/11/${Math.floor(((1 - Math.asinh(Math.tan((lat * Math.PI) / 180)) / Math.PI) / 2) * Math.pow(2, 11))}/${Math.floor(((lon + 180) / 360) * Math.pow(2, 11))}`;
+                target.src = `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2024-06-01/GoogleMapsCompatible_Level9/6/${Math.floor(((1 - Math.asinh(Math.tan((Math.max(-85, Math.min(85, lat)) * Math.PI) / 180)) / Math.PI) / 2) * 64)}/${Math.floor(((lon + 180) / 360) * 64)}.jpg`;
               }}
               className="w-full h-full object-cover select-none"
             />
@@ -212,7 +216,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
             <div className="flex flex-col gap-1.5">
               <div className="text-[12px] font-semibold text-white/95 flex items-center gap-1.5">
                 <ChevronRight className="w-3.5 h-3.5 text-white/70 shrink-0" />
-                <span>Muse Spark 1.3 · Spatial Geodesic Corridor</span>
+                <span>Spatial Geodesic Corridor</span>
               </div>
               <p className="text-[12px] leading-relaxed text-white/80 font-light pl-5">
                 {spatialText}
@@ -223,7 +227,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
             <div className="flex flex-col gap-1.5">
               <div className="text-[12px] font-semibold text-white/95 flex items-center gap-1.5">
                 <ChevronRight className="w-3.5 h-3.5 text-white/70 shrink-0" />
-                <span>Muse Wonder 1.0 · Planetary Physics & Thermodynamics</span>
+                <span>Planetary Physics & Atmospheric State</span>
               </div>
               <p className="text-[12px] leading-relaxed text-white/80 font-light pl-5">
                 {physicsText}
@@ -234,7 +238,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
             <div className="flex flex-col gap-1.5">
               <div className="text-[12px] font-semibold text-white/95 flex items-center gap-1.5">
                 <ChevronRight className="w-3.5 h-3.5 text-white/70 shrink-0" />
-                <span>Muse Spark 1.2 · Tactical Mission Advisory</span>
+                <span>Tactical Mission Advisory</span>
               </div>
               <p className="text-[12px] leading-relaxed text-white/80 font-light pl-5">
                 {tacticalText}

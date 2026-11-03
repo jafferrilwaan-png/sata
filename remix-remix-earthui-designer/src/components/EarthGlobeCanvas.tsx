@@ -2132,7 +2132,7 @@ export const EarthGlobeCanvas = forwardRef<
         renderer.render(scene, camera);
 
         // Zero-Lag Analytical Contrast Check for bottom-row text elements (Throttled to 1000ms to eliminate layout thrashing)
-        if (now - lastContrastCheckMs > 1000) {
+        if (!isSearchSubmittedRef.current && now - lastContrastCheckMs > 2500) {
           lastContrastCheckMs = now;
           const adaptiveNodes = document.querySelectorAll<HTMLElement>(
             '[data-adaptive-text="true"]'
