@@ -133,7 +133,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
   const [chatInput, setChatInput] = useState<string>('');
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isAgentExecuting, setIsAgentExecuting] = useState<boolean>(false);
-  const [activeToolSteps, setActiveToolSteps] = useState<string[]>([]);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -245,13 +245,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     }
 
     // Set Live Tool Calling Steps for User Verification
-    setActiveToolSteps([
-      `Tasking Meta AI Agent Swarm (${selectedMetaModel})...`,
-      `Tool calling: control_3d_earth -> Locking orbit at ${latStr}, ${lonStr}`,
-      wantsIR || wantsHazard ? `Tool calling: nasa_firms_telemetry -> Polling VIIRS 375m & MODIS radiances` : `Tool calling: satellite_orbit_tracker -> Synchronizing SGP4 telemetry`,
-      wantsAirGas || wantsHazard ? `Tool calling: sentinel_atmospheric_chemistry -> Probing CAMS CO, NO2, SO2, PM2.5, AOD` : `Tool calling: atmospheric_sounder -> Fetching boundary layer profiles`,
-      wantsMoisture || wantsTide ? `Tool calling: hydrological_moisture_engine -> Fetching relative humidity & soil moisture` : `Tool calling: multi_spectral_synthesizer -> Calibrating optical reflectance`,
-    ]);
+    
 
     // 2. LIVE DATA DISPATCH: Query backend /api/llama-reason and live Open-Meteo telemetry
     (async () => {
@@ -455,7 +449,7 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
                 onClick={() => onSelectMetaModel?.(m.id as any)}
                 className={`px-2.5 py-0.5 rounded-full text-[9.5px] transition-all cursor-pointer ${
                   selectedMetaModel === m.id
-                    ? 'bg-sky-500/30 border border-sky-400/50 text-white font-medium shadow-[0_0_10px_rgba(56,189,248,0.35)]'
+                    ? 'bg-white/20 border border-white/30 text-white font-medium shadow-[0_0_12px_rgba(255,255,255,0.15)]'
                     : 'bg-white/[0.05] hover:bg-white/10 text-white/70 hover:text-white border border-white/10'
                 }`}
               >
@@ -660,30 +654,21 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
               </div>
             ))}
 
-            {/* Active Tool Calling & Retrieval Feedback State */}
+            {/* Pure Apple iOS Frosted Glass Thinking / Observation Retrieval Indicator */}
             {isAgentExecuting && (
-              <div className="p-3.5 rounded-[18px] bg-sky-500/[0.08] border border-sky-400/30 flex flex-col gap-2 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
-                    <span className="text-[10.5px] font-mono font-medium text-sky-300 uppercase tracking-wider">
-                      Retrieving live satellite observations... Active Tool Calling
-                    </span>
-                  </div>
-                  <span className="text-[9.5px] font-mono text-white/50">{selectedMetaModel}</span>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-[20px] bg-white/[0.04] border border-white/10 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/50 animate-pulse [animation-delay:200ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/30 animate-pulse [animation-delay:400ms]" />
                 </div>
-
-                <div className="flex flex-col gap-1 mt-0.5">
-                  {(activeToolSteps.length > 0 ? activeToolSteps : [
-                    `Tasking Meta AI Agent Swarm (${selectedMetaModel})...`,
-                    `Tool calling: control_3d_earth -> Locking orbit at ${latStr}, ${lonStr}`,
-                    `Tool calling: nasa_firms_telemetry -> Polling active satellite observations`,
-                  ]).map((step, sIdx) => (
-                    <div key={sIdx} className="flex items-center gap-2 text-[10px] font-mono text-white/85">
-                      <span className="text-sky-400 font-bold">✓</span>
-                      <span>{step}</span>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between flex-1 gap-2 min-w-0">
+                  <span className="text-[11px] font-normal tracking-wide text-white/80 truncate">
+                    Retrieving live satellite observations...
+                  </span>
+                  <span className="text-[9.5px] font-mono text-white/40 shrink-0">
+                    {selectedMetaModel}
+                  </span>
                 </div>
               </div>
             )}

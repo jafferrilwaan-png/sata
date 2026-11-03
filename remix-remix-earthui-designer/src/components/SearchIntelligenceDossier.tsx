@@ -90,7 +90,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
               <h2 className="text-[15px] font-semibold tracking-wide text-white truncate">
                 {targetName}
               </h2>
-              <div className="flex items-center gap-2 text-[11px] text-sky-300 font-mono mt-0.5">
+              <div className="flex items-center gap-2 text-[11px] text-white/80 font-mono mt-0.5">
                 <span>{latStr}</span>
                 <span className="text-white/30">•</span>
                 <span>{lonStr}</span>
@@ -148,7 +148,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
           <div className="flex items-center justify-between px-4 py-3 rounded-[18px] bg-white/[0.04] border border-white/10 text-center">
             <div className="flex-1 flex flex-col items-center">
               <div className="flex items-center gap-1.5 text-[10px] text-white/50 uppercase tracking-wider font-medium">
-                <Wind className="w-3.5 h-3.5 text-sky-400" />
+                <Wind className="w-3.5 h-3.5 text-white/70" />
                 <span>Wind</span>
               </div>
               <span className="text-[14px] font-semibold text-white font-mono mt-0.5">
@@ -160,7 +160,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
 
             <div className="flex-1 flex flex-col items-center">
               <div className="flex items-center gap-1.5 text-[10px] text-white/50 uppercase tracking-wider font-medium">
-                <Gauge className="w-3.5 h-3.5 text-sky-400" />
+                <Gauge className="w-3.5 h-3.5 text-white/70" />
                 <span>Pressure</span>
               </div>
               <span className="text-[14px] font-semibold text-white font-mono mt-0.5">
@@ -199,8 +199,8 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
           {/* Meta AI Intelligence Swarm Narrative */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-sky-300">
-                <Compass className="w-4 h-4 text-sky-400" />
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-white/80">
+                <Compass className="w-4 h-4 text-white/70" />
                 <span>Meta AI Multi-Model Intelligence</span>
               </div>
               <span className="text-[9.5px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
@@ -211,7 +211,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
             {/* Muse Spark 1.3 · Spatial Corridor */}
             <div className="flex flex-col gap-1.5">
               <div className="text-[12px] font-semibold text-white/95 flex items-center gap-1.5">
-                <ChevronRight className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-white/70 shrink-0" />
                 <span>Muse Spark 1.3 · Spatial Geodesic Corridor</span>
               </div>
               <p className="text-[12px] leading-relaxed text-white/80 font-light pl-5">
@@ -222,7 +222,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
             {/* Muse Wonder 1.0 · Planetary Physics */}
             <div className="flex flex-col gap-1.5">
               <div className="text-[12px] font-semibold text-white/95 flex items-center gap-1.5">
-                <ChevronRight className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-white/70 shrink-0" />
                 <span>Muse Wonder 1.0 · Planetary Physics & Thermodynamics</span>
               </div>
               <p className="text-[12px] leading-relaxed text-white/80 font-light pl-5">
@@ -233,7 +233,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
             {/* Muse Spark 1.2 · Tactical Mission Briefing */}
             <div className="flex flex-col gap-1.5">
               <div className="text-[12px] font-semibold text-white/95 flex items-center gap-1.5">
-                <ChevronRight className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-white/70 shrink-0" />
                 <span>Muse Spark 1.2 · Tactical Mission Advisory</span>
               </div>
               <p className="text-[12px] leading-relaxed text-white/80 font-light pl-5">
@@ -249,7 +249,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
               onClick={onTrackSatellite || onClose}
               className="flex-1 h-10 rounded-full bg-white/10 hover:bg-white/18 border border-white/20 text-white text-[12px] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
-              <Compass className="w-4 h-4 text-sky-300" />
+              <Compass className="w-4 h-4 text-white/80" />
               <span>Track Orbit</span>
             </button>
 
