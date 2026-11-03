@@ -89,28 +89,35 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
             </button>
           </div>
 
-          {/* Optical Ground Pass Imagery */}
-          <div className="relative w-full h-44 sm:h-52 rounded-2xl overflow-hidden border border-white/15 bg-black/60 shadow-inner group">
-            <img
-              src={opticalPassUrl}
-              alt={`Live optical view beneath ${satellite.satellite_name}`}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            {/* Minimal Inset Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
-            <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between pointer-events-none">
-              <div>
-                <div className="text-[10px] uppercase font-mono tracking-wider text-white/60">
-                  Sub-Satellite Nadir Point
+          {/* 100% Clean Optical Ground Pass Imagery — ZERO Text Overlay On Image */}
+          <div className="flex flex-col gap-2">
+            <div className="relative w-full h-44 sm:h-52 rounded-2xl overflow-hidden border border-white/15 bg-black/80 shadow-inner group">
+              <img
+                src={opticalPassUrl}
+                alt={`Live optical view beneath ${satellite.satellite_name}`}
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.onerror = null;
+                  target.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/11/${Math.floor(((1 - Math.asinh(Math.tan((coords.lat * Math.PI) / 180)) / Math.PI) / 2) * Math.pow(2, 11))}/${Math.floor(((coords.lon + 180) / 360) * Math.pow(2, 11))}`;
+                }}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 select-none"
+              />
+            </div>
+
+            {/* Clean Sub-Satellite Nadir Point Metadata Strip — Located Beneath The Image */}
+            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white">
+              <div className="min-w-0">
+                <div className="text-[9.5px] uppercase font-mono tracking-wider text-white/50">
+                  Sub-Satellite Nadir Point • {coords.region}
                 </div>
-                <div className="text-[13px] font-medium text-white">
-                  {coords.region}
-                </div>
-                <div className="text-[11px] font-mono text-white/80">
+                <div className="text-[11px] font-mono text-white/90">
                   {latStr}, {lonStr}
                 </div>
               </div>
-              <span className="whitespace-nowrap text-[11px] font-medium tracking-wide bg-white/10 backdrop-blur-xl px-3 py-1 rounded-full border border-white/20 text-white shadow-sm">0.28m Ground Resolution</span>
+              <span className="shrink-0 whitespace-nowrap text-[10.5px] font-medium tracking-wide bg-white/10 backdrop-blur-xl px-2.5 py-1 rounded-full border border-white/15 text-white shadow-sm">
+                0.28m Ground Resolution
+              </span>
             </div>
           </div>
 

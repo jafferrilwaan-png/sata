@@ -1366,6 +1366,8 @@ export default function App() {
                   lon={liveAiDispatchState?.lon ?? customGeocodedPlace?.lon ?? 78}
                   briefingLead={liveAiDispatchState?.briefingLead || displayObservationData.aiInsightLead}
                   briefingBody={liveAiDispatchState?.briefingBody || displayObservationData.aiInsightBody}
+                  selectedMetaModel={selectedMetaModel}
+                  onSelectMetaModel={setSelectedMetaModel}
                   onApplyLayer={(layer) => {
                     setActiveLayerMode(layer);
                   }}

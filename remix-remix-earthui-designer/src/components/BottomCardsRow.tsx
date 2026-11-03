@@ -108,18 +108,20 @@ export const BottomCardsRow: React.FC<BottomCardsRowProps> = ({
                       }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                    <span className="absolute bottom-1.5 left-2 text-[9px] font-medium text-white/90 bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-sm">
+                    
+                  </div>
+                  <div className="flex flex-col mt-1.5 lg:mt-2 w-full gap-0.5">
+                    <span className="text-[9px] font-medium text-sky-300 uppercase tracking-wider truncate">
                       {item.category}
                     </span>
+                    <span
+                      data-adaptive-text="true"
+                      data-contrast-mode="light"
+                      className="sata-adaptive-primary text-[11px] sm:text-[clamp(9.5px,0.82vw,12.5px)] font-normal text-[#f4f4f5] group-hover:text-white transition-colors line-clamp-2 leading-tight w-full h-[2.5em]"
+                    >
+                      {item.title}
+                    </span>
                   </div>
-                  <span
-                    data-adaptive-text="true"
-                    data-contrast-mode="light"
-                    className="sata-adaptive-primary mt-1.5 lg:mt-2 text-[11px] sm:text-[clamp(9.5px,0.82vw,12.5px)] font-normal text-[#f4f4f5] group-hover:text-white transition-colors line-clamp-2 leading-tight w-full h-[2.5em]"
-                  >
-                    {item.title}
-                  </span>
                 </button>
               );
             })}

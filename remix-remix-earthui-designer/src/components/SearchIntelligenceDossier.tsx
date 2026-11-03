@@ -111,23 +111,34 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
           </button>
         </div>
 
-        {/* Genuine NASA Satellite Downlink Sensor Feed */}
-        <div className="relative w-full h-[165px] sm:h-[185px] overflow-hidden border-b border-white/10 shrink-0 bg-black/60">
-          <img
-            src={computeSubmeterOpticalTileUrl(lat, lon, 11)}
-            alt={targetName}
-            className="w-full h-full object-cover select-none"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#070e22] via-transparent to-black/20 pointer-events-none" />
-
-          {/* Live Downlink Badge */}
-          <div className="absolute bottom-3 left-4 flex items-center px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium tracking-wider shadow-lg">
-            <span>LIVE DOWNLINK</span>
+        {/* 100% Clean Satellite Downlink Sensor Feed — ZERO Text Overlay On Image */}
+        <div className="flex flex-col border-b border-white/10 shrink-0">
+          <div className="relative w-full h-[165px] sm:h-[185px] overflow-hidden bg-black/80">
+            <img
+              src={computeSubmeterOpticalTileUrl(lat, lon, 11)}
+              alt={targetName}
+              referrerPolicy="no-referrer"
+              loading="eager"
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.onerror = null;
+                target.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/11/${Math.floor(((1 - Math.asinh(Math.tan((lat * Math.PI) / 180)) / Math.PI) / 2) * Math.pow(2, 11))}/${Math.floor(((lon + 180) / 360) * Math.pow(2, 11))}`;
+              }}
+              className="w-full h-full object-cover select-none"
+            />
           </div>
 
-          {/* Geodesic Coordinate Stamp */}
-          <div className="absolute bottom-3 right-4 px-2.5 py-1 rounded-[10px] bg-black/65 backdrop-blur-md border border-white/15 text-[10.5px] font-mono text-white/90">
-            {latStr}, {lonStr}
+          {/* Clean Downlink Metadata Strip — Positioned Beneath The Imagery */}
+          <div className="flex items-center justify-between px-4 py-2 bg-white/[0.04] text-white">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/15 text-[9.5px] font-mono tracking-wider">
+                LIVE DOWNLINK
+              </span>
+              <span className="text-[10px] text-white/60">0.28m Ground Resolution</span>
+            </div>
+            <div className="text-[10.5px] font-mono text-white/90">
+              {latStr}, {lonStr}
+            </div>
           </div>
         </div>
 

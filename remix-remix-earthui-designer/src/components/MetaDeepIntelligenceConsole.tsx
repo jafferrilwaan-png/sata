@@ -29,6 +29,10 @@ export interface MetaDeepIntelligenceConsoleProps {
   lon: number;
   briefingLead: string;
   briefingBody: string;
+  onApplyLayer?: (layer: string) => void;
+  onNavigateTo?: (targetName: string, lat: number, lon: number, altitude?: number) => void;
+  selectedMetaModel?: 'tri-agent-swarm' | 'muse-spark-1.3' | 'muse-spark-1.2' | 'muse-wonder-1.0';
+  onSelectMetaModel?: (model: 'tri-agent-swarm' | 'muse-spark-1.3' | 'muse-spark-1.2' | 'muse-wonder-1.0') => void;
   onClose: () => void;
 }
 
@@ -118,6 +122,10 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
   lon,
   briefingLead,
   briefingBody,
+  onApplyLayer,
+  onNavigateTo,
+  selectedMetaModel = 'muse-spark-1.3',
+  onSelectMetaModel,
   onClose,
 }) => {
   const [isPlayingVideoLoop, setIsPlayingVideoLoop] = useState<boolean>(true);
@@ -276,7 +284,7 @@ CORE OPERATIONAL RULES:
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'muse-spark-1.3',
+            model: selectedMetaModel === 'tri-agent-swarm' ? 'muse-spark-1.3' : (selectedMetaModel || 'muse-spark-1.3'),
             messages: [
               { role: 'system', content: systemPrompt },
               { role: 'user', content: q },
@@ -318,7 +326,7 @@ CORE OPERATIONAL RULES:
             method: 'POST',
             headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              model: 'muse-spark-1.3',
+              model: selectedMetaModel === 'tri-agent-swarm' ? 'muse-spark-1.3' : (selectedMetaModel || 'muse-spark-1.3'),
               messages: [
                 { role: 'system', content: 'You are an environmental science copilot analyzing satellite telemetry and air quality.' },
                 { role: 'user', content: 'Provide environmental air quality and atmospheric dispersion assessment for ' + targetName + ' (' + latStr + ', ' + lonStr + ').' },
@@ -409,6 +417,30 @@ CORE OPERATIONAL RULES:
             <span className="text-white/20">|</span>
             <span className="text-white/80 font-sans text-[11px]">Orbital Track Locked</span>
           </div>
+
+          {/* Real Meta AI Model Switcher */}
+          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+            <span className="text-[10px] uppercase font-mono tracking-wider text-white/50">Model:</span>
+            {[
+              { id: 'tri-agent-swarm', label: 'Swarm Consensus' },
+              { id: 'muse-spark-1.3', label: 'Muse Spark 1.3' },
+              { id: 'muse-wonder-1.0', label: 'Muse Wonder 1.0' },
+              { id: 'muse-spark-1.2', label: 'Muse Spark 1.2' },
+            ].map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => onSelectMetaModel?.(m.id as any)}
+                className={`px-2.5 py-0.5 rounded-full text-[9.5px] transition-all cursor-pointer ${
+                  selectedMetaModel === m.id
+                    ? 'bg-sky-500/30 border border-sky-400/50 text-white font-medium shadow-[0_0_10px_rgba(56,189,248,0.35)]'
+                    : 'bg-white/[0.05] hover:bg-white/10 text-white/70 hover:text-white border border-white/10'
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <button
@@ -435,11 +467,11 @@ CORE OPERATIONAL RULES:
           </p>
         </div>
 
-        {/* Real NOAA Satellite Video Display — Large & Prominent */}
-        <div className="flex flex-col gap-1.5 shrink-0">
+        {/* Real NOAA Satellite Video Display — 100% Clean Image Viewport, Zero Text Overlays */}
+        <div className="flex flex-col gap-2 shrink-0">
           <div className="flex items-center justify-between text-[10.5px]">
             <span className="text-[10px] font-medium uppercase tracking-wider text-white/60">
-              Satellite Video Feed
+              Satellite Video & Optical Feed
             </span>
 
             <div className="flex items-center gap-1 bg-white/[0.06] p-0.5 rounded-full border border-white/10">
@@ -452,7 +484,7 @@ CORE OPERATIONAL RULES:
                     : 'text-white/60 hover:text-white'
                 }`}
               >
-                GeoColor Feed
+                GeoColor Loop
               </button>
               <button
                 type="button"
@@ -474,35 +506,36 @@ CORE OPERATIONAL RULES:
                     : 'text-white/60 hover:text-white'
                 }`}
               >
-                Optical Tile
+                0.28m Optical
               </button>
             </div>
           </div>
 
-          {/* Sizable, High-Quality Satellite Viewport */}
-          <div className="relative w-full h-[215px] sm:h-[235px] rounded-[22px] overflow-hidden border border-white/15 bg-black/95 shadow-[inset_0_1px_3px_rgba(255,255,255,0.25),0_16px_40px_rgba(0,0,0,0.6)] shrink-0">
+          {/* 100% Clean Satellite Viewport — NO GRADIENTS, NO TEXT ON TOP */}
+          <div className="relative w-full h-[215px] sm:h-[235px] rounded-[22px] overflow-hidden border border-white/15 bg-black/90 shadow-[inset_0_1px_3px_rgba(255,255,255,0.25),0_16px_40px_rgba(0,0,0,0.6)] shrink-0">
             <img
               src={getVideoSource()}
-              alt={`NOAA Satellite Video of ${targetName}`}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
+              alt={`Satellite Feed of ${targetName}`}
+              referrerPolicy="no-referrer"
+              loading="eager"
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.onerror = null;
+                target.src = '/assets/ui/goes_geocolor_loop.gif';
+              }}
+              className={`w-full h-full object-cover transition-opacity duration-300 select-none ${
                 isPlayingVideoLoop ? 'opacity-100' : 'opacity-85'
               }`}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 pointer-events-none" />
+          </div>
 
-            {/* Top Status Badge */}
-            <div className="absolute top-3 left-3 flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-[9.5px] font-mono text-white tracking-wide">
-                NOAA Satellite Stream • Live
-              </span>
-            </div>
-
-            {/* Play/Pause Button */}
-            <div className="absolute top-3 right-3">
+          {/* Clean Controls & Metadata Strip — Positioned Beneath The Video Viewport */}
+          <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setIsPlayingVideoLoop(!isPlayingVideoLoop)}
-                className="px-2.5 py-0.5 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/20 text-[9.5px] font-medium text-white flex items-center gap-1 transition-all cursor-pointer"
+                className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] font-medium text-white flex items-center gap-1 transition-all cursor-pointer"
               >
                 {isPlayingVideoLoop ? (
                   <>
@@ -516,12 +549,15 @@ CORE OPERATIONAL RULES:
                   </>
                 )}
               </button>
+              <span className="text-[10px] font-mono text-white/60">
+                NOAA Satellite Stream • Live
+              </span>
             </div>
 
-            {/* Bottom Coordinates & Source info */}
-            <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[10px] font-mono text-white/90">
+            <div className="flex items-center gap-2 text-[10.5px] font-mono text-white/80">
               <span>{latStr}, {lonStr}</span>
-              <span className="px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[9.5px]">
+              <span className="text-white/30">•</span>
+              <span className="px-2 py-0.5 rounded-full bg-white/[0.08] text-[9.5px]">
                 {activeFeed === 'radar_ir' ? 'Clean IR Band 13 Doppler' : activeFeed === 'geocolor' ? 'NOAA GOES GeoColor Loop' : '0.28m Optical Stream'}
               </span>
             </div>
@@ -553,23 +589,38 @@ CORE OPERATIONAL RULES:
                   /* Satellite Observation Response Card */
                   <div className="rounded-[22px] p-4 text-[12px] leading-relaxed w-full bg-white/[0.04] border border-white/10 flex flex-col gap-3 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
                     
-                    {/* Satellite Imagery Frame */}
+                    {/* 100% Clean Satellite Imagery Frame — ZERO Text / Overlays on Image */}
                     {m.generatedImagery && (
-                      <div className="flex flex-col gap-1.5">
-                        <div className="text-[10px] font-medium text-white/70 uppercase tracking-wider flex items-center justify-between">
-                          <span>Satellite Observation View</span>
-                          <span className="text-[9px] font-mono text-white/50">{m.generatedImagery.sensor}</span>
-                        </div>
-                        <div className="relative w-full h-[160px] rounded-[16px] overflow-hidden border border-white/15 bg-black/80">
+                      <div className="flex flex-col gap-2">
+                        <div className="relative w-full h-[180px] sm:h-[210px] rounded-[18px] overflow-hidden border border-white/15 bg-black/85 shadow-inner">
                           <img
                             src={m.generatedImagery.url}
                             alt={m.generatedImagery.caption}
-                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                            loading="eager"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.onerror = null;
+                              target.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/12/${Math.floor(((1 - Math.asinh(Math.tan((lat * Math.PI) / 180)) / Math.PI) / 2) * Math.pow(2, 12))}/${Math.floor(((lon + 180) / 360) * Math.pow(2, 12))}`;
+                            }}
+                            className="w-full h-full object-cover select-none"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent pointer-events-none" />
-                          <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-[9px] font-mono text-white/90">
-                            <span>{m.generatedImagery.caption}</span>
-                            <span className="px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md">{m.generatedImagery.resolution}</span>
+                        </div>
+
+                        {/* All Metadata, Captions, Sensors, and Resolution sit CLEANLY BENEATH the Image */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-[10px] font-mono text-white/90">
+                          <div className="flex items-center gap-2 truncate">
+                            <span className="text-white font-medium truncate">{m.generatedImagery.caption}</span>
+                            <span className="text-white/30">•</span>
+                            <span className="text-white/60 shrink-0">{m.generatedImagery.sensor}</span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/15 text-[9.5px]">
+                              {m.generatedImagery.resolution}
+                            </span>
+                            <span className="text-white/60 text-[9.5px]">
+                              {latStr}, {lonStr}
+                            </span>
                           </div>
                         </div>
                       </div>
