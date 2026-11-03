@@ -1895,7 +1895,7 @@ export const EarthGlobeCanvas = forwardRef<
           earthSurfaceMat.uniforms.uThermalIntensity.value;
 
         // Throttle DOM data-* attribute updates to every 250ms to eliminate 600 DOM mutations/sec
-        if (now - lastDomAttrUpdateMs > 250 && container?.parentElement) {
+        if (now - lastDomAttrUpdateMs > 1000 && container?.parentElement) {
           lastDomAttrUpdateMs = now;
           const parentEl = container.parentElement;
           if (cachedTermState) {

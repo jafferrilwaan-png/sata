@@ -1329,7 +1329,7 @@ export default function App() {
             }
           }}
           onZoomSectorChange={setZoomSectorId}
-          onZoomTelemetryChange={setZoomTelemetryCoords}
+          onZoomTelemetryChange={isSearchSubmitted ? undefined : setZoomTelemetryCoords}
           activeTab={activeTab}
           adjustOrbitEnabled={adjustOrbitEnabled}
           targetPointOfView={observationData.targetPointOfView}

@@ -129,6 +129,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
   onClose,
 }) => {
   const [isPlayingVideoLoop, setIsPlayingVideoLoop] = useState<boolean>(true);
+  const [isFeedRequested, setIsFeedRequested] = useState<boolean>(false);
   const [activeFeed, setActiveFeed] = useState<'geocolor' | 'radar_ir' | 'optical'>('geocolor');
   const [chatInput, setChatInput] = useState<string>('');
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
@@ -215,6 +216,9 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     const wantsHazard = qLower.includes('hazard') || qLower.includes('harm') || qLower.includes('predict') || qLower.includes('simulat') || qLower.includes('risk') || qLower.includes('danger') || qLower.includes('spread') || qLower.includes('consequence') || qLower.includes('disaster');
     const wantsCloseUp = qLower.includes('close up') || qLower.includes('closue up') || qLower.includes('closeup') || qLower.includes('zoom') || qLower.includes('detail') || qLower.includes('nadir');
     const wantsVideo = qLower.includes('video') || qLower.includes('vidoe') || qLower.includes('stream') || qLower.includes('loop') || qLower.includes('feed');
+    if (wantsVideo) {
+      setIsFeedRequested(true);
+    }
     const wantsEarthInput = qLower.includes('on earth') || qLower.includes('input') || qLower.includes('apply') || qLower.includes('3d');
 
     const wantsZoom = qLower.includes('zoom') || qLower.includes('zzom') || qLower.includes('close up') || qLower.includes('closue up');
@@ -431,6 +435,7 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
   return (
     <aside
       aria-label="Satellite Intelligence Dossier"
+      style={{ transform: 'translateZ(0)', willChange: 'transform' }}
       className="pointer-events-auto w-full h-full sm:min-h-0 rounded-[28px] p-4 sm:p-5 flex flex-col overflow-hidden select-none border border-white/14 bg-black/45 backdrop-blur-[36px] saturate-[170%] shadow-[0_32px_80px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.22)] text-white"
     >
       {/* 1. Header: Clean Minimal Title, Coordinates, Close Button — NO SVG ICONS, NO BLUE TEXT */}
@@ -499,87 +504,16 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
           </p>
         </div>
 
-        {/* Real NOAA Satellite Video Display — 100% Clean Image Viewport, Zero Text Overlays */}
+        {/* Clean Satellite Feed Bar — Collapsible on Demand (Zero Unsolicited Viewports) */}
         <div className="flex flex-col gap-2 shrink-0">
-          <div className="flex items-center justify-between text-[10.5px]">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-white/60">
-              Satellite Video & Optical Feed
-            </span>
-
-            <div className="flex items-center gap-1 bg-white/[0.06] p-0.5 rounded-full border border-white/10">
-              <button
-                type="button"
-                onClick={() => setActiveFeed('optical')}
-                className={`px-2 py-0.5 rounded-full text-[9.5px] transition-all cursor-pointer ${
-                  activeFeed === 'optical'
-                    ? 'bg-white/20 text-white font-medium'
-                    : 'text-white/60 hover:text-white'
-                }`}
-              >
-                0.28m Optical
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFeed('radar_ir')}
-                className={`px-2 py-0.5 rounded-full text-[9.5px] transition-all cursor-pointer ${
-                  activeFeed === 'radar_ir'
-                    ? 'bg-white/20 text-white font-medium'
-                    : 'text-white/60 hover:text-white'
-                }`}
-              >
-                Clean IR Radar
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFeed('geocolor')}
-                className={`px-2 py-0.5 rounded-full text-[9.5px] transition-all cursor-pointer ${
-                  activeFeed === 'geocolor'
-                    ? 'bg-white/20 text-white font-medium'
-                    : 'text-white/60 hover:text-white'
-                }`}
-              >
-                {isAmericas ? 'GeoColor Loop' : 'Multispectral Loop'}
-              </button>
-            </div>
-          </div>
-
-          {/* 100% Clean Satellite Viewport — NO GRADIENTS, NO TEXT ON TOP */}
-          <div className="relative w-full h-[215px] sm:h-[235px] rounded-[22px] overflow-hidden border border-white/15 bg-black/90 shadow-[inset_0_1px_3px_rgba(255,255,255,0.25),0_16px_40px_rgba(0,0,0,0.6)] shrink-0">
-            <img
-              src={getVideoSource()}
-              alt={`Satellite Feed of ${targetName}`}
-              referrerPolicy="no-referrer"
-              loading="eager"
-              onError={(e) => {
-                const target = e.currentTarget;
-                target.onerror = null;
-                target.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/${Math.floor(((1 - Math.asinh(Math.tan((lat * Math.PI) / 180)) / Math.PI) / 2) * Math.pow(2, 10))}/${Math.floor(((lon + 180) / 360) * Math.pow(2, 10))}`;
-              }}
-              className={`w-full h-full object-cover transition-opacity duration-300 select-none ${
-                isPlayingVideoLoop ? 'opacity-100' : 'opacity-85'
-              }`}
-            />
-          </div>
-
-          {/* Clean Controls & Metadata Strip — Positioned Beneath The Video Viewport */}
           <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white flex-wrap gap-2">
             <div className="flex items-center gap-2 whitespace-nowrap">
               <button
                 type="button"
-                onClick={() => setIsPlayingVideoLoop(!isPlayingVideoLoop)}
+                onClick={() => setIsFeedRequested(!isFeedRequested)}
                 className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] font-medium text-white flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap"
               >
-                {isPlayingVideoLoop ? (
-                  <>
-                    <Pause className="w-2.5 h-2.5 text-white" />
-                    <span>Pause</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-2.5 h-2.5 text-white" />
-                    <span>Play</span>
-                  </>
-                )}
+                {isFeedRequested ? 'Hide Satellite Feed' : 'Show Satellite Feed'}
               </button>
               <span className="text-[10px] font-mono text-white/60 whitespace-nowrap">
                 NOAA Satellite Stream • Live
@@ -594,6 +528,70 @@ Target Coordinates: ${latStr}, ${lonStr} (${targetName}). 3D Earth digital twin 
               </span>
             </div>
           </div>
+
+          {/* Only rendered when requested by user or chat command — Zero unsolicited heavy viewports */}
+          {isFeedRequested && (
+            <div className="flex flex-col gap-2 pt-1">
+              <div className="flex items-center justify-between text-[10.5px]">
+                <span className="text-[10px] font-medium uppercase tracking-wider text-white/60">
+                  Satellite Downlink Bands
+                </span>
+
+                <div className="flex items-center gap-1 bg-white/[0.06] p-0.5 rounded-full border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setActiveFeed('optical')}
+                    className={`px-2 py-0.5 rounded-full text-[9.5px] transition-all cursor-pointer ${
+                      activeFeed === 'optical'
+                        ? 'bg-white/20 text-white font-medium'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    0.28m Optical
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFeed('radar_ir')}
+                    className={`px-2 py-0.5 rounded-full text-[9.5px] transition-all cursor-pointer ${
+                      activeFeed === 'radar_ir'
+                        ? 'bg-white/20 text-white font-medium'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    Clean IR Radar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFeed('geocolor')}
+                    className={`px-2 py-0.5 rounded-full text-[9.5px] transition-all cursor-pointer ${
+                      activeFeed === 'geocolor'
+                        ? 'bg-white/20 text-white font-medium'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    {isAmericas ? 'GeoColor Loop' : 'Multispectral Loop'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative w-full h-[215px] sm:h-[235px] rounded-[22px] overflow-hidden border border-white/15 bg-black/90 shadow-[inset_0_1px_3px_rgba(255,255,255,0.25),0_16px_40px_rgba(0,0,0,0.6)] shrink-0">
+                <img
+                  src={getVideoSource()}
+                  alt={`Satellite Feed of ${targetName}`}
+                  referrerPolicy="no-referrer"
+                  loading="eager"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.onerror = null;
+                    target.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/${Math.floor(((1 - Math.asinh(Math.tan((lat * Math.PI) / 180)) / Math.PI) / 2) * Math.pow(2, 10))}/${Math.floor(((lon + 180) / 360) * Math.pow(2, 10))}`;
+                  }}
+                  className={`w-full h-full object-cover transition-opacity duration-300 select-none ${
+                    isPlayingVideoLoop ? 'opacity-100' : 'opacity-85'
+                  }`}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Observation Interaction Thread */}
