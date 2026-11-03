@@ -423,6 +423,7 @@ export const EarthGlobeCanvas = forwardRef<
           uTsunamiWavePhase: { value: 0.0 },
           uTsunamiSurge: { value: 0.0 },
           uRainStormIntensity: { value: 0.0 },
+          uIrThermalMode: { value: 0.0 },
         },
         vertexShader: `
           uniform sampler2D uDayMap;
@@ -499,6 +500,7 @@ export const EarthGlobeCanvas = forwardRef<
           uniform float uTsunamiWavePhase;
           uniform float uTsunamiSurge;
           uniform float uRainStormIntensity;
+          uniform float uIrThermalMode;
           varying vec2 vUv;
           varying vec3 vNormal;
           varying vec3 vLocalNormal;
@@ -937,6 +939,16 @@ export const EarthGlobeCanvas = forwardRef<
                 float blendAlpha = uHighResAlpha * edgeMask * highResTex.a;
                 finalCol = mix(finalCol, highResTex.rgb, blendAlpha);
               }
+            }
+
+            if (uIrThermalMode > 0.01) {
+              // False-color Infrared / Thermal Radiometry Look (VIIRS / Sentinel-3 SLSTR)
+              float lum = dot(finalCol, vec3(0.299, 0.587, 0.114));
+              vec3 thermalWarm = vec3(1.0, 0.42, 0.12) * smoothstep(0.35, 0.85, lum) * 1.4;
+              vec3 thermalCool = vec3(0.08, 0.22, 0.45) * smoothstep(0.40, 0.0, lum);
+              vec3 thermalMid = vec3(0.15, 0.65, 0.45) * smoothstep(0.15, 0.55, lum) * (1.0 - smoothstep(0.55, 0.85, lum));
+              vec3 irRgb = thermalCool + thermalMid + thermalWarm;
+              finalCol = mix(finalCol, irRgb, uIrThermalMode * 0.85);
             }
 
             gl_FragColor = vec4(finalCol, 1.0);

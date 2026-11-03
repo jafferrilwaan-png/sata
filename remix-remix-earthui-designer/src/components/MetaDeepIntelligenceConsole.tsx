@@ -217,18 +217,18 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     const wantsVideo = qLower.includes('video') || qLower.includes('vidoe') || qLower.includes('stream') || qLower.includes('loop') || qLower.includes('feed');
     const wantsEarthInput = qLower.includes('on earth') || qLower.includes('input') || qLower.includes('apply') || qLower.includes('3d');
 
+    const wantsZoom = qLower.includes('zoom') || qLower.includes('zzom') || qLower.includes('close up') || qLower.includes('closue up');
+
+    // ONLY attach imagery in chat if user explicitly asked to see an image/photo/video in chat
+    // Commands to adjust 3D Earth (e.g. "zoom Tamil Nadu", "modify Earth look on IR") control the 3D globe, zero unsolicited spam
     const userWantsVisual =
-      wantsIR ||
-      wantsCloseUp ||
-      wantsVideo ||
-      wantsEarthInput ||
       qLower.includes('image') ||
       qLower.includes('photo') ||
-      qLower.includes('firms') ||
       qLower.includes('picture') ||
-      qLower.includes('satellite pass') ||
+      qLower.includes('snapshot') ||
       qLower.includes('optical pass') ||
-      qLower.includes('visual');
+      qLower.includes('satellite pass') ||
+      wantsVideo;
 
     // 1. AUTONOMOUS AGENT ACTION: Directly control 3D Earth digital twin & camera
     if (wantsIR) {
@@ -273,6 +273,22 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
 
         if (metaData?.briefingSummary) {
           replyText = metaData.briefingSummary.replace(/^(Meta Muse|Llama 4):\s*/i, '');
+        }
+
+        // AUTONOMOUS AGENT ACTION: Fly camera & zoom 3D globe to resolved target
+        if (metaData && typeof metaData.lat === 'number' && typeof metaData.lon === 'number' && (metaData.lat !== 0 || metaData.lon !== 0)) {
+          const targetAltitude = wantsZoom || wantsCloseUp ? 1.35 : (metaData.zoomAltitude || 1.6);
+          onNavigateTo?.(metaData.targetName || targetName, metaData.lat, metaData.lon, targetAltitude);
+        }
+
+        // AUTONOMOUS 3D GLOBE SHADER ACTION: Apply requested sensor layer (e.g. VIIRS Infrared Thermal)
+        if (wantsIR || metaData?.layerType === 'THERMAL') {
+          onApplyLayer?.('VIIRS_NIGHT_THERMAL');
+          setActiveFeed('radar_ir');
+        } else if (metaData?.layerType === 'STORM' || wantsAirGas || wantsMoisture) {
+          onApplyLayer?.('ATMOSPHERIC_AOD_CLOUDS');
+        } else if (metaData?.layerType === 'ORBITAL') {
+          onApplyLayer?.('HYBRID_ALL_LAYERS');
         }
       } catch (e) {
         console.warn('Live dispatch network exception:', e);
