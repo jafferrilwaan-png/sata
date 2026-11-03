@@ -398,12 +398,28 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
           let imagerySensor = 'Cartosat-3 / Sentinel-3 Optical';
           let imageryRes = '0.28m Ground Resolution';
 
+          const isStormOrCyclone =
+            wantsHazard ||
+            wantsMoisture ||
+            qLower.includes('cyclone') ||
+            qLower.includes('storm') ||
+            qLower.includes('rain') ||
+            qLower.includes('murasu') ||
+            qLower.includes('hurricane') ||
+            qLower.includes('typhoon');
+
           if (wantsIR) {
             const { x, y, z } = latLonToTileXYZ(resolvedLat, resolvedLon, 7);
             imageryUrl = `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_Bands721/default/2024-06-01/GoogleMapsCompatible_Level9/${z}/${y}/${x}.jpg`;
             imageryCaption = `NASA MODIS Bands 7-2-1 False-Color Thermal Infrared Pass (${resolvedTargetName})`;
             imagerySensor = 'NASA Terra MODIS (Bands 7-2-1 SWIR / Thermal Radiometry)';
             imageryRes = '250m-500m NASA Radiometer Resolution';
+          } else if (isStormOrCyclone) {
+            const { x, y, z } = latLonToTileXYZ(resolvedLat, resolvedLon, 6);
+            imageryUrl = `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2024-06-01/GoogleMapsCompatible_Level9/${z}/${y}/${x}.jpg`;
+            imageryCaption = `NASA MODIS Atmospheric Storm & Cloud Pass (${resolvedTargetName})`;
+            imagerySensor = 'NASA Terra MODIS (Calibrated Atmospheric Reflectance)';
+            imageryRes = '250m Weather & Cloud Radiometer';
           } else if (wantsCloseUp || wantsEarthInput) {
             imageryUrl = computeSubmeterOpticalTileUrl(resolvedLat, resolvedLon, 16);
             imageryCaption = `Ultra-High-Resolution 0.28m Nadir Surface Inspection (${resolvedTargetName})`;
@@ -629,7 +645,7 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
                             onError={(e) => {
                               const target = e.currentTarget;
                               target.onerror = null;
-                              target.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/12/${Math.floor(((1 - Math.asinh(Math.tan((lat * Math.PI) / 180)) / Math.PI) / 2) * Math.pow(2, 12))}/${Math.floor(((lon + 180) / 360) * Math.pow(2, 12))}`;
+                              target.src = computeSubmeterOpticalTileUrl(lat, lon, 5);
                             }}
                             className="w-full h-full object-cover select-none"
                           />
