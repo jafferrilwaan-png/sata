@@ -1,4 +1,4 @@
-import { saveMissionChatToArchive } from '../utils/missionArchiveStorage';
+﻿import { saveMissionChatToArchive } from '../utils/missionArchiveStorage';
 
 export interface SatelliteSensorTool {
   id: string;
@@ -1329,7 +1329,20 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
                     </div>
                     
                     {/* Clean Observation Text First */}
-                    <RichTelemetryText content={m.text} />
+                    {m.id === 'initial-meta-msg' && (!briefingBody || briefingBody.includes('Ready to track any planetary sector') || briefingBody === 'Satellite telemetry synchronized.') ? (
+                      <div className="flex items-center gap-2.5 py-2 text-white/80 select-none">
+                        <img
+                          src="/assets/aistudio/image_565e711c.png"
+                          alt="Thinking"
+                          className="w-4 h-4 object-contain animate-spin shrink-0 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]"
+                        />
+                        <span className="font-sans text-[12px] text-white/80 animate-pulse">
+                          Retrieving live satellite observations...
+                        </span>
+                      </div>
+                    ) : (
+                      <RichTelemetryText content={m.text} />
+                    )}
 
                     {/* Genuine Live Satellite Video Streaming Player inside Message Card */}
                     {m.videoFeed ? (
