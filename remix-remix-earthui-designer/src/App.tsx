@@ -1672,7 +1672,7 @@ export default function App() {
           }}
           onFocusSearch={handleFocusSearch}
           onOpenNotifications={() => setIsAlertsModalOpen(true)}
-          githubUrl="https://github.com"
+          githubUrl="https://github.com/jafferrilwaan-png/sata"
           onOpenProfile={() => setIsProfileModalOpen(true)}
           onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
           unreadAlertsCount={temporalState.activeHeatSpots}
