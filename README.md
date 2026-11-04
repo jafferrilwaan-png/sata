@@ -23,7 +23,7 @@
 
 ---
 
-## Official 3-Minute Demo Video
+
 
 <div align="center">
   <video src="https://github.com/jafferrilwaan-png/sata/raw/main/docs/videos/sata_sentinel_official_demo.mp4" controls width="100%" style="max-width: 960px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
