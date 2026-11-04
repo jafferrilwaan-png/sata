@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { computeSubmeterOpticalTileUrl } from '../utils/telemetryLogic';
 import { X, Wind, Gauge, Flame, Compass, ChevronRight, Activity, Waves } from 'lucide-react';
 
 export interface SearchIntelligenceDossierProps {
@@ -90,11 +91,11 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
               <h2 className="text-[15px] font-semibold tracking-wide text-white truncate">
                 {targetName}
               </h2>
-              <div className="flex items-center gap-2 text-[11px] text-white/80 font-mono mt-0.5">
+              <div className="flex items-center gap-2 text-[11px] text-white/80 font-sans font-medium mt-0.5">
                 <span>{latStr}</span>
-                <span className="text-white/30">•</span>
+                
                 <span>{lonStr}</span>
-                <span className="text-white/30">•</span>
+                
                 <span className="text-emerald-400 font-sans">0.28m SGP4 Verified</span>
               </div>
             </div>
@@ -135,12 +136,12 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
           {/* Clean Downlink Metadata Strip — Positioned Beneath The Imagery */}
           <div className="flex items-center justify-between px-4 py-2 bg-white/[0.04] text-white">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/15 text-[9.5px] font-mono tracking-wider">
+              <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/15 text-[9.5px] font-sans font-medium tracking-wider">
                 LIVE DOWNLINK
               </span>
               <span className="text-[10px] text-white/60">0.28m Ground Resolution</span>
             </div>
-            <div className="text-[10.5px] font-mono text-white/90">
+            <div className="text-[10.5px] font-sans font-medium text-white/90">
               {latStr}, {lonStr}
             </div>
           </div>
@@ -155,7 +156,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
                 <Wind className="w-3.5 h-3.5 text-white/70" />
                 <span>Wind</span>
               </div>
-              <span className="text-[14px] font-semibold text-white font-mono mt-0.5">
+              <span className="text-[14px] font-semibold text-white font-sans mt-0.5">
                 {windVal} <span className="text-[10px] text-white/60 font-normal">km h</span>
               </span>
             </div>
@@ -167,7 +168,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
                 <Gauge className="w-3.5 h-3.5 text-white/70" />
                 <span>Pressure</span>
               </div>
-              <span className="text-[14px] font-semibold text-white font-mono mt-0.5">
+              <span className="text-[14px] font-semibold text-white font-sans mt-0.5">
                 {pressureVal} <span className="text-[10px] text-white/60 font-normal">hPa</span>
               </span>
             </div>
@@ -179,7 +180,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
                 <Flame className="w-3.5 h-3.5 text-amber-400" />
                 <span>Thermal</span>
               </div>
-              <span className="text-[14px] font-semibold text-white font-mono mt-0.5">
+              <span className="text-[14px] font-semibold text-white font-sans mt-0.5">
                 {heatVal} <span className="text-[10px] text-white/60 font-normal">MW</span>
               </span>
             </div>
@@ -192,7 +193,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
                     <Waves className="w-3.5 h-3.5 text-teal-400" />
                     <span>Surge</span>
                   </div>
-                  <span className="text-[14px] font-semibold text-white font-mono mt-0.5">
+                  <span className="text-[14px] font-semibold text-white font-sans mt-0.5">
                     {surgeVal} <span className="text-[10px] text-white/60 font-normal">m</span>
                   </span>
                 </div>
@@ -207,12 +208,12 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
                 <Compass className="w-4 h-4 text-white/70" />
                 <span>Meta AI Multi-Model Intelligence</span>
               </div>
-              <span className="text-[9.5px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+              <span className="text-[9.5px] font-sans font-medium text-white/80 bg-white/10 border border-white/15 px-2.5 py-0.5 rounded-full">
                 Tri-Agent Matrix Active
               </span>
             </div>
 
-            {/* Muse Spark 1.3 · Spatial Corridor */}
+            {/* Muse Spark 1.3 Spatial Corridor */}
             <div className="flex flex-col gap-1.5">
               <div className="text-[12px] font-semibold text-white/95 flex items-center gap-1.5">
                 <ChevronRight className="w-3.5 h-3.5 text-white/70 shrink-0" />
@@ -223,7 +224,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
               </p>
             </div>
 
-            {/* Muse Wonder 1.0 · Planetary Physics */}
+            {/* Muse Wonder 1.0 Planetary Physics */}
             <div className="flex flex-col gap-1.5">
               <div className="text-[12px] font-semibold text-white/95 flex items-center gap-1.5">
                 <ChevronRight className="w-3.5 h-3.5 text-white/70 shrink-0" />
@@ -234,7 +235,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
               </p>
             </div>
 
-            {/* Muse Spark 1.2 · Tactical Mission Briefing */}
+            {/* Muse Spark 1.2 Tactical Mission Briefing */}
             <div className="flex flex-col gap-1.5">
               <div className="text-[12px] font-semibold text-white/95 flex items-center gap-1.5">
                 <ChevronRight className="w-3.5 h-3.5 text-white/70 shrink-0" />

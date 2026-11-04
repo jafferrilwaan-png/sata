@@ -6,6 +6,7 @@ import {
   LiveOrbitPass,
   LiveIncidentItem,
 } from '../utils/telemetryLogic';
+import { LiveSatelliteVideoPlayer } from './LiveSatelliteVideoPlayer';
 
 interface ObservationSidebarProps {
   activeHeatSpots: number;
@@ -24,7 +25,7 @@ interface ObservationSidebarProps {
   detectedCount?: number;
 }
 
-export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
+export const ObservationSidebar = React.memo<ObservationSidebarProps>(({
   activeHeatSpots,
   aiInsightLead,
   aiInsightBody,
@@ -117,7 +118,7 @@ export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
         {/* Sub-Card 1: AI INSIGHTS (Pure Apple iOS Liquid Glass) */}
         <div className="sata-ai-card shrink-0 rounded-[18px] sm:rounded-[20px] p-3 sm:p-3.5">
           <div className="text-[11px] sm:text-[12px] font-normal tracking-[0.06em] text-[#a1a1aa] uppercase mb-1">
-            AI Insights
+            {aiInsightLead || 'Observation Insight:'}
           </div>
 
           <div className="flex items-baseline gap-2 mb-1">
@@ -132,14 +133,13 @@ export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
             </span>
           </div>
 
-          {/* Clean Apple iOS Intelligence Typography */}
+          {/* Clean Observation Telemetry Typography */}
           <div className="mt-2 pt-2 border-t border-white/10 flex flex-col gap-1.5">
-            <div className="text-[11.5px] sm:text-[12px] leading-[1.65] text-zinc-100 font-normal space-y-1.5 max-h-[145px] overflow-y-auto sata-sidebar-scroll pr-1 select-text">
+            <div className="text-[11.5px] sm:text-[12px] leading-[1.65] text-zinc-100 font-normal space-y-1.5 select-text">
               <p className="tracking-[0.01em]">
-                <span className="text-white font-semibold">
-                  {aiInsightLead ? (aiInsightLead.endsWith(':') ? aiInsightLead : `${aiInsightLead}:`) : 'Observation Insight:'}
-                </span>{' '}
-                {aiInsightBody}
+                {aiInsightBody
+                  ? aiInsightBody.replace(/^(?:Llama 4|Meta Muse|Meta AI|Meta AI Operations Commander):\s*/i, '')
+                  : 'Synchronizing live satellite observations across orbital passes.'}
               </p>
             </div>
           </div>
@@ -187,13 +187,20 @@ export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
               </button>
             </div>
 
-            {/* Complete 3D Optical Satellite Body */}
-            <div className="relative w-full h-[62px] sm:h-[70px] my-1 flex items-center justify-center z-0">
-              <img
-                src="/assets/ui/hubble_clean.png?v=clean_full_hd"
-                alt={currentSat.satellite_name}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-contain pointer-events-none select-none transition-transform duration-500"
+            {/* Real-Time Live Streaming Satellite Orbital Feed */}
+            <div className="my-1.5 w-full">
+              <LiveSatelliteVideoPlayer
+                compact={true}
+                satelliteName={currentSat.satellite_name}
+                lat={currentSat.satellite_name.toLowerCase().includes('sentinel') ? 43.71 : currentSat.satellite_name.toLowerCase().includes('noaa') ? 28.57 : 21.15}
+                lon={currentSat.satellite_name.toLowerCase().includes('sentinel') ? 10.40 : currentSat.satellite_name.toLowerCase().includes('noaa') ? -80.65 : 79.08}
+                altitudeKm={currentSat.altitude_km}
+                velocityKms={currentSat.velocity_kms}
+                resolution="1080p / 60 FPS"
+                bitrate="12.4 Mbps"
+                downlinkFreq="X-Band 8.2 GHz"
+                initialFeedType="orbital_canvas"
+                showControls={true}
               />
             </div>
 
@@ -219,7 +226,7 @@ export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
                 <span className="text-white/80">
                   {currentSat.inclination_deg}° Inclination
                 </span>
-                <span className="font-mono tabular-nums text-white/90">
+                <span className="font-sans font-medium tabular-nums text-white/90">
                   {currentSat.velocity_kms} km s
                 </span>
               </div>
@@ -286,16 +293,16 @@ export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
               </button>
             </div>
 
-            {/* Row 3: Live NASA EONET Disasters (All 30 Scrollable Real Incidents) */}
+            {/* Row 3: Live NASA EONET Disasters (Real-Time NASA EONET Incidents) */}
             {liveIncidents && liveIncidents.length > 0 && (
               <div className="flex flex-col gap-1.5 pt-2 border-t border-white/10">
                 <div className="text-[10.5px] text-white/70 tracking-wider uppercase flex items-center justify-between">
                   <span>Live Disasters</span>
-                  <span className="sata-date-pill px-2 py-0.5 rounded-full text-[9px] font-mono">
-                    {detectedCount ?? liveIncidents.length} DETECTED
+                  <span className="sata-date-pill px-2 py-0.5 rounded-full text-[9px] font-sans font-medium text-emerald-300">
+                    NASA EONET  {liveIncidents.length} ACTIVE
                   </span>
                 </div>
-                <div className="flex flex-col gap-1.5 max-h-[190px] overflow-y-auto sata-sidebar-scroll pr-1">
+                <div className="flex flex-col gap-1.5">
                   {liveIncidents.map((inc, idx) => (
                     <button
                       key={inc.id || idx}
@@ -309,7 +316,7 @@ export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
                             inc.thumbnail_url ||
                             (inc.coordinates && inc.coordinates.length === 2
                               ? computeSubmeterOpticalTileUrl(inc.coordinates[0], inc.coordinates[1], 10)
-                              : '/assets/ui/real_wildfire.png')
+                              : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/6/30/45')
                           }
                           alt={inc.title}
                           loading="lazy"
@@ -319,7 +326,7 @@ export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
                             if (inc.coordinates && inc.coordinates.length === 2) {
                               target.src = computeSubmeterOpticalTileUrl(inc.coordinates[0], inc.coordinates[1], 8);
                             } else {
-                              target.src = '/assets/ui/real_wildfire.png';
+                              target.src = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/6/30/45';
                             }
                           }}
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
@@ -344,4 +351,4 @@ export const ObservationSidebar: React.FC<ObservationSidebarProps> = ({
       </div>
     </aside>
   );
-};
+});

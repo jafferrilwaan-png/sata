@@ -178,19 +178,19 @@ export function computeLocalSolarTelemetry(
 
   if (solarElevationDeg > -6 && localHourFloat >= 5.0 && localHourFloat < 10.5) {
     phase = 'MORNING';
-    phaseLabel = `Morning · ${localSolarTime24h} Local`;
+    phaseLabel = `Morning ${localSolarTime24h} Local`;
   } else if (solarElevationDeg > 0 && localHourFloat >= 10.5 && localHourFloat < 17.0) {
     phase = 'DAYLIGHT';
-    phaseLabel = `Daylight · ${localSolarTime24h} Local`;
+    phaseLabel = `Daylight ${localSolarTime24h} Local`;
   } else if (solarElevationDeg > -8 && localHourFloat >= 17.0 && localHourFloat < 19.75) {
     phase = 'EVENING_TWILIGHT';
-    phaseLabel = `Twilight · ${localSolarTime24h} Local`;
+    phaseLabel = `Twilight ${localSolarTime24h} Local`;
   } else if (solarElevationDeg > 0) {
     phase = 'DAYLIGHT';
-    phaseLabel = `Daylight · ${localSolarTime24h} Local`;
+    phaseLabel = `Daylight ${localSolarTime24h} Local`;
   } else {
     phase = 'NIGHT';
-    phaseLabel = `Night · ${localSolarTime24h} Local`;
+    phaseLabel = `Night ${localSolarTime24h} Local`;
   }
 
   return {
@@ -429,7 +429,7 @@ export function runImplementSubagent(
         {
           id: 'sen-viirs',
           sensorName: 'VIIRS Thermal',
-          valueText: '375m · 84 pts',
+          valueText: '375m 84 pts',
           statusText: 'ACTIVE',
           glbKey: 'terra',
         },
@@ -443,7 +443,7 @@ export function runImplementSubagent(
         {
           id: 'sen-aod',
           sensorName: 'Aerosol AOD',
-          valueText: `${atmosphere.temperatureC}°C · ${atmosphere.cloudCoverPct}% Cloud`,
+          valueText: `${atmosphere.temperatureC}°C ${atmosphere.cloudCoverPct}% Cloud`,
           statusText: 'STABLE',
           glbKey: 'starlink',
         },
@@ -452,7 +452,7 @@ export function runImplementSubagent(
         {
           id: 'sen-viirs',
           sensorName: 'VIIRS Thermal',
-          valueText: `375m · ${activeHeatSpots} pts`,
+          valueText: `375m ${activeHeatSpots} pts`,
           statusText: 'ACTIVE',
           glbKey: 'terra',
         },
@@ -466,7 +466,7 @@ export function runImplementSubagent(
         {
           id: 'sen-aod',
           sensorName: 'Live Surface',
-          valueText: `${atmosphere.temperatureC}°C · ${atmosphere.cloudCoverPct}% Cloud`,
+          valueText: `${atmosphere.temperatureC}°C ${atmosphere.cloudCoverPct}% Cloud`,
           statusText: 'STABLE',
           glbKey: 'starlink',
         },

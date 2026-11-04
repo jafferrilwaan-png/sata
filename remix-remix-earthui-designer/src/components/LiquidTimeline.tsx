@@ -12,7 +12,7 @@ interface LiquidTimelineProps {
   onTogglePlay: () => void;
 }
 
-export const LiquidTimeline: React.FC<LiquidTimelineProps> = ({
+export const LiquidTimeline = React.memo<LiquidTimelineProps>(({
   selectedDay,
   onSelectDay,
   isPlaying,
@@ -53,7 +53,7 @@ export const LiquidTimeline: React.FC<LiquidTimelineProps> = ({
         <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#93c5fd]/90 font-medium tracking-wider uppercase mb-1">
           <span>Oct 24</span>
           <span className="text-white font-semibold drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]">
-            {temporal.isoDate} · {temporal.relativeLabel}
+            {temporal.isoDate} {temporal.relativeLabel}
           </span>
           <span>Nov 03</span>
         </div>
@@ -107,4 +107,4 @@ export const LiquidTimeline: React.FC<LiquidTimelineProps> = ({
       </button>
     </div>
   );
-};
+});

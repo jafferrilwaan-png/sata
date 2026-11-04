@@ -48,10 +48,10 @@
   background: rgba(14, 18, 28, 0.42);
   backdrop-filter: blur(36px) saturate(170%);
   -webkit-backdrop-filter: blur(36px) saturate(170%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.55),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.22);
+    0 20px 48px rgba(0, 0, 0, 0.40),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.25);
 }
 
 .sata-sidebar-scroll {
@@ -73,13 +73,13 @@
 }
 
 .sata-ai-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow:
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.20),
-    0 8px 24px -4px rgba(0, 0, 0, 0.35);
+    0 8px 24px -4px rgba(0, 0, 0, 0.25);
 }
 
 .sata-search-bar {
@@ -88,16 +88,16 @@
   -webkit-backdrop-filter: blur(36px) saturate(170%);
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow:
-    0 20px 48px rgba(0, 0, 0, 0.55),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.22);
+    0 16px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.28);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sata-search-bar:focus-within {
-  border-color: rgba(255, 255, 255, 0.30);
-  background: rgba(22, 28, 42, 0.55);
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
   box-shadow:
-    0 24px 56px rgba(0, 0, 0, 0.65),
-    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.35);
+    0 20px 48px rgba(0, 0, 0, 0.45),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.40);
 }
 
 .sata-home-pill {

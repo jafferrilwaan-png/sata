@@ -4,7 +4,10 @@ export type NasaGibsLayerMode =
   | 'VIIRS_NIGHT_THERMAL'
   | 'MODIS_TRUE_COLOR_TERRAIN'
   | 'ATMOSPHERIC_AOD_CLOUDS'
-  | 'HYBRID_ALL_LAYERS';
+  | 'HYBRID_ALL_LAYERS'
+  | 'NDVI_VEGETATION'
+  | 'SAR_MICROWAVE'
+  | 'BLACK_MARBLE_NIGHT';
 
 export interface HotspotNode {
   id: string;
@@ -340,6 +343,12 @@ export function parseLayerModeFromQuery(query: string): NasaGibsLayerMode | null
   if (!q) return null;
   if (q.includes('all layer') || q.includes('hybrid') || q.includes('combined')) {
     return 'HYBRID_ALL_LAYERS';
+  }
+  if (q.includes('greener') || q.includes('green') || q.includes('vegetation') || q.includes('ndvi') || q.includes('chlorophyll')) {
+    return 'NDVI_VEGETATION';
+  }
+  if (q.includes('sar') || q.includes('radar microwave') || q.includes('microwave') || q.includes('risat')) {
+    return 'SAR_MICROWAVE';
   }
   if (
     q.includes('true color') ||
@@ -2268,7 +2277,7 @@ export interface TemporalThermalScrubState {
   daysAgo: number;
   /** ISO-8601 date string (YYYY-MM-DD) for NASA GIBS WMTS temporal tile requests */
   isoDate: string;
-  /** Compact HUD label for the observation sidebar (e.g. 'T-6D', 'LIVE · T-0D') */
+  /** Compact HUD label for the observation sidebar (e.g. 'T-6D', 'LIVE T-0D') */
   relativeLabel: string;
   /** Percentage position (0..100) along the 7-day scrub bar (57% at default day 28) */
   thumbPct: number;
@@ -2317,9 +2326,9 @@ export function computeTemporalThermalState(
 
   const relativeLabel =
     clampedDay === 28
-      ? 'LIVE · T-0D'
+      ? 'LIVE T-0D'
       : daysAgo === 0
-      ? 'PEAK · T-0D'
+      ? 'PEAK T-0D'
       : `T-${daysAgo}D`;
 
   // Preserve exact reference UI node positions:
@@ -2602,15 +2611,8 @@ export function computeGpuShaderLodAndDisplacement(params: {
     Math.min(0.018, baseModeDisplacement + zoomDisplacement).toFixed(5)
   );
 
-  const baseDayMix =
-    mode === 'MODIS_TRUE_COLOR_TERRAIN'
-      ? 0.68
-      : mode === 'HYBRID_ALL_LAYERS'
-      ? 0.42
-      : 0.0;
-  const modisTrueColorBlend = Number(
-    Math.min(0.78, baseDayMix * 0.58 + zoomProgress * 0.56).toFixed(4)
-  );
+  // Always locked to 1.0 so daylight and photorealistic true color terrain are 100% active at all altitudes and modes
+  const modisTrueColorBlend = 1.0;
 
   return {
     zoomProgress,

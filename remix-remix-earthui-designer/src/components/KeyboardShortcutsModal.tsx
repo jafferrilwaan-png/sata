@@ -56,7 +56,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/65 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-950/20 backdrop-blur-sm"
           />
 
           {/* Modal Container */}
@@ -65,7 +65,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-            className="relative w-full max-w-[480px] rounded-[24px] border border-white/16 bg-black/55 backdrop-blur-2xl p-5 shadow-[0_24px_64px_rgba(0,0,0,0.7),inset_0_1px_1.5px_rgba(255,255,255,0.25)] flex flex-col gap-4 text-white z-10"
+            className="relative w-full max-w-[480px] rounded-[24px] border border-white/16 bg-black/55 backdrop-blur-2xl saturate-[180%] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.35)] flex flex-col gap-4 text-white z-10"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
@@ -108,7 +108,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
                         <span className="text-white/85 font-normal">
                           {item.desc}
                         </span>
-                        <div className="flex items-center gap-1 shrink-0 font-mono text-[10.5px]">
+                        <div className="flex items-center gap-1 shrink-0 font-sans font-medium text-[10.5px]">
                           {item.keys.map((k, ki) => (
                             <kbd
                               key={ki}
@@ -137,8 +137,8 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
 
             {/* Footer Tip */}
             <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10.5px] text-white/50">
-              <span>Press <kbd className="px-1.5 py-0.5 rounded-[4px] bg-white/10 text-white font-mono text-[9.5px]">Esc</kbd> anytime to dismiss</span>
-              <span className="text-sky-400 font-mono">SATA v2.4</span>
+              <span>Press <kbd className="px-1.5 py-0.5 rounded-[4px] bg-white/10 text-white font-sans font-medium text-[9.5px]">Esc</kbd> anytime to dismiss</span>
+              <span className="text-sky-400 font-sans font-medium">SATA v2.4</span>
             </div>
           </motion.div>
         </div>

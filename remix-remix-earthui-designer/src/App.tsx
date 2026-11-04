@@ -1,3 +1,4 @@
+import { saveMissionChatToArchive } from './utils/missionArchiveStorage';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 import { Mic, MicOff, X, ChevronDown } from 'lucide-react';
@@ -12,6 +13,9 @@ import { MissionAlertsModal } from './components/MissionAlertsModal';
 import { CommanderProfileModal } from './components/CommanderProfileModal';
 import { SatelliteTelemetryModal } from './components/SatelliteTelemetryModal';
 import Galaxy from './components/Galaxy';
+import { useVoiceRecorder } from './hooks/useVoiceRecorder';
+import { VoiceRecordingIndicator } from './components/VoiceRecordingIndicator';
+import { PLANETARY_SIMULATIONS_CATALOG, findPlanetarySimulation, type PlanetarySimulationScenario } from './data/planetarySimulations';
 import {
   NavTab,
   NasaGibsLayerMode,
@@ -29,31 +33,196 @@ import {
   getNextTimelinePlaybackDay,
 } from './utils/telemetryLogic';
 
+export function resolveTargetGeospatial(query: string): { name: string; lat: number; lon: number; altitude: number; layer: string } | null {
+  const qLower = query.toLowerCase();
+  const wantsOpticalOr3D = qLower.includes('high-res') || qLower.includes('high res') || qLower.includes('optical') || qLower.includes('3d') || qLower.includes('resolution') || qLower.includes('zoom') || qLower.includes('close') || qLower.includes('detail') || qLower.includes('pass') || qLower.includes('see');
+  const wantsThermal = qLower.includes('thermal') || qLower.includes('fire') || qLower.includes('heat') || qLower.includes('ir') || qLower.includes('infrared') || qLower.includes('temperature') || qLower.includes('temp');
+  const wantsWeather = qLower.includes('radar') || qLower.includes('weather') || qLower.includes('rain') || qLower.includes('storm') || qLower.includes('cyclone') || qLower.includes('cloud');
+  const wantsGreen = qLower.includes('greener') || qLower.includes('green') || qLower.includes('vegetation') || qLower.includes('ndvi') || qLower.includes('chlorophyll');
+  const defaultLayer = wantsGreen ? 'NDVI_VEGETATION' : wantsThermal ? 'VIIRS_NIGHT_THERMAL' : wantsWeather ? 'ATMOSPHERIC_AOD_CLOUDS' : 'MODIS_TRUE_COLOR_TERRAIN';
+  const defaultAlt = wantsOpticalOr3D ? 1.28 : 1.35;
+
+  if (qLower.includes('egypt') || qLower.includes('cairo') || qLower.includes('nile') || qLower.includes('aswan') || qLower.includes('suez')) {
+    return { name: 'Egypt (Nile River & Delta)', lat: 26.82, lon: 30.80, altitude: 1.45, layer: defaultLayer };
+  }
+  if (qLower.includes('bay of bengal') && qLower.includes('chennai')) {
+    return { name: 'Bay of Bengal vs Chennai', lat: 13.80, lon: 83.20, altitude: 1.45, layer: 'VIIRS_NIGHT_THERMAL' };
+  }
+  if (qLower.includes('tamil nadu') || qLower.includes('tamilnadu') || qLower.includes('tamild nadu')) {
+    return { name: 'Tamil Nadu, India', lat: 11.13, lon: 78.66, altitude: 1.25, layer: defaultLayer };
+  }
+  if (qLower.includes('chennai')) {
+    return { name: 'Chennai, Tamil Nadu', lat: 13.08, lon: 80.27, altitude: 1.25, layer: defaultLayer };
+  }
+  if (qLower.includes('delhi')) {
+    return { name: 'New Delhi, India', lat: 28.61, lon: 77.21, altitude: 1.25, layer: defaultLayer };
+  }
+  if (qLower.includes('mumbai') || qLower.includes('bombay')) {
+    return { name: 'Mumbai, Maharashtra', lat: 19.07, lon: 72.88, altitude: 1.25, layer: defaultLayer };
+  }
+  if (qLower.includes('bengaluru') || qLower.includes('bangalore')) {
+    return { name: 'Bengaluru, Karnataka', lat: 12.97, lon: 77.59, altitude: 1.25, layer: defaultLayer };
+  }
+  if (qLower.includes('kolkata') || qLower.includes('calcutta')) {
+    return { name: 'Kolkata, West Bengal', lat: 22.57, lon: 88.36, altitude: 1.25, layer: defaultLayer };
+  }
+  if (qLower.includes('mawsynram') || qLower.includes('cherrapunji') || qLower.includes('meghalaya') || qLower.includes('wettest')) {
+    return { name: 'Mawsynram, Meghalaya', lat: 25.30, lon: 91.58, altitude: 1.28, layer: wantsWeather ? 'ATMOSPHERIC_AOD_CLOUDS' : defaultLayer };
+  }
+  if (qLower.includes('india') || qLower.includes('indian')) {
+    return { name: 'India', lat: 20.59, lon: 78.96, altitude: wantsOpticalOr3D ? 1.28 : 1.35, layer: defaultLayer };
+  }
+  if (qLower.includes('sydney') || qLower.includes('australia')) {
+    return { name: 'Sydney, Australia', lat: -33.86, lon: 151.21, altitude: 1.28, layer: defaultLayer };
+  }
+  if (qLower.includes('tokyo') || qLower.includes('japan')) {
+    return { name: 'Tokyo, Japan', lat: 35.68, lon: 139.69, altitude: 1.28, layer: defaultLayer };
+  }
+  if (qLower.includes('london') || qLower.includes('united kingdom') || qLower.includes('uk')) {
+    return { name: 'London, United Kingdom', lat: 51.50, lon: -0.12, altitude: 1.28, layer: defaultLayer };
+  }
+  if (qLower.includes('paris') || qLower.includes('france')) {
+    return { name: 'Paris, France', lat: 48.85, lon: 2.35, altitude: 1.28, layer: defaultLayer };
+  }
+  if (qLower.includes('new york') || qLower.includes('nyc')) {
+    return { name: 'New York City, USA', lat: 40.71, lon: -74.00, altitude: 1.28, layer: defaultLayer };
+  }
+  if (qLower.includes('kennedy') || qLower.includes('cape canaveral') || qLower.includes('florida')) {
+    return { name: 'Kennedy Space Center, Florida', lat: 28.57, lon: -80.65, altitude: 1.30, layer: defaultLayer };
+  }
+  if (qLower.includes('california')) {
+    return { name: 'California, USA', lat: 36.77, lon: -119.41, altitude: 1.32, layer: defaultLayer };
+  }
+  if (qLower.includes('manaus') || qLower.includes('amazon') || qLower.includes('brazil')) {
+    return { name: 'Manaus, Amazon Basin, Brazil', lat: -3.12, lon: -60.02, altitude: 1.30, layer: defaultLayer };
+  }
+  if (qLower.includes('dubai') || qLower.includes('uae')) {
+    return { name: 'Dubai, UAE', lat: 25.20, lon: 55.27, altitude: 1.28, layer: defaultLayer };
+  }
+  if (qLower.includes('singapore')) {
+    return { name: 'Singapore', lat: 1.35, lon: 103.82, altitude: 1.25, layer: defaultLayer };
+  }
+  if (qLower.includes('bay of bengal') || qLower.includes('bengal')) {
+    return { name: 'Bay of Bengal Cyclonic Basin', lat: 14.80, lon: 88.50, altitude: 1.38, layer: 'ATMOSPHERIC_AOD_CLOUDS' };
+  }
+  return null;
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('HOME');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('q') || '';
+    }
+    return '';
+  });
   const [selectedHotspotId, setSelectedHotspotId] = useState<string | null>(null);
   const [zoomSectorId, setZoomSectorId] = useState<string | null>(null);
   const [adjustOrbitEnabled, setAdjustOrbitEnabled] = useState<boolean>(true);
   const [selectedTimelineDay, setSelectedTimelineDay] = useState<number>(28);
   const [isPlayingTimeline, setIsPlayingTimeline] = useState<boolean>(false);
-  const [isSearchSubmitted, setIsSearchSubmitted] = useState<boolean>(false);
+  const [isSearchSubmitted, setIsSearchSubmitted] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return Boolean(new URLSearchParams(window.location.search).get('q'));
+    }
+    return false;
+  });
   const [isAiReasoning, setIsAiReasoning] = useState<boolean>(false);
   const [activeLayerMode, setActiveLayerMode] =
-    useState<NasaGibsLayerMode>('VIIRS_NIGHT_THERMAL');
+    useState<NasaGibsLayerMode>('MODIS_TRUE_COLOR_TERRAIN');
   const [customGeocodedPlace, setCustomGeocodedPlace] = useState<{
     name: string;
     region: string;
     lat: number;
     lon: number;
-  } | null>(null);
+  } | null>(() => {
+    if (typeof window !== 'undefined') {
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q) {
+        const qLower = q.toLowerCase();
+        const isBengal = qLower.includes('bengal') || qLower.includes('cyclone') || qLower.includes('bay') || qLower.includes('murasu');
+        const isMawsynram = qLower.includes('mawsynram') || qLower.includes('rain') || qLower.includes('cherrapunji');
+        const targetLat = isBengal ? 15.10 : isMawsynram ? 25.30 : 20.0;
+        const targetLon = isBengal ? 80.50 : isMawsynram ? 91.58 : 78.0;
+        const targetTitle = isBengal ? 'Tropical Cyclone Murasu' : isMawsynram ? 'Mawsynram, Meghalaya' : q;
+        return {
+          targetName: targetTitle,
+          lat: targetLat,
+          lon: targetLon,
+          zoomAltitude: 1.6,
+          activeHeatSpots: isBengal ? 85 : 94,
+          layerType: 'STORM',
+          briefingLead: 'NASA EONET Satellite Telemetry Lock:',
+          briefingBody: isBengal
+            ? 'Active Cyclonic Storm localized at Tropical Cyclone Murasu (15.1000°, 80.5000°). Radiative power 85 MW confirmed by NASA VIIRS sensors. Synchronizing satellite submeter optical telemetry pass.'
+            : 'Mawsynram village in the East Khasi Hills of Meghalaya, India, verified as the highest rainfall location on Earth with 11,871 mm average annual precipitation.',
+          telemetry: {
+            viirsPoints: 61,
+            modisPoints: 33,
+            aodStatus: 'ELEVATED',
+            cloudCoverPct: 98,
+            windSpeedKmH: 140,
+            pressureHPa: 985,
+            heatPowerMw: 0,
+            waveSurgeM: 4.2,
+          },
+          source: 'meta-live',
+          latencyMs: 140,
+        };
+      }
+    }
+    return null;
+  });
   const [agentCloudOpacity, setAgentCloudOpacity] = useState<number>(0.68);
   const [agentInsightOverride, setAgentInsightOverride] = useState<{
     forKey: string;
     aiInsightBody: string;
   } | null>(null);
-  const [liveAiDispatchState, setLiveAiDispatchState] = useState<{
-    targetName: string;
+  const [liveAiDispatchState, setLiveAiDispatchState] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q) {
+        const sim = findPlanetarySimulation(q);
+        if (sim) {
+          return {
+            targetName: sim.target.name,
+            lat: sim.target.lat,
+            lon: sim.target.lon,
+            zoomAltitude: sim.target.altitude,
+            activeHeatSpots: 47,
+            layerType: sim.shaderParams.simulationType === 1.0 ? 'CRYO_SNOW' : 'SIMULATION',
+            briefingLead: `Meta AI Swarm Planetary Simulation [${sim.category.toUpperCase()}]:`,
+            briefingBody: `${sim.reasoning.swarmConsensusSummary}\n\n${sim.reasoning.museWonder10_Physics}\n\n${sim.reasoning.museSpark12_ImpactCascades}`,
+            thinkingSteps: [
+              `Simulation Parameter Lock: Loaded coupled planetary equations for ${sim.title}.`,
+              sim.reasoning.museSpark13_Geospatial,
+              sim.reasoning.museWonder10_Physics,
+              sim.reasoning.museSpark12_ImpactCascades,
+            ],
+            recommendations: [
+              { category: 'Phase 1 Immediate', action: sim.reasoning.strategicProtocols.phase1_Immediate },
+              { category: 'Phase 2 Stabilization', action: sim.reasoning.strategicProtocols.phase2_Stabilization },
+              { category: 'Phase 3 Planetary Governance', action: sim.reasoning.strategicProtocols.phase3_Governance },
+            ],
+            telemetry: {
+              viirsPoints: 34,
+              modisPoints: 28,
+              aodStatus: 'SIMULATED',
+              cloudCoverPct: sim.shaderParams.simulationType === 1.0 ? 82 : 45,
+              windSpeedKmH: 64,
+              pressureHPa: 1024,
+              heatPowerMw: 0,
+              waveSurgeM: 2.4,
+            },
+            source: 'meta-planetary-simulation-engine',
+            latencyMs: 95,
+          };
+        }
+      }
+    }
+    return null;
+  });
+  const [_unusedDispatchType] = useState<{ targetName: string;
     lat: number;
     lon: number;
     zoomAltitude: number;
@@ -84,10 +253,12 @@ export default function App() {
       targetLat?: number;
       targetLon?: number;
     };
+    thinkingSteps?: string[];
+    recommendations?: Array<{ category: string; action: string }>;
+    keyMetrics?: Array<{ label: string; value: string; delta: string; trend: 'critical-high' | 'critical-low' | 'neutral' | 'elevated' }>;
     source?: string;
     latencyMs?: number;
   } | null>(null);
-  const [isListening, setIsListening] = useState<boolean>(false);
   const [selectedMetaModel, setSelectedMetaModel] = useState<
     'tri-agent-swarm' | 'muse-spark-1.3' | 'muse-spark-1.2' | 'muse-wonder-1.0'
   >('tri-agent-swarm');
@@ -95,6 +266,14 @@ export default function App() {
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState<boolean>(false);
   const [isAlertsModalOpen, setIsAlertsModalOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const [isSimulationsModalOpen, setIsSimulationsModalOpen] = useState<boolean>(false);
+  const [activeSimulation, setActiveSimulation] = useState<PlanetarySimulationScenario | null>(() => {
+    if (typeof window !== 'undefined') {
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q) return findPlanetarySimulation(q);
+    }
+    return null;
+  });
   const [selectedSatellite, setSelectedSatellite] = useState<LiveOrbitPass | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
   const [liveFirmsPoints, setLiveFirmsPoints] = useState<FirmsAnomalyPoint[]>([]);
@@ -107,6 +286,62 @@ export default function App() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const q = params.get('q');
+      // 0. Auto-trigger Planetary Simulation if present in initial URL
+      if (q) {
+        const matchedSim = findPlanetarySimulation(q);
+        if (matchedSim) {
+          setActiveSimulation(matchedSim);
+          setCustomGeocodedPlace({
+            name: matchedSim.target.name,
+            region: matchedSim.target.region,
+            lat: matchedSim.target.lat,
+            lon: matchedSim.target.lon,
+          });
+          setLiveAiDispatchState({
+            targetName: matchedSim.target.name,
+            lat: matchedSim.target.lat,
+            lon: matchedSim.target.lon,
+            zoomAltitude: matchedSim.target.altitude,
+            activeHeatSpots: 47,
+            layerType: matchedSim.shaderParams.simulationType === 1.0 ? 'CRYO_SNOW' : 'SIMULATION',
+            briefingLead: `Meta AI Swarm Planetary Simulation [${matchedSim.category.toUpperCase()}]:`,
+            briefingBody: `${matchedSim.reasoning.swarmConsensusSummary}\n\n${matchedSim.reasoning.museWonder10_Physics}\n\n${matchedSim.reasoning.museSpark12_ImpactCascades}`,
+            thinkingSteps: [
+              `Simulation Parameter Lock: Loaded coupled planetary equations for ${matchedSim.title}.`,
+              matchedSim.reasoning.museSpark13_Geospatial,
+              matchedSim.reasoning.museWonder10_Physics,
+              matchedSim.reasoning.museSpark12_ImpactCascades,
+            ],
+            recommendations: [
+              { category: 'Phase 1 Immediate', action: matchedSim.reasoning.strategicProtocols.phase1_Immediate },
+              { category: 'Phase 2 Stabilization', action: matchedSim.reasoning.strategicProtocols.phase2_Stabilization },
+              { category: 'Phase 3 Governance', action: matchedSim.reasoning.strategicProtocols.phase3_Governance },
+            ],
+            telemetry: {
+              viirsPoints: 34,
+              modisPoints: 28,
+              aodStatus: 'SIMULATED',
+              cloudCoverPct: matchedSim.shaderParams.simulationType === 1.0 ? 82 : 45,
+              windSpeedKmH: 64,
+              pressureHPa: 1024,
+              heatPowerMw: 0,
+              waveSurgeM: 2.4,
+            },
+            source: 'meta-planetary-simulation-engine',
+            latencyMs: 95,
+          });
+          globeRef.current?.pointOfView(
+            {
+              lat: matchedSim.target.lat,
+              lng: matchedSim.target.lon,
+              altitude: matchedSim.target.altitude,
+              label: matchedSim.title,
+            },
+            1200
+          );
+        }
+      }
+
       if (q) {
         setSearchQuery(q);
         setIsSearchSubmitted(true);
@@ -115,11 +350,12 @@ export default function App() {
         const isKennedy = qLower.includes('kennedy') || qLower.includes('florida') || qLower.includes('cape');
         const isFire = qLower.includes('fire') || qLower.includes('wildfire') || qLower.includes('thermal');
         
-        const targetLat = isKennedy ? 28.57 : isBengal ? 14.8 : 20.0;
-        const targetLon = isKennedy ? -80.65 : isBengal ? 88.5 : 78.0;
-        const targetAlt = 2.65;
+        const geo = resolveTargetGeospatial(q);
+        const targetLat = geo ? geo.lat : (isKennedy ? 28.57 : isBengal ? 14.8 : 20.59);
+        const targetLon = geo ? geo.lon : (isKennedy ? -80.65 : isBengal ? 88.5 : 78.96);
+        const targetAlt = geo ? geo.altitude : (isKennedy ? 1.30 : isBengal ? 1.38 : 1.28);
 
-        const targetTitle = isKennedy ? 'Kennedy Space Center, Florida' : isBengal ? 'Bay of Bengal Cyclonic Basin' : q;
+        const targetTitle = geo ? geo.name : (isKennedy ? 'Kennedy Space Center, Florida' : isBengal ? 'Bay of Bengal Cyclonic Basin' : qLower.includes('india') ? 'India' : (q.length > 25 ? 'Target Sector' : q));
         const bodyText = isKennedy
           ? "Kennedy Space Center is NASA's primary spaceport located on Merritt Island, Florida. Real-time satellite imagery from NOAA GOES-East monitors coastal cloud formations and local atmospheric stability. Current conditions show clear skies with optimal visibility and calm sea breezes along the Space Coast."
           : isBengal
@@ -156,38 +392,73 @@ export default function App() {
           }, 2000);
         }, 400);
       }
+
+      const modal = params.get('modal');
+      if (modal === 'shortcuts') setIsShortcutsModalOpen(true);
+      if (modal === 'profile' || modal === 'commander') setIsProfileModalOpen(true);
+      if (modal === 'alerts') setIsAlertsModalOpen(true);
+      if (modal === 'telemetry') {
+        setSelectedSatellite({
+          id: 'SAT-ISRO-CARTOSAT3',
+          satellite_name: 'Cartosat-3 (High-Res 0.28m Optical)',
+          mission: 'ISRO PSLV-C47 Sun-Synchronous',
+          agency: 'ISRO',
+          pass_time: '14:22:10 UTC',
+          altitude_km: 508,
+          velocity_kms: 7.61,
+          inclination_deg: 97.4,
+          status: 'TRACKING',
+        });
+      }
+
+      const tab = params.get('tab');
+      if (tab) setActiveTab(tab.toUpperCase() as NavTab);
     }
   }, []);
 
-  const toggleVoiceRecognition = () => {
-    const SpeechRecognition =
-      (window as unknown as { SpeechRecognition?: any }).SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: any }).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    if (isListening) {
-      setIsListening(false);
-      return;
-    }
+    const mainVoiceRecorder = useVoiceRecorder();
+  const [activeVoiceMessage, setActiveVoiceMessage] = useState<{
+    audioUrl: string;
+    duration: number;
+    transcript: string;
+  } | null>(null);
+
+  const isListening = mainVoiceRecorder.isRecording;
+
+  const handleFinishMainVoice = async () => {
+    const res = await mainVoiceRecorder.stopRecording();
+    if (!res) return;
+
+    const transcript = res.transcript || 'Global planetary observation query';
+    setSearchQuery(transcript);
+    setActiveVoiceMessage({
+      audioUrl: res.url,
+      duration: res.duration,
+      transcript: transcript,
+    });
+
     try {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
-      recognition.onerror = () => setIsListening(false);
-      recognition.onresult = (event: any) => {
-        const transcript = event.results?.[0]?.[0]?.transcript;
-        if (transcript) {
-          setSearchQuery(transcript);
-          const detected = parseLayerModeFromQuery(transcript);
-          if (detected) setActiveLayerMode(detected);
-        }
-        setIsListening(false);
-      };
-      recognition.start();
-    } catch {
-      setIsListening(false);
+      const formData = new FormData();
+      formData.append('audio', res.blob, 'voice_query.webm');
+      formData.append('transcript', transcript);
+      formData.append('duration', res.duration.toString());
+      formData.append('model', selectedMetaModel);
+      fetch('/api/meta-voice', {
+        method: 'POST',
+        body: formData,
+      }).catch((e) => console.warn('Meta voice call error:', e));
+    } catch (e) {
+      console.warn('Voice submit error:', e);
+    }
+
+    handleExecuteSearch(transcript);
+  };
+
+  const toggleVoiceRecognition = () => {
+    if (mainVoiceRecorder.isRecording) {
+      handleFinishMainVoice();
+    } else {
+      mainVoiceRecorder.startRecording();
     }
   };
 
@@ -500,14 +771,14 @@ export default function App() {
           {
             id: 'tel-viirs',
             sensorName: 'VIIRS NOAA-20 NRT',
-            valueText: `${liveAiDispatchState.telemetry.viirsPoints} points`,
+            valueText: `${liveAiDispatchState.telemetry?.viirsPoints ?? 0} points`,
             statusText: 'ACTIVE',
             glbKey: 'starlink' as const,
           },
           {
             id: 'tel-modis',
             sensorName: 'MODIS Terra NRT',
-            valueText: `${liveAiDispatchState.telemetry.modisPoints} points`,
+            valueText: `${liveAiDispatchState.telemetry?.modisPoints ?? 0} points`,
             statusText: 'ACTIVE',
             glbKey: 'terra' as const,
           },
@@ -515,7 +786,7 @@ export default function App() {
             id: 'tel-aod',
             sensorName: 'AOD, Atmospheric',
             valueText: '',
-            statusText: (liveAiDispatchState.telemetry.aodStatus as any) || 'STABLE',
+            statusText: (liveAiDispatchState.telemetry?.aodStatus as any) || 'STABLE',
             glbKey: 'hubble' as const,
           },
           {
@@ -530,7 +801,7 @@ export default function App() {
           lng: liveAiDispatchState.lon,
           altitude: liveAiDispatchState.zoomAltitude,
           label: liveAiDispatchState.targetName,
-          region: `${liveAiDispatchState.telemetry.aodStatus || 'LIVE'} · VIIRS SCAN`,
+          region: `${liveAiDispatchState.telemetry.aodStatus || 'LIVE'} VIIRS SCAN`,
         },
       };
     }
@@ -745,52 +1016,49 @@ export default function App() {
     }
   };
 
-  const handleFocusSearch = () => {
-    searchInputRef.current?.focus();
+    const handleFocusSearch = () => {
+    if (!isSearchSubmitted) {
+      searchInputRef.current?.focus();
+    } else {
+      const chatInput = document.querySelector('input[placeholder*="Ask about satellite"]') as HTMLInputElement;
+      if (chatInput) {
+        chatInput.focus();
+      } else {
+        setIsSearchSubmitted(false);
+        setTimeout(() => searchInputRef.current?.focus(), 150);
+      }
+    }
   };
 
-  const handleExecuteSearch = async (e?: React.FormEvent) => {
+  const handleExecuteSearch = async (overrideQueryOrEvent?: string | React.FormEvent, e?: React.FormEvent) => {
+    let q = searchQuery.trim();
+    if (typeof overrideQueryOrEvent === 'string') {
+      q = overrideQueryOrEvent.trim();
+      setSearchQuery(q);
+    } else if (overrideQueryOrEvent && 'preventDefault' in overrideQueryOrEvent) {
+      overrideQueryOrEvent.preventDefault();
+    }
     e?.preventDefault();
-    const q = searchQuery.trim();
     if (!q) return;
     setIsSearchSubmitted(true);
     setIsAiReasoning(true);
 
     const qLower = q.toLowerCase();
     const isGreeting =
-      qLower.includes('hi meta') ||
-      qLower.includes('hey meta') ||
-      qLower.includes('hello meta') ||
+      qLower.startsWith('hi') ||
+      qLower.startsWith('hey') ||
+      qLower.startsWith('hello') ||
       qLower === 'hi' ||
       qLower === 'hello' ||
       qLower === 'hey' ||
+      qLower.includes('dudue') ||
+      qLower.includes('dude') ||
+      qLower.includes('bro') ||
       qLower.includes('who are you') ||
       qLower.includes('what can you do') ||
       qLower.includes('help');
 
-    if (isGreeting) {
-      setLiveAiDispatchState({
-        targetName: 'SATA Aerospace Command • Meta AI Swarm',
-        lat: 25.0,
-        lon: 10.0,
-        zoomAltitude: 2.8,
-        activeHeatSpots: 0,
-        layerType: 'Autonomous Operations Swarm',
-        briefingLead: 'Meta AI Operations Commander:',
-        briefingBody: 'SATA Aerospace Sentinel online. Real-time satellite downlinks, NASA FIRMS thermal telemetry, and multi-spectral atmospheric chemistry sensors are synchronized and ready for tasking. You can command me to inspect any global coordinates, run hazard dispersion simulations, evaluate moisture levels, or analyze thermal hotspots.',
-        telemetry: {
-          viirsPoints: 0,
-          modisPoints: 0,
-          aodStatus: 'STABLE',
-          cloudCoverPct: 20,
-        },
-        source: 'meta-copilot',
-        latencyMs: 120,
-      });
-      globeRef.current?.pointOfView({ lat: 25, lng: 10, altitude: 2.8, label: 'Global Space Operations Orbit' }, 2000);
-      setIsAiReasoning(false);
-      return;
-    }
+    // Greeting routed to live AI reasoning
 
     // Autonomous Layer & Physics Mode Dispatch from query intent
     const isThermalQuery = qLower.includes('fire') || qLower.includes('thermal') || qLower.includes('heat') || qLower.includes('firms') || qLower.includes('radiation') || qLower.includes('ir') || qLower.includes('abnormal');
@@ -802,39 +1070,82 @@ export default function App() {
     } else if (isStormQuery) {
       setActiveLayerMode('ATMOSPHERIC_AOD_CLOUDS');
     } else if (isOpticalQuery) {
-      setActiveLayerMode('TRUE_COLOR_DAY');
+      setActiveLayerMode('MODIS_TRUE_COLOR_TERRAIN');
     }
 
+    const geoTarget = resolveTargetGeospatial(q);
     const matchedIncident = liveIncidents.find((inc) =>
       inc.title.toLowerCase().includes(q.toLowerCase()) ||
       q.toLowerCase().includes(inc.title.toLowerCase())
     );
-    const targetLat = matchedIncident ? matchedIncident.coordinates[0] : (baseEval.targetPointOfView?.lat || 20);
-    const targetLon = matchedIncident ? matchedIncident.coordinates[1] : (baseEval.targetPointOfView?.lng || 78);
-    const targetAltitude = matchedIncident ? 2.65 : (baseEval.targetPointOfView?.altitude || 2.65);
+    const wantsOpticalOr3D = qLower.includes('high-res') || qLower.includes('high res') || qLower.includes('optical') || qLower.includes('3d') || qLower.includes('resolution') || qLower.includes('zoom') || qLower.includes('close') || qLower.includes('detail') || qLower.includes('pass') || qLower.includes('see');
+
+    const isChatOrGreeting = isGreeting || q.length < 3 || ['hi', 'hello', 'hey', 'dudue', 'dude', 'bro', 'ok', 'okay'].some(w => qLower.includes(w));
+    const cleanTargetTitle = geoTarget
+      ? geoTarget.name
+      : matchedIncident
+      ? matchedIncident.title
+      : qLower.includes('india')
+      ? 'India'
+      : isChatOrGreeting
+      ? undefined
+      : undefined;
+
+    const targetLat = geoTarget ? geoTarget.lat : matchedIncident ? matchedIncident.coordinates[0] : (baseEval.targetPointOfView?.lat || 20.59);
+    const targetLon = geoTarget ? geoTarget.lon : matchedIncident ? matchedIncident.coordinates[1] : (baseEval.targetPointOfView?.lng || 78.96);
+    const targetAltitude = geoTarget ? geoTarget.altitude : wantsOpticalOr3D ? 1.28 : matchedIncident ? 1.45 : (baseEval.targetPointOfView?.altitude || 1.35);
+
+    if (geoTarget) {
+      setActiveLayerMode(geoTarget.layer as any);
+    } else if (wantsOpticalOr3D) {
+      setActiveLayerMode('MODIS_TRUE_COLOR_TERRAIN');
+    }
 
     globeRef.current?.pointOfView(
       {
         lat: targetLat,
         lng: targetLon,
         altitude: targetAltitude,
-        label: matchedIncident ? matchedIncident.title : q,
+        label: cleanTargetTitle,
       },
       2000
     );
 
+    const isFireQuery = q.toLowerCase().includes('fire') || q.toLowerCase().includes('wildfire') || q.toLowerCase().includes('heat') || q.toLowerCase().includes('thermal') || q.toLowerCase().includes('firms');
+    const isRainOrStormQuery = q.toLowerCase().includes('rain') || q.toLowerCase().includes('storm') || q.toLowerCase().includes('cyclone') || q.toLowerCase().includes('flood');
+    const isTimeQuery = q.toLowerCase().includes('time') || q.toLowerCase().includes('clock') || q.toLowerCase().includes('date');
+    const isIndiaTarget = (targetLat >= 6 && targetLat <= 38 && targetLon >= 68 && targetLon <= 97);
+
+    const immediateTimeStr = isTimeQuery
+      ? new Intl.DateTimeFormat('en-US', {
+          timeZone: isIndiaTarget ? 'Asia/Kolkata' : 'UTC',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZoneName: 'short',
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        }).format(new Date())
+      : '';
+
+    const initialBriefing = isTimeQuery
+      ? `The current local time in **${matchedIncident ? matchedIncident.title : q}** is **${immediateTimeStr}** (${isIndiaTarget ? 'Indian Standard Time, UTC+5:30' : 'UTC'}). Coordinates: ${Math.abs(targetLat).toFixed(2)}° ${targetLat >= 0 ? 'N' : 'S'}, ${Math.abs(targetLon).toFixed(2)}° ${targetLon >= 0 ? 'E' : 'W'}. Local satellite pass geometry locked.`
+      : selectedMetaModel === 'tri-agent-swarm'
+        ? `Meta AI Tri-Agent Swarm actively reasoning over atmospheric chemistry and satellite telemetry for "${q}"...`
+        : `Retrieving satellite coordinates and observations for "${q}"...`;
+
     // Immediately display active Tri-Model Meta reasoning in the intelligence briefing
     setLiveAiDispatchState({
-      targetName: matchedIncident ? matchedIncident.title : q,
+      targetName: cleanTargetTitle,
       lat: targetLat,
       lon: targetLon,
       zoomAltitude: targetAltitude,
       activeHeatSpots: matchedIncident ? (matchedIncident.category === 'Fire' ? 84 : 0) : 0,
-      layerType: matchedIncident ? matchedIncident.category : 'THERMAL',
+      layerType: isFireQuery ? 'VIIRS_NIGHT_THERMAL' : isRainOrStormQuery ? 'ATMOSPHERIC_AOD_CLOUDS' : 'MODIS_TRUE_COLOR_TERRAIN',
       briefingLead: 'Observation Analysis:',
-      briefingBody: selectedMetaModel === 'tri-agent-swarm'
-        ? `Meta AI Tri-Agent Swarm actively reasoning over atmospheric chemistry and satellite telemetry for "${q}"...`
-        : `Retrieving satellite coordinates and thermal observations for "${q}"...`,
+      briefingBody: initialBriefing,
       telemetry: {
         viirsPoints: matchedIncident ? 42 : 0,
         modisPoints: matchedIncident ? 28 : 0,
@@ -889,7 +1200,7 @@ export default function App() {
           };
 
           setLiveAiDispatchState({
-            targetName: payload.targetName || q,
+            targetName: cleanTargetTitle,
             lat: payload.lat,
             lon: payload.lon,
             zoomAltitude: payload.zoomAltitude || 1.8,
@@ -913,32 +1224,30 @@ export default function App() {
           });
 
           setCustomGeocodedPlace({
-            name: payload.targetName || q,
-            region: `${payload.telemetry?.aodStatus || 'LIVE'} · VIIRS SCAN`,
+            name: cleanTargetTitle,
+            region: `${payload.telemetry?.aodStatus || 'LIVE'} VIIRS SCAN`,
             lat: payload.lat,
             lon: payload.lon,
           });
 
-          if (isRainOrStorm) {
-            setActiveLayerMode('ATMOSPHERIC_AOD_CLOUDS');
-          } else if (isTsunami) {
-            setActiveLayerMode('HYBRID_ALL_LAYERS');
-          } else if (isFire) {
+          const userWantsThermal = isFire || qLower.includes('thermal') || qLower.includes('infrared');
+          if (userWantsThermal) {
             setActiveLayerMode('VIIRS_NIGHT_THERMAL');
-          } else if (payload.layerType === 'THERMAL') {
-            setActiveLayerMode('VIIRS_NIGHT_THERMAL');
-          } else if (payload.layerType === 'STORM') {
+          } else if (isRainOrStorm || payload.layerType === 'STORM') {
             setActiveLayerMode('ATMOSPHERIC_AOD_CLOUDS');
-          } else if (payload.layerType === 'CRYO') {
+          } else if (isTsunami || payload.layerType === 'CRYO') {
             setActiveLayerMode('HYBRID_ALL_LAYERS');
+          } else {
+            setActiveLayerMode('MODIS_TRUE_COLOR_TERRAIN');
           }
+          
 
           globeRef.current?.pointOfView(
             {
               lat: payload.lat,
               lng: payload.lon,
               altitude: payload.zoomAltitude || 1.8,
-              label: payload.targetName || q,
+              label: cleanTargetTitle,
             },
             2000
           );
@@ -1027,45 +1336,31 @@ export default function App() {
   };
 
   const currentDisplayedIncidents = useMemo(() => {
-    if (liveAiDispatchState) {
+    if (!liveIncidents || liveIncidents.length === 0) return [];
+    if (liveAiDispatchState && typeof liveAiDispatchState.lat === 'number' && typeof liveAiDispatchState.lon === 'number') {
       const targetLat = liveAiDispatchState.lat;
       const targetLon = liveAiDispatchState.lon;
-      const q = liveAiDispatchState.targetName.toLowerCase();
-      const near = liveIncidents.filter((inc) => {
-        if (!inc.coordinates || inc.coordinates.length < 2) return false;
-        const [lat, lon] = inc.coordinates;
-        const dLat = Math.abs(lat - targetLat);
-        const dLon = Math.abs(lon - targetLon);
-        return (dLat < 20 && dLon < 20) || inc.title.toLowerCase().includes(q) || inc.category.toLowerCase().includes(q);
+      const q = (liveAiDispatchState.targetName || '').toLowerCase();
+      // Sort real NASA EONET incidents: matching/nearest incidents prioritized
+      return [...liveIncidents].sort((a, b) => {
+        const aMatches = a.title.toLowerCase().includes(q) || a.category.toLowerCase().includes(q);
+        const bMatches = b.title.toLowerCase().includes(q) || b.category.toLowerCase().includes(q);
+        if (aMatches && !bMatches) return -1;
+        if (!aMatches && bMatches) return 1;
+        const distA = a.coordinates ? Math.hypot(a.coordinates[0] - targetLat, a.coordinates[1] - targetLon) : 999;
+        const distB = b.coordinates ? Math.hypot(b.coordinates[0] - targetLat, b.coordinates[1] - targetLon) : 999;
+        return distA - distB;
       });
-      if (near.length > 0) return near;
-      return [
-        {
-          id: `incident-ai-${liveAiDispatchState.lat.toFixed(2)}`,
-          code: 'AI-ANOMALY',
-          title: `${liveAiDispatchState.targetName} (${liveAiDispatchState.activeHeatSpots} Detected)`,
-          category:
-            liveAiDispatchState.layerType === 'STORM'
-              ? 'Severe Storm'
-              : liveAiDispatchState.layerType === 'CRYO'
-              ? 'Ocean Surge'
-              : 'Active Anomaly',
-          coordinates: [liveAiDispatchState.lat, liveAiDispatchState.lon] as [number, number],
-          thumbnail_url: computeSubmeterOpticalTileUrl(liveAiDispatchState.lat, liveAiDispatchState.lon, 10),
-          date_detected: new Date().toISOString().split('T')[0],
-          intensity_mw: liveAiDispatchState.environmentalPhysics?.thermalRadiativeMw || 150,
-        },
-        ...liveIncidents.slice(0, 2),
-      ];
     }
     return liveIncidents;
   }, [liveIncidents, liveAiDispatchState]);
 
   const renderSearchBar = (inputId: string = 'sata-command-search-input') => (
-    <form
+    <motion.form
       layout
       layoutId="sata-command-search-bar"
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      id="sata-command-search-bar"
       onSubmit={handleExecuteSearch}
       onClick={(e) => {
         const target = e.target as HTMLElement;
@@ -1084,7 +1379,9 @@ export default function App() {
             setLiveAiDispatchState(null);
             setSelectedHotspotId(null);
             setAgentInsightOverride(null);
-            globeRef.current?.pointOfView({ lat: 20, lng: 78, altitude: 2.4, label: 'Overview' }, 2000);
+            setActiveLayerMode('MODIS_TRUE_COLOR_TERRAIN');
+            setActiveSimulation(null);
+            globeRef.current?.pointOfView({ lat: 20, lng: 78, altitude: 2.4, label: 'Overview' }, 1800);
           }}
           aria-label="Reset to Home Orbit"
           title="Reset to Home Orbit"
@@ -1094,12 +1391,22 @@ export default function App() {
             src="/assets/aistudio/image_565e711c.png"
             alt="Meta AI"
             className={`w-[15px] h-[15px] sm:w-[17px] sm:h-[17px] object-contain shrink-0 ${
-              isSearchSubmitted || isAiReasoning
+              isSearchSubmitted || isAiReasoning || searchQuery.length > 0
                 ? 'animate-spin drop-shadow-[0_0_12px_rgba(56,189,248,0.85)] filter brightness-125'
                 : 'drop-shadow-[0_0_8px_rgba(168,85,247,0.35)]'
             }`}
           />
         </button>
+        {mainVoiceRecorder.isRecording ? (
+          <div className="flex-1 flex items-center py-0.5">
+            <VoiceRecordingIndicator
+              duration={mainVoiceRecorder.recordingDuration}
+              onStop={handleFinishMainVoice}
+              onCancel={mainVoiceRecorder.cancelRecording}
+            />
+          </div>
+        ) : (
+          <>
         <label htmlFor={inputId} className="sr-only">
           Search location, satellite, or hazard...
         </label>
@@ -1119,6 +1426,23 @@ export default function App() {
             }
             if (selectedHotspotId) {
               setSelectedHotspotId(null);
+            }
+          }}
+          onPaste={(e) => {
+            const items = e.clipboardData?.items;
+            if (items) {
+              for (let i = 0; i < items.length; i++) {
+                if (items[i].type.startsWith('image/')) {
+                  const file = items[i].getAsFile();
+                  if (file) {
+                    e.preventDefault();
+                    const imgName = file.name || 'pasted_imagery.png';
+                    setSearchQuery('Analyzing imagery: ' + imgName);
+                    handleExecuteSearch('Analyzing imagery: ' + imgName);
+                    return;
+                  }
+                }
+              }
             }
           }}
           placeholder={isAiReasoning ? 'Analyzing satellite data...' : 'Search location, satellite, or hazard...'}
@@ -1144,10 +1468,12 @@ export default function App() {
         ) : (
           <kbd
             aria-hidden="true"
-            className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[9.5px] font-mono font-medium text-white/35 bg-white/[0.06] border border-white/10 rounded-[5px] select-none pointer-events-none"
+            className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[9.5px] font-sans font-medium text-white/35 bg-white/[0.06] border border-white/10 rounded-[5px] select-none pointer-events-none"
           >
             ⌘K
           </kbd>
+        )}
+          </>
         )}
       </div>
 
@@ -1159,7 +1485,7 @@ export default function App() {
             toggleVoiceRecognition();
           }}
           aria-label="Voice Search"
-          title={isListening ? 'Listening... Speak your query' : 'Ask with voice'}
+          title={mainVoiceRecorder.isRecording ? 'Finish and send voice recording' : 'Record voice with Meta AI'}
           className={`w-[26px] h-[26px] sm:w-[28px] sm:h-[28px] rounded-full flex items-center justify-center cursor-pointer transition-all ${
             isListening
               ? 'sata-date-pill text-white shadow-[0_0_14px_rgba(56,189,248,0.35)]'
@@ -1199,7 +1525,7 @@ export default function App() {
           {isModelMenuOpen && (
             <div
               onMouseDown={(e) => e.stopPropagation()}
-              className="absolute right-0 bottom-full mb-2 w-[220px] rounded-[18px] border border-white/15 bg-black/60 backdrop-blur-2xl p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.65),inset_0_1px_1px_rgba(255,255,255,0.22)] z-50 flex flex-col gap-1 text-white"
+              className={`absolute right-0 ${isSearchSubmitted ? "top-full mt-2" : "bottom-full mb-2"} w-[230px] rounded-[22px] border border-white/12 bg-white/[0.06] backdrop-blur-[45px] p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.25)] z-50 flex flex-col gap-1 text-white`}
             >
               {[
                 { id: 'tri-agent-swarm', label: 'Multi-Sensor Consensus', desc: 'Parallel multi-spectral analysis' },
@@ -1218,9 +1544,9 @@ export default function App() {
                       setSelectedMetaModel(m.id as any);
                       setIsModelMenuOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-[12px] transition-all cursor-pointer ${
+                    className={`w-full text-left px-3.5 py-2.5 rounded-[14px] transition-all cursor-pointer ${
                       isSel
-                        ? 'bg-sky-500/20 border border-sky-400/40 text-white shadow-[0_0_14px_rgba(56,189,248,0.25),inset_0_1px_1px_rgba(255,255,255,0.4)]'
+                        ? 'bg-white/[0.10] border border-white/18 text-white shadow-none'
                         : 'hover:bg-white/[0.08] text-white/80 hover:text-white border border-transparent'
                     }`}
                   >
@@ -1233,7 +1559,7 @@ export default function App() {
           )}
         </div>
       </div>
-    </form>
+    </motion.form>
   );
 
   return (
@@ -1278,7 +1604,10 @@ export default function App() {
               setCustomGeocodedPlace(null);
               setIsSearchSubmitted(false);
               setLiveAiDispatchState(null);
-              globeRef.current?.pointOfView({ lat: 20, lng: 0, altitude: 2.8 }, 1200);
+              setAgentInsightOverride(null);
+              setActiveLayerMode('MODIS_TRUE_COLOR_TERRAIN');
+              setActiveSimulation(null);
+              globeRef.current?.pointOfView({ lat: 20, lng: 78, altitude: 2.4, label: 'Overview' }, 1500);
             } else if (tab === 'SATELLITES') {
               const defaultSat: LiveOrbitPass = {
                 id: 'sat-cartosat-3',
@@ -1297,8 +1626,6 @@ export default function App() {
             } else if (tab === 'ORBITS') {
               setAdjustOrbitEnabled(true);
               globeRef.current?.pointOfView({ lat: 14.8, lng: 88.5, altitude: 3.1 }, 1200);
-            } else if (tab === 'RELEASES') {
-              document.querySelector('section[aria-label="Upcoming Releases"]')?.scrollIntoView({ behavior: 'smooth' });
             }
           }}
           onFocusSearch={handleFocusSearch}
@@ -1308,8 +1635,8 @@ export default function App() {
           onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
           unreadAlertsCount={temporalState.activeHeatSpots}
         >
-          {isSearchSubmitted ? renderSearchBar("sata-command-search-input") : null}
-      </TopNavbar>
+          {isSearchSubmitted ? renderSearchBar("sata-command-search-input-top") : null}
+        </TopNavbar>
 
       {/* Central 3D Earth Globe Stage (Dedicated non-overlapping stage on mobile, full-bleed fixed stage on sm+) */}
       <div className="pointer-events-none fixed inset-0 z-10 flex items-center justify-center">
@@ -1319,15 +1646,11 @@ export default function App() {
           globeTileEngineUrl={(x, y, l) =>
             getNasaGibsTileUrl(x, y, l, activeLayerMode, temporalState.isoDate)
           }
-          pointsData={
-            liveFirmsPoints.length > 0
-              ? liveFirmsPoints
-              : temporalState.modulatedFirmsPoints
-          }
+          pointsData={[]}
           pointsMerge={true}
-          ringsData={HOTSPOT_NODES}
-          arcsData={telemetryArcs}
-          labelsData={HOTSPOT_NODES}
+          ringsData={[]}
+          arcsData={[]}
+          labelsData={[]}
           selectedHotspotId={selectedHotspotId}
           onSelectHotspot={(id) => {
             setSelectedHotspotId(id);
@@ -1342,6 +1665,8 @@ export default function App() {
           adjustOrbitEnabled={adjustOrbitEnabled}
           targetPointOfView={observationData.targetPointOfView}
           activeLayerMode={activeLayerMode}
+          isSearchSubmitted={isSearchSubmitted}
+          activeSimulation={activeSimulation}
           minimalCloudOpacity={agentCloudOpacity}
           cloudPhysicsParams={{
             cloudCoverPct:
@@ -1360,7 +1685,6 @@ export default function App() {
             targetLon: liveAiDispatchState?.lon,
           }}
           timelineDay={selectedTimelineDay}
-          isSearchSubmitted={isSearchSubmitted}
         />
       </div>
 
@@ -1377,17 +1701,21 @@ export default function App() {
               className="w-full h-full flex flex-col sm:flex-row items-stretch justify-start sm:justify-between gap-3 sm:gap-3.5 lg:gap-5 pointer-events-none"
             >
               {/* LEFT COLUMN: Wide, Full-Height Meta Deep Intelligence Console */}
-              <div className="flex pointer-events-auto w-full sm:w-[500px] lg:w-[540px] xl:w-[580px] h-auto sm:h-full sm:min-h-0 shrink-0">
+              <div className="flex pointer-events-auto w-full sm:w-[500px] lg:w-[540px] xl:w-[580px] h-full sm:min-h-0 shrink-0">
                 <MetaDeepIntelligenceConsole
-                  targetName={liveAiDispatchState?.targetName || customGeocodedPlace?.name || searchQuery || 'Target Observation Sector'}
+                  userQuery={searchQuery}
+                  initialVoiceMessage={activeVoiceMessage || undefined}
+                  targetName={liveAiDispatchState?.targetName || customGeocodedPlace?.name || 'Global Observation'}
                   lat={liveAiDispatchState?.lat ?? customGeocodedPlace?.lat ?? 20}
                   lon={liveAiDispatchState?.lon ?? customGeocodedPlace?.lon ?? 78}
                   briefingLead={liveAiDispatchState?.briefingLead || displayObservationData.aiInsightLead}
                   briefingBody={liveAiDispatchState?.briefingBody || displayObservationData.aiInsightBody}
+                  thinkingSteps={liveAiDispatchState?.thinkingSteps}
+                  recommendations={liveAiDispatchState?.recommendations}
                   selectedMetaModel={selectedMetaModel}
                   onSelectMetaModel={setSelectedMetaModel}
                   onApplyLayer={(layer) => {
-                    setActiveLayerMode(layer);
+                    setActiveLayerMode(layer as NasaGibsLayerMode);
                   }}
                   onNavigateTo={(targetName, lat, lon, altitude) => {
                     setCustomGeocodedPlace({ name: targetName, region: 'SECTOR TARGET', lat, lon });
@@ -1398,10 +1726,16 @@ export default function App() {
                             targetName,
                             lat,
                             lon,
-                            zoomAltitude: altitude || 1.8,
-                            layerType: 'ORBITAL',
+                            zoomAltitude: altitude || 1.28,
+                            layerType: 'MODIS_TRUE_COLOR_TERRAIN',
+                            telemetry: {
+                              viirsPoints: 0,
+                              modisPoints: 0,
+                              aodStatus: 'STABLE',
+                              cloudCoverPct: 0,
+                            },
                             briefingSummary: '',
-                            briefingLead: 'Meta AI Consensus',
+                            briefingLead: 'Observation Analysis',
                             briefingBody: '',
                             severity: 'STABLE',
                             phenomenon: 'THERMAL',
@@ -1409,7 +1743,7 @@ export default function App() {
                             latencyMs: 0,
                           } as any)
                     );
-                    globeRef.current?.pointOfView({ lat, lng: lon, altitude: altitude || 1.8, label: targetName }, 2000);
+                    globeRef.current?.pointOfView({ lat, lng: lon, altitude: altitude || 1.30, label: targetName }, 2000);
                   }}
                   onClose={() => {
                     setIsSearchSubmitted(false);
@@ -1417,7 +1751,9 @@ export default function App() {
                     setLiveAiDispatchState(null);
                     setSelectedHotspotId(null);
                     setAgentInsightOverride(null);
-                    globeRef.current?.pointOfView({ lat: 20, lng: 78, altitude: 2.4, label: 'Overview' }, 2000);
+                    setActiveLayerMode('MODIS_TRUE_COLOR_TERRAIN');
+                    setActiveSimulation(null);
+                    globeRef.current?.pointOfView({ lat: 20, lng: 78, altitude: 2.4, label: 'Overview' }, 1800);
                   }}
                 />
               </div>
@@ -1437,10 +1773,11 @@ export default function App() {
               {/* Home Mode Left & Center Column: Search Bar & Bottom 3 Glass Cards */}
               <div className="relative shrink-0 sm:shrink sm:flex-1 flex flex-col justify-start sm:justify-end gap-3 sm:gap-3.5 min-w-0 sm:min-h-0">
                 <div className="pointer-events-auto w-full flex justify-center mb-1">
-                  {renderSearchBar("sata-command-search-input")}
+                  {!isSearchSubmitted ? renderSearchBar("sata-command-search-input-bottom") : null}
                 </div>
                 <div className="pointer-events-auto w-full shrink-0">
                   <BottomCardsRow
+                    showReleases={false}
                     releases={displayObservationData.matchedReleases}
                     sensors={displayObservationData.matchedSensors}
                     liveIncidents={currentDisplayedIncidents}
@@ -1468,13 +1805,13 @@ export default function App() {
                   liveOrbits={liveOrbits}
                   onSelectOrbitSatellite={(sat) => {
                     setSelectedSatellite(sat);
-                    const satCoords: Record<string, { lat: number; lon: number }> = {
+                    const satCoords = {
                       'Cartosat-3': { lat: 21.15, lon: 79.08 },
                       'Sentinel-3': { lat: 43.71, lon: 10.40 },
                       'NOAA-20': { lat: 28.57, lon: -80.65 },
                       'ISS (ZARYA)': { lat: 14.80, lon: 88.50 },
                     };
-                    const c = satCoords[sat.satellite_name] || { lat: 20, lon: 78 };
+                    const c = (satCoords as any)[sat.satellite_name] || { lat: 20, lon: 78 };
                     globeRef.current?.pointOfView(
                       { lat: c.lat, lng: c.lon, altitude: 2.1, label: sat.satellite_name },
                       1500
@@ -1492,6 +1829,7 @@ export default function App() {
 
       
 
+            
       <KeyboardShortcutsModal
         isOpen={isShortcutsModalOpen}
         onClose={() => setIsShortcutsModalOpen(false)}
@@ -1506,22 +1844,64 @@ export default function App() {
       <CommanderProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
+        onFlyToLocation={(name, lat, lon, altitude, layer) => {
+          setActiveLayerMode(layer as NasaGibsLayerMode);
+          setIsSearchSubmitted(true);
+          setSearchQuery(name);
+          globeRef.current?.pointOfView({ lat, lng: lon, altitude, label: name }, 2000);
+          setLiveAiDispatchState((prev) => ({
+            ...(prev || {}),
+            targetName: name,
+            lat,
+            lon,
+            zoomAltitude: altitude,
+            layerType: layer,
+            briefingLead: 'Mission Dossier Restored:',
+            briefingBody: 'Restored archived satellite observation for ' + name + ' [' + Math.abs(lat).toFixed(2) + '°, ' + Math.abs(lon).toFixed(2) + '°]. Digital twin telemetry and sensor layers synchronized.',
+            activeHeatSpots: 0,
+            telemetry: {
+              viirsPoints: 0,
+              modisPoints: 0,
+              aodStatus: 'STABLE',
+              cloudCoverPct: 15,
+            },
+            source: 'archive-dossier',
+            latencyMs: 40,
+          } as any));
+        }}
       />
 
       <SatelliteTelemetryModal
         satellite={selectedSatellite}
         onClose={() => setSelectedSatellite(null)}
         onNextSatellite={() => {
-          const defaultSats = [
-            { id: 'sat-cartosat-3', satellite_name: 'Cartosat-3', mission: 'ISRO Earth Observation Sun-Synchronous LEO', agency: 'ISRO', pass_time: '2026-10-28 08:42 UTC', altitude_km: 505, velocity_kms: 7.59, inclination_deg: 97.5, status: 'TRACKING' },
-            { id: 'sat-sentinel-3', satellite_name: 'Sentinel-3', mission: 'Copernicus Ocean and Land Surface Mission', agency: 'ESA', pass_time: '2026-10-28 09:15 UTC', altitude_km: 814, velocity_kms: 7.44, inclination_deg: 98.65, status: 'ORBITING' },
-            { id: 'sat-noaa-20', satellite_name: 'NOAA-20', mission: 'JPSS Polar Environmental Satellite VIIRS/CrIS', agency: 'NOAA', pass_time: '2026-10-28 09:38 UTC', altitude_km: 824, velocity_kms: 7.43, inclination_deg: 98.7, status: 'TRACKING' },
-            { id: 'sat-iss', satellite_name: 'ISS (ZARYA)', mission: 'International Space Station Microgravity Lab', agency: 'NASA', pass_time: '2026-10-28 10:04 UTC', altitude_km: 418, velocity_kms: 7.66, inclination_deg: 51.64, status: 'TRACKING' },
+          const defaultSats: LiveOrbitPass[] = [
+            { id: 'sat-cartosat-3', satellite_name: 'Cartosat-3 (High-Res 0.28m Optical)', mission: 'ISRO PSLV-C47 Sun-Synchronous LEO', agency: 'ISRO', pass_time: '14:22:10 UTC', altitude_km: 508, velocity_kms: 7.61, inclination_deg: 97.4, status: 'TRACKING' },
+            { id: 'sat-sentinel-3', satellite_name: 'Sentinel-3 (SLSTR Thermal & Ocean Radiometer)', mission: 'Copernicus Ocean & Land Environmental Mission', agency: 'ESA', pass_time: '14:48:30 UTC', altitude_km: 814, velocity_kms: 7.44, inclination_deg: 98.65, status: 'TRACKING' },
+            { id: 'sat-noaa-20', satellite_name: 'NOAA-20 (VIIRS 375m Multi-Spectral Radiometer)', mission: 'JPSS Polar Environmental Satellite VIIRS/CrIS', agency: 'NOAA', pass_time: '15:12:05 UTC', altitude_km: 824, velocity_kms: 7.43, inclination_deg: 98.7, status: 'TRACKING' },
+            { id: 'sat-iss', satellite_name: 'ISS (Zarya Orbiting Laboratory)', mission: 'International Space Station Microgravity Research', agency: 'NASA', pass_time: '15:35:40 UTC', altitude_km: 418, velocity_kms: 7.66, inclination_deg: 51.64, status: 'TRACKING' },
+            { id: 'sat-landsat-9', satellite_name: 'Landsat-9 (OLI-2 & TIRS-2 Thermal Infrared)', mission: 'USGS/NASA Planetary Resource Surveillance', agency: 'USGS/NASA', pass_time: '15:58:12 UTC', altitude_km: 705, velocity_kms: 7.50, inclination_deg: 98.2, status: 'TRACKING' },
           ];
-          const list = liveOrbits.length > 0 ? liveOrbits : defaultSats;
-          const currIdx = selectedSatellite ? list.findIndex(s => s.satellite_name === selectedSatellite.satellite_name) : 0;
-          const nextSat = list[(currIdx + 1) % list.length];
+          const currIdx = selectedSatellite
+            ? defaultSats.findIndex(s =>
+                s.id === selectedSatellite.id ||
+                s.satellite_name.toLowerCase().includes(selectedSatellite.satellite_name.split(' ')[0].toLowerCase()) ||
+                selectedSatellite.satellite_name.toLowerCase().includes(s.satellite_name.split(' ')[0].toLowerCase())
+              )
+            : 0;
+          const nextIdx = (currIdx >= 0 ? currIdx + 1 : 1) % defaultSats.length;
+          const nextSat = defaultSats[nextIdx];
           setSelectedSatellite(nextSat);
+
+          const satLocMap: Record<string, { lat: number; lng: number }> = {
+            'sat-cartosat-3': { lat: 21.15, lng: 79.08 },
+            'sat-sentinel-3': { lat: 43.71, lng: 10.40 },
+            'sat-noaa-20': { lat: 28.57, lng: -80.65 },
+            'sat-iss': { lat: 14.80, lng: 88.50 },
+            'sat-landsat-9': { lat: 34.05, lng: -118.24 },
+          };
+          const targetCoords = satLocMap[nextSat.id] || { lat: 20, lng: 78 };
+          globeRef.current?.pointOfView({ lat: targetCoords.lat, lng: targetCoords.lng, altitude: 2.1, label: nextSat.satellite_name }, 1200);
         }}
       />
     </div>

@@ -256,7 +256,7 @@ describe('TopNavbar Empirical Challenge & Adversarial Stress Test Suite', () => 
     });
 
     it('confirms 0 settings references across all 4 navigation tabs', () => {
-      const tabs: NavTab[] = ['HOME', 'SATELLITES', 'ORBITS', 'RELEASES'];
+      const tabs: NavTab[] = ['HOME', 'SATELLITES', 'ORBITS'];
       for (const tab of tabs) {
         const html = ReactDOMServer.renderToStaticMarkup(
           React.createElement(TopNavbar, createProps({ activeTab: tab }))
@@ -381,16 +381,16 @@ describe('TopNavbar Empirical Challenge & Adversarial Stress Test Suite', () => 
       assert.ok(!htmlWithout.includes('aria-label="Keyboard Shortcuts (?)"'), 'Shortcuts button omitted when handler undefined');
     });
 
-    it('preserves all 4 orbital navigation tabs in Zone 2 with proper active indicator', () => {
+    it('preserves all 3 orbital navigation tabs in Zone 2 with proper active indicator', () => {
       const html = ReactDOMServer.renderToStaticMarkup(
         React.createElement(TopNavbar, createProps({ activeTab: 'ORBITS' }))
       );
 
-      // Verify all 4 tab labels exist
+      // Verify all 3 tab labels exist
       assert.ok(html.includes('>HOME<'), 'Must render HOME tab');
       assert.ok(html.includes('>SATELLITES<'), 'Must render SATELLITES tab');
       assert.ok(html.includes('>ORBITS<'), 'Must render ORBITS tab');
-      assert.ok(html.includes('>RELEASES<'), 'Must render RELEASES tab');
+      assert.ok(!html.includes('>RELEASES<'), 'Must not render RELEASES tab');
 
       // Verify active pill styling is on ORBITS
       const orbitsMatch = html.match(/<button[^>]*class="([^"]*)"[^>]*>ORBITS<\/button>/);

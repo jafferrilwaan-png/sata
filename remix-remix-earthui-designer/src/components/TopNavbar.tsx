@@ -16,9 +16,9 @@ interface TopNavbarProps {
   children?: React.ReactNode;
 }
 
-const NAV_TABS: NavTab[] = ['HOME', 'SATELLITES', 'ORBITS', 'RELEASES'];
+const NAV_TABS: NavTab[] = ['HOME', 'SATELLITES', 'ORBITS'];
 
-export const TopNavbar: React.FC<TopNavbarProps> = ({
+export const TopNavbar = React.memo<TopNavbarProps>(({
   activeTab,
   onSelectTab,
   onFocusSearch,
@@ -31,7 +31,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   children,
 }) => {
   return (
-    <header className="relative z-40 flex flex-wrap sm:flex-nowrap items-center justify-between px-3 sm:px-5 lg:px-8 pt-2.5 sm:pt-3 pb-1 w-full gap-y-2 gap-x-2 sm:gap-4 shrink-0 pointer-events-none">
+    <header className="sticky top-0 z-40 flex flex-wrap sm:flex-nowrap items-center justify-between px-3 sm:px-5 lg:px-8 pt-2.5 sm:pt-3 pb-1 w-full gap-y-2 gap-x-2 sm:gap-4 shrink-0 pointer-events-none">
       {/* Zone 1: Exact SATA Stencil Wordmark + Minimal White "Powered by Meta" Sub-Lockup */}
       <button
         type="button"
@@ -175,4 +175,4 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       </div>
     </header>
   );
-};
+});

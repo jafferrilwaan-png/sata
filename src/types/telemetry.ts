@@ -1,4 +1,4 @@
-export type LayerType = "THERMAL" | "CRYO" | "STORM" | "ORBITAL";
+export type LayerType = "THERMAL" | "CRYO" | "STORM" | "ORBITAL" | "TRUE_COLOR" | "TERRAIN";
 
 export type EventPhenomenon =
   | "CYCLONE_RAIN"
@@ -20,6 +20,8 @@ export interface EnvironmentalPhysics {
   severity: "CRITICAL" | "HIGH" | "MODERATE" | "STABLE";
   tacticalProtocol: string;
   satelliteVisionUrl?: string;
+  targetLat?: number;
+  targetLon?: number;
 }
 
 export interface TelemetryMetrics {
@@ -32,6 +34,11 @@ export interface TelemetryMetrics {
   windSpeedKmh?: number;
 }
 
+export interface AiRecommendation {
+  category: string;
+  action: string;
+}
+
 export interface SataOrbitalDispatchResult {
   targetName: string;
   lat: number;
@@ -40,6 +47,9 @@ export interface SataOrbitalDispatchResult {
   activeHeatSpots: number;
   layerType: LayerType;
   briefingSummary: string;
+  briefingLead?: string;
+  thinkingSteps?: string[];
+  recommendations?: AiRecommendation[];
   telemetry: TelemetryMetrics;
   environmentalPhysics?: EnvironmentalPhysics;
   source?: "meta-live" | "meta-live-error";

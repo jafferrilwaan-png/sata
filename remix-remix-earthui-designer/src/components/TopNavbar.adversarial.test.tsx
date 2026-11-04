@@ -179,7 +179,7 @@ describe('Adversarial Stress Test: TopNavbar & GitHub Button Refactor', () => {
   });
 
   describe('Suite 4: activeTab Enum Permutations & Tab Highlighting', () => {
-    const tabs: NavTab[] = ['HOME', 'SATELLITES', 'ORBITS', 'RELEASES'];
+    const tabs: NavTab[] = ['HOME', 'SATELLITES', 'ORBITS'];
 
     tabs.forEach((activeTab) => {
       it(`highlights tab "${activeTab}" with .sata-home-pill while other tabs remain unhighlighted`, () => {
@@ -253,7 +253,7 @@ describe('Adversarial Stress Test: TopNavbar & GitHub Button Refactor', () => {
       assert.ok(html.includes('>HOME</button>'), 'HOME tab button rendered');
       assert.ok(html.includes('>SATELLITES</button>'), 'SATELLITES tab button rendered');
       assert.ok(html.includes('>ORBITS</button>'), 'ORBITS tab button rendered');
-      assert.ok(html.includes('>RELEASES</button>'), 'RELEASES tab button rendered');
+      assert.ok(!html.includes('>RELEASES</button>'), 'RELEASES tab button must not be rendered');
     });
 
     it('renders docked search bar and omits navigation tabs when children is passed', () => {
@@ -320,7 +320,7 @@ describe('Adversarial Stress Test: TopNavbar & GitHub Button Refactor', () => {
   });
 
   describe('Suite 7: Zone 1, 2, 3 Layout Preservation across 144 Permutations', () => {
-    const tabs: NavTab[] = ['HOME', 'SATELLITES', 'ORBITS', 'RELEASES'];
+    const tabs: NavTab[] = ['HOME', 'SATELLITES', 'ORBITS'];
     const alertCounts = [0, 9999, -1];
     const urls = [undefined, 'https://github.com/nasa/sata-sentinel', 'https://github.com/meta/sata'];
     const childrenOptions = [
@@ -420,7 +420,7 @@ describe('Adversarial Stress Test: TopNavbar & GitHub Button Refactor', () => {
     }
 
     it(`successfully verified all ${testCount} prop permutation invariants`, () => {
-      assert.equal(testCount, 288, 'Expected exactly 288 combinations tested');
+      assert.equal(testCount, 216, 'Expected exactly 216 combinations tested');
     });
   });
 });

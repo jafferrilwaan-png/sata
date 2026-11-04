@@ -529,16 +529,26 @@ const Galaxy: React.FC<GalaxyProps> = ({
       if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame);
     };
 
+    let resizeRaf: number | null = null;
     const resize = () => {
-      const s = settingsRef.current;
-      const width = Math.max(1, container.clientWidth);
-      const height = Math.max(1, container.clientHeight);
-      // Hard clamp dpr to 1.0 max for zero lag (0.5 in software WebGL)
-      const ratio = isSoftwareGl ? 0.5 : clamp(s.dpr || 1.0, 0.5, 1.0);
-      canvas.width = Math.max(1, Math.round(width * ratio));
-      canvas.height = Math.max(1, Math.round(height * ratio));
-      render();
-      wake();
+      if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(() => {
+        resizeRaf = null;
+        if (!container) return;
+        const s = settingsRef.current;
+        const width = Math.max(1, container.clientWidth);
+        const height = Math.max(1, container.clientHeight);
+        // Hard clamp dpr to 1.0 max for zero lag (0.5 in software WebGL)
+        const ratio = isSoftwareGl ? 0.5 : clamp(s.dpr || 1.0, 0.5, 1.0);
+        const targetW = Math.max(1, Math.round(width * ratio));
+        const targetH = Math.max(1, Math.round(height * ratio));
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+          canvas.width = targetW;
+          canvas.height = targetH;
+          render();
+          wake();
+        }
+      });
     };
 
     const resizeObserver = new ResizeObserver(resize);
@@ -557,6 +567,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(raf);
+      if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
       wakeRef.current = null;
       resizeObserver.disconnect();
       intersection.disconnect();
