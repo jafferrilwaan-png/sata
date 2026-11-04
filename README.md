@@ -85,7 +85,7 @@ The dynamic boundary between illuminated daylight and nocturnal shadow is calcul
 
 ---
 
-## ⚡ Key Features & Innovations
+## Key Features & Innovations
 
 - **Multi-Temporal Satellite & Aerial Comparison (e.g. Egypt 1952 vs 2026)**:
   Side-by-side structured analysis contrasting historical pre-Aswan aerial photography and early Corona sorties against 2026 Copernicus Sentinel-2 / Cartosat-3 optical data, quantifying urban sprawl (+2,480% in Greater Cairo) and desert reclamation across Toshka and Sinai.
@@ -126,22 +126,6 @@ git clone https://github.com/jafferrilwaan-png/sata.git
 cd sata/remix-remix-earthui-designer
 ```
 
-### 3. Environment Variables Configuration
-Create a `.env` file in `remix-remix-earthui-designer/` (or copy from `.env.example`):
-
-```bash
-# Meta AI Official API Configuration
-META_API_KEY=LLM_2207748566818315_UsqKa7V6H8nCNmeOK-9i03yjt9k
-META_BASE_URL=https://api.meta.ai/v1
-VITE_META_API_KEY=LLM_2207748566818315_UsqKa7V6H8nCNmeOK-9i03yjt9k
-
-# NASA FIRMS & EONET Sensor Access
-NASA_FIRMS_KEY=2da6fcf4c5fefba6e463c74f403aba67
-NASA_FIRMS_MAP_KEY=2da6fcf4c5fefba6e463c74f403aba67
-
-# Port Configuration
-PORT=4000
-```
 
 ### 4. Install Dependencies
 ```bash
