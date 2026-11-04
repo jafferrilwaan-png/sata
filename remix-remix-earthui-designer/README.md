@@ -25,15 +25,11 @@
 
 ## Official 3-Minute Demo Video
 
-An automated, high-definition end-to-end platform demonstration showcasing real-time planetary tracking, natural conversational queries, submeter optical passes, and multi-temporal synthesis.
-
-- **Direct Repository Video**: [Watch / Download sata_sentinel_official_demo.mp4 (HD 720p with Tenor Voiceover)](docs/videos/sata_sentinel_official_demo.mp4)
-- **Demo Highlights**:
-  - `00:00 - 00:25`: Physically grounded WebGL 3D globe with real-time solar declination, Rayleigh twilight scattering, and nocturnal city lights.
-  - `00:25 - 00:55`: Natural conversational Meta AI omnibar interaction (*"HI MEATA"*) with zero accidental globe repositioning.
-  - `00:55 - 01:35`: Autonomous multi-temporal flight and 74-year synthesis (*Egypt 1952 vs 2026 Nile Delta hydrology and urban expansion*).
-  - `01:35 - 02:15`: Submeter satellite pass (ISRO Cartosat-3 0.28m GSD), SGP4 orbital kinematics, and autonomous radiometric anomaly screening.
-  - `02:15 - 02:35`: Real-time multi-spectral sensor overlay switching (VIIRS Thermal Night, MODIS True Color, Atmospheric AOD).
+<div align="center">
+  <video src="https://github.com/jafferrilwaan-png/sata/raw/main/docs/videos/sata_sentinel_official_demo.mp4" controls width="100%" style="max-width: 960px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <a href="https://github.com/jafferrilwaan-png/sata/raw/main/docs/videos/sata_sentinel_official_demo.mp4">Watch SATA Sentinel Official Demo Video (MP4)</a>
+  </video>
+</div>
 
 ---
 

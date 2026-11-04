@@ -42,6 +42,9 @@ export function resolveTargetGeospatial(query: string): { name: string; lat: num
   const defaultLayer = wantsGreen ? 'NDVI_VEGETATION' : wantsThermal ? 'VIIRS_NIGHT_THERMAL' : wantsWeather ? 'ATMOSPHERIC_AOD_CLOUDS' : 'MODIS_TRUE_COLOR_TERRAIN';
   const defaultAlt = wantsOpticalOr3D ? 1.28 : 1.35;
 
+  if (qLower.includes('highest rainfall') || qLower.includes('wettest') || qLower.includes('rainiest') || qLower.includes('mawsynram') || qLower.includes('cherrapunji') || qLower.includes('meghalaya')) {
+    return { name: 'Mawsynram, Meghalaya (Highest Rainfall on Earth)', lat: 25.30, lon: 91.58, altitude: 1.28, layer: 'ATMOSPHERIC_AOD_CLOUDS' };
+  }
   if (qLower.includes('south america') || qLower.includes('latin america')) {
     return { name: 'South America', lat: -14.23, lon: -51.92, altitude: 2.15, layer: defaultLayer };
   }

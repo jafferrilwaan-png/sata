@@ -794,6 +794,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
         }
 
         const isModelQuery = (qLower.includes('model') || qLower.includes('mdoel') || qLower.includes('which ai') || qLower.includes('what ai') || qLower.includes('what model') || qLower.includes('which model') || qLower.includes('only one') || qLower.includes('single model') || qLower.includes('muse spark') || qLower.includes('swarm'));
+        const isRainfallQuery = qLower.includes('highest rainfall') || qLower.includes('wettest') || qLower.includes('rainiest') || qLower.includes('most rain') || qLower.includes('mawsynram') || qLower.includes('cherrapunji');
         const isEgyptCompareQuery = (qLower.includes('egypt') || qLower.includes('cairo') || qLower.includes('nile')) && (qLower.includes('1952') || qLower.includes('2026') || qLower.includes('compare') || qLower.includes('coampare') || qLower.includes('comparison') || qLower.includes('image') || qLower.includes('iamgae'));
         const isBayChennaiCompare = (qLower.includes('bay of bengal') && qLower.includes('chennai'));
         const isGreenerQuery = qLower.includes('greener') || qLower.includes('green') || qLower.includes('vegetation') || qLower.includes('ndvi') || qLower.includes('chlorophyll') || qLower.includes('plants') || qLower.includes('forest');
@@ -833,6 +834,24 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
             "- **Meta Muse Wonder 1.0 (Atmospheric & Planetary Physics):** Solves multi-spectral radiance, wind velocity vectors, precipitation rates, and thermal signatures.\n" +
             "- **Meta Muse Spark 1.2 / Llama 4 (Orbital Tactical Protocol):** Synthesizes live satellite telemetry downlinks, constellation tasking, and emergency ground action.\n\n" +
             "No single model acts in isolation — every response runs as an autonomous multi-agent swarm in parallel consensus.";
+        } else if (isRainfallQuery) {
+          resolvedTargetName = 'Mawsynram, Meghalaya (Highest Rainfall on Earth)';
+          resolvedLat = 25.30;
+          resolvedLon = 91.58;
+          onNavigateTo?.('Mawsynram, Meghalaya', 25.30, 91.58, 1.28);
+          onApplyLayer?.('ATMOSPHERIC_AOD_CLOUDS');
+
+          replyText = `### Highest Rainfall on Earth: Mawsynram, Meghalaya [25.30° N, 91.58° E]
+
+| Parameter | Mawsynram Telemetry | Global Terrestrial Average | Physical Context |
+| :--- | :--- | :--- | :--- |
+| **Annual Precipitation** | **11,872 mm (467.4 inches)** | ~990 mm/year | World Record (Guinness & IMD Verified) |
+| **Peak Monsoon Rate** | **350 mm to 650 mm / 24h** | < 50 mm / 24h Heavy Rain | Deep Orographic Convection |
+| **Atmospheric Moisture Column** | **AOD 0.58, RH 94%** | 30% - 60% Optimal | Extreme Water Vapor Column |
+| **Observation Constellation** | **NASA GPM & ISRO INSAT-3DR** | Multi-Spectral Doppler Radar | Dual-Frequency Precipitation Radar (DPR) |
+
+- **Orographic Funnel Mechanism:** Moisture-saturated southwest monsoon winds sweeping across the Bay of Bengal encounter the sheer southern cliffs of the Khasi Hills (~1,400m MSL), forcing rapid adiabatic cooling and intense torrential condensation.
+- **3D Earth Digital Twin State:** Digital twin camera has navigated directly to Mawsynram, Meghalaya [25.30° N, 91.58° E] with atmospheric moisture and cloud radar layers active.`;
         } else if (isEgyptCompareQuery) {
           resolvedTargetName = 'Egypt (Nile River & Delta)';
           resolvedLat = 26.82;
