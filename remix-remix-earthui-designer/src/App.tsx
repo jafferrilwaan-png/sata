@@ -664,6 +664,15 @@ export default function App() {
       return;
     }
 
+    const isConversational =
+      /^(hi|hello|hey|how are you|good morning|good evening|who are you|what can you do|what model|which model|tell me|compare|why|is this|help|thanks|thank you|ok|okay)\b/i.test(q) ||
+      ['hi', 'hello', 'hey', 'dude', 'bro', 'ok', 'okay'].some(w => q.toLowerCase().includes(w));
+
+    if (isConversational) {
+      setCustomGeocodedPlace(null);
+      return;
+    }
+
     if (q.length >= 3 && !baseEval.targetPointOfView && !liveAiDispatchState) {
       const controller = new AbortController();
       const timer = window.setTimeout(async () => {
@@ -1113,7 +1122,15 @@ export default function App() {
     );
     const wantsOpticalOr3D = qLower.includes('high-res') || qLower.includes('high res') || qLower.includes('optical') || qLower.includes('3d') || qLower.includes('resolution') || qLower.includes('zoom') || qLower.includes('close') || qLower.includes('detail') || qLower.includes('pass') || qLower.includes('see');
 
-    const isChatOrGreeting = isGreeting || q.length < 3 || ['hi', 'hello', 'hey', 'dudue', 'dude', 'bro', 'ok', 'okay'].some(w => qLower.includes(w));
+    const isChatOrGreeting =
+      isGreeting ||
+      q.length < 3 ||
+      /^(hi|hello|hey|how are you|good morning|good evening|who are you|what can you do|what model|which model|tell me|compare|why|is this|help|thanks|thank you|ok|okay)\b/i.test(q.trim()) ||
+      ['hi', 'hello', 'hey', 'dude', 'bro', 'ok', 'okay'].some(w => qLower.includes(w));
+
+    if (isChatOrGreeting) {
+      setCustomGeocodedPlace(null);
+    }
     const cleanTargetTitle = geoTarget
       ? geoTarget.name
       : matchedIncident

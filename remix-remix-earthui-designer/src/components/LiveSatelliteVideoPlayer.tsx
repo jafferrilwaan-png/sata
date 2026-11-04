@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { computeSubmeterOpticalTileUrl } from '../utils/telemetryLogic';
 import { Play, Pause, Volume2, VolumeX, Maximize2, Radio, Satellite, RefreshCw } from 'lucide-react';
 
 export interface LiveSatelliteVideoPlayerProps {
@@ -274,11 +275,28 @@ export const LiveSatelliteVideoPlayer: React.FC<LiveSatelliteVideoPlayerProps> =
           />
         </div>
       ) : (
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full object-cover cursor-pointer"
-          onClick={() => setIsPlaying(!isPlaying)}
-        />
+        <div className="absolute inset-0 w-full h-full overflow-hidden bg-slate-950">
+          <img
+            src={computeSubmeterOpticalTileUrl(lat, lon, 9)}
+            alt={`Live satellite pass: ${satelliteName}`}
+            className="w-full h-full object-cover select-none pointer-events-none"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = computeSubmeterOpticalTileUrl(lat, lon, 7);
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/40 pointer-events-none" />
+          
+          {/* Authentic Optical Reticle Crosshair */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="relative w-28 h-28 border border-sky-400/40 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-sky-400 rounded-full shadow-[0_0_8px_#38bdf8]" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-3 bg-sky-400/70" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-3 bg-sky-400/70" />
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 h-px w-3 bg-sky-400/70" />
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 h-px w-3 bg-sky-400/70" />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* 2. Top Status Bar: LIVE Badge, Source Switcher, UTC Clock */}

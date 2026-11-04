@@ -417,8 +417,13 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const initialTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const initialQuery = initialVoiceMessage?.transcript || userQuery || targetName || "Global Observation";
-    const initialReply = (briefingBody || briefingLead || 'Satellite telemetry synchronized.').replace(/^(?:Llama 4|Meta Muse):\s*/i, '');
     const initialQLower = initialQuery.toLowerCase();
+    const isInitGreeting =
+      /^(hi|hello|hey|how are you|good morning|good evening|who are you|what can you do)\b/i.test(initialQuery.trim()) ||
+      ['hi', 'hello', 'hey', 'dude', 'bro'].some((w) => initialQLower.includes(w));
+    const initialReply = isInitGreeting
+      ? 'Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?'
+      : (briefingBody || briefingLead || 'Satellite telemetry synchronized.').replace(/^(?:Llama 4|Meta Muse|Meta AI):\s*/i, '');
     const initialWantsVideo = (initialQLower.includes('video') || initialQLower.includes('stream') || initialQLower.includes('live feed')) && !initialQLower.includes('no video');
 
     return [
@@ -529,8 +534,14 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
   useEffect(() => {
     if (!targetName) return;
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const cleanBody = (briefingBody || briefingLead || 'Satellite telemetry synchronized.')
-      .replace(/^(?:Llama 4|Meta Muse|Meta AI):s*/i, '');
+    const userPrompt = userQuery || targetName;
+    const userQLower = userPrompt.toLowerCase();
+    const isUserGreeting =
+      /^(hi|hello|hey|how are you|good morning|good evening|who are you|what can you do)\b/i.test(userPrompt.trim()) ||
+      ['hi', 'hello', 'hey', 'dude', 'bro'].some((w) => userQLower.includes(w));
+    const cleanBody = isUserGreeting
+      ? 'Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?'
+      : (briefingBody || briefingLead || 'Satellite telemetry synchronized.').replace(/^(?:Llama 4|Meta Muse|Meta AI):\s*/i, '');
 
     setMessages((prev) => {
       const userPrompt = userQuery || targetName;
