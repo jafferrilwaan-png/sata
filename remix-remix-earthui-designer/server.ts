@@ -356,7 +356,7 @@ async function startServer() {
       const META_BASE_URL = process.env.META_BASE_URL || 'https://api.meta.ai/v1';
 
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 2000);
+      const timer = setTimeout(() => controller.abort(), 15000);
 
       try {
         const metaRes = await fetch(`${META_BASE_URL}/chat/completions`, {
@@ -370,8 +370,9 @@ async function startServer() {
             messages: [
               {
                 role: 'system',
-                content: `You are SATA Sentinel, an autonomous satellite Earth observation AI powered by Meta AI.
-Answer the user's inquiry directly, accurately, scientifically, and specifically about what they asked.`
+                content: `You are SATA Sentinel, an autonomous satellite Earth observation intelligence system powered by Meta AI (${actualModel}).
+If the user asks a casual or conversational question (e.g. "how are you", "are you fine", "hi", "who are you"), reply directly, naturally, and warmly in 1-2 friendly sentences.
+If the user asks about geography, locations, weather, climate, comparisons (e.g. Egypt 1952 vs 2026), or satellites, provide an in-depth, scientifically verified briefing with precise metrics.`
               },
               { role: 'user', content: query }
             ],
@@ -404,7 +405,12 @@ Answer the user's inquiry directly, accurately, scientifically, and specifically
         summaryText = 'Multi-spectral satellite telemetry locked over South America [-14.23°, -51.92°]. Sensor feeds confirm active Amazon basin convective cloud systems, stable albedo across the Cerrado biome, and real-time SST monitoring across both the Atlantic and Pacific equatorial coastlines.';
       } else if (qLower.includes('egypt')) {
         summaryText = 'Multi-temporal satellite & aerial comparison active for Egypt and the Nile River Basin. Sensor channels confirm perennial irrigation across the Delta and extensive desert reclamation infrastructure visible via Sentinel-2 NIR/NDVI bands.';
-      } else if (/^(hi|hello|hey|how are you|who are you)\b/i.test(query.trim())) {
+      } else if (
+        /\b(hi|hello|hey|how are you|who are you|are you fine|how r u|good morning|good evening)\b/i.test(qLower) ||
+        ['how are you', 'are you fine', 'fine', 'hi', 'hello', 'hey'].some(w => qLower.includes(w))
+      ) {
+        summaryText = "I'm doing great, thank you! I am Meta AI for SATA. All orbital telemetry, satellite constellations, and 3D Earth sensors are operating smoothly. How can I assist you with planetary data today?";
+      } else if (false) {
         summaryText = 'Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?';
       } else {
         summaryText = `Orbital observation channels active for "${query}". Satellite constellations synchronized across visible, infrared, and radar passes.`;

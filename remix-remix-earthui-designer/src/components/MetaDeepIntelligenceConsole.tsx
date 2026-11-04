@@ -640,7 +640,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     // Strict negative check: If user says "remove", "don't", "no", "fake", "stop", "hide", NEVER enable video feed
     
     const isTimeQuery = qLower.includes('time') || qLower.includes('clock') || qLower.includes('date');
-    const isGreeting = /^(hi|hello|hey|greetings|hola|how are you|who are you)\b/i.test(qLower.trim()) || ['hi', 'hello', 'hey', 'dude', 'bro'].some(w => qLower.trim().split(/\s+/).includes(w));
+    const isGreeting = /\b(hi|hello|hey|greetings|hola|how are you|who are you|are you fine|how r u|good morning|good evening)\b/i.test(qLower) || ['how are you', 'are you fine', 'fine', 'hi', 'hello', 'hey', 'dude', 'bro'].some(w => qLower.includes(w));
 
     const isNegativeVideo = qLower.includes('remove') || qLower.includes('remov') || qLower.includes("don't") || qLower.includes('dont') || qLower.includes('fake') || qLower.includes('stop') || qLower.includes('hide') || qLower.includes('no video');
     const wantsVideo = !isNegativeVideo && (
@@ -781,7 +781,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
           .then((r) => r.ok ? r.json() : null)
           .catch(() => null);
 
-        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 2500));
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 15000));
         const [weatherData, fetchedMeta] = await Promise.all([
           Promise.race([weatherPromise, timeoutPromise]),
           Promise.race([metaPromise, timeoutPromise])
@@ -900,7 +900,11 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
             `Solar Status: Real-time insolation synchronized with orbital pass geometry.\n\n` +
             (replyText || '');
         } else if (isGreeting) {
-          replyText = `Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?`;
+          if (qLower.includes('how are you') || qLower.includes('are you fine') || qLower.includes('fine')) {
+            replyText = "I'm doing great, thank you for asking! I am Meta AI for SATA. All orbital telemetry, satellite constellations, and 3D Earth sensors are operating smoothly. How can I assist you with planetary data today?";
+          } else {
+            replyText = "Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?";
+          }
         }
 
         // AUTONOMOUS AGENT ACTION: Fly camera & zoom 3D globe to resolved target

@@ -313,7 +313,18 @@ export const EarthGlobeCanvas = forwardRef<
         const target = e.target as HTMLElement | null;
         if (!target) return;
         if (target === renderer.domElement) return; // OrbitControls already handles canvas wheel directly
-        if (target.closest('.sata-sidebar-scroll')) return; // Let scrollable menus scroll normally
+        // NEVER zoom background Earth when scrolling over any modal, dialog, sheet, or overlay!
+        if (
+          target.closest('[role="dialog"]') ||
+          target.closest('[aria-modal="true"]') ||
+          target.closest('.fixed') ||
+          target.closest('.sata-sidebar-scroll') ||
+          target.closest('.overflow-y-auto') ||
+          target.closest('.overflow-auto') ||
+          target.closest('aside')
+        ) {
+          return;
+        }
         e.preventDefault();
         povAnimRef.current.active = false;
         const zoomDelta = Math.sign(e.deltaY) * 0.24;

@@ -164,7 +164,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
   return (
     <AnimatePresence>
       {satellite && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 select-none pointer-events-auto">
+        <div onWheel={(e) => e.stopPropagation()} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 select-none pointer-events-auto overflow-hidden">
           {/* Frosted Glass Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -183,7 +183,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
             transition={{ type: 'spring', damping: 28, stiffness: 340 }}
-            className="relative z-10 w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-[28px] p-5 sm:p-6 border border-white/25 bg-white/[0.08] backdrop-blur-[45px] saturate-[180%] shadow-[0_24px_70px_rgba(0,0,0,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.35)] text-white flex flex-col gap-3.5 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
+            className="relative z-10 w-full max-w-2xl max-h-[88vh] flex flex-col rounded-[28px] p-5 sm:p-6 border border-white/25 bg-white/[0.08] backdrop-blur-[45px] saturate-[180%] shadow-[0_24px_70px_rgba(0,0,0,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.35)] text-white overflow-hidden"
           >
             {/* Header: Pure Typography */}
             <div className="flex items-start justify-between pb-3 border-b border-white/10 gap-3 shrink-0">
@@ -251,7 +251,9 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
               </button>
             </div>
 
-            {/* TAB 1: Real-Time High-Resolution Satellite Optical Pass (5-Min Cadence) */}
+            {/* Scrollable Modal Content — Header and Tabs remain fixed above! */}
+            <div className="flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col gap-3.5 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent overscroll-contain">
+              {/* TAB 1: Real-Time High-Resolution Satellite Optical Pass (5-Min Cadence) */}
             {activeTab === 'groundtrack' && (
               <div className="flex flex-col gap-3">
                 {/* Satellite Optical Pass Card */}
@@ -462,6 +464,8 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
                 </span>
                 <span className="text-[10px] text-white/60">Sun-Synchronous</span>
               </div>
+            </div>
+
             </div>
 
             {/* Action Footer: Clean Track Next Satellite Button */}

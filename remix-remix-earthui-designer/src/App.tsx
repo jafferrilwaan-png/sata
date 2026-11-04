@@ -1460,7 +1460,7 @@ export default function App() {
         ) : (
           <>
         <label htmlFor={inputId} className="sr-only">
-          Search location, satellite, or hazard...
+          Ask satellite anything...
         </label>
         <input
           id={inputId}
@@ -1497,7 +1497,7 @@ export default function App() {
               }
             }
           }}
-          placeholder={isAiReasoning ? 'Analyzing satellite data...' : 'Search location, satellite, or hazard...'}
+          placeholder={isAiReasoning ? 'Meta AI reasoning over satellite telemetry...' : 'Ask satellite anything...'}
           className="w-full bg-transparent text-[12px] sm:text-[13.5px] font-light text-white placeholder-[#a1a1aa] focus:outline-none tracking-[0.01em]"
         />
         {searchQuery ? (
