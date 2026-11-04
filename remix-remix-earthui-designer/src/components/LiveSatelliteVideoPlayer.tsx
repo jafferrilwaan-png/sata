@@ -216,7 +216,7 @@ export const LiveSatelliteVideoPlayer: React.FC<LiveSatelliteVideoPlayerProps> =
 
       // Active target pulse
       const pulseRadius = 3 + Math.abs(Math.sin(angle * 6)) * 2;
-      ctx.fillStyle = '#ef4444';
+      ctx.fillStyle = '#38bdf8';
       ctx.beginPath();
       ctx.arc(crossX, crossY, pulseRadius, 0, Math.PI * 2);
       ctx.fill();
@@ -285,7 +285,7 @@ export const LiveSatelliteVideoPlayer: React.FC<LiveSatelliteVideoPlayerProps> =
       <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none z-20">
         <div className="flex items-center gap-1.5 pointer-events-auto">
           {/* Authentic Live Streaming Indicator Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-red-600/90 text-white font-sans text-[10px] sm:text-[10.5px] font-bold tracking-wider uppercase shadow-[0_0_12px_rgba(239,68,68,0.7)] backdrop-blur-md select-none">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-sky-500/20 text-sky-200 border border-sky-400/30 font-sans text-[10px] sm:text-[10.5px] font-semibold tracking-wider uppercase backdrop-blur-md select-none shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
             <span>LIVE ORBITAL FEED</span>
           </div>
 

@@ -42,6 +42,39 @@ export function resolveTargetGeospatial(query: string): { name: string; lat: num
   const defaultLayer = wantsGreen ? 'NDVI_VEGETATION' : wantsThermal ? 'VIIRS_NIGHT_THERMAL' : wantsWeather ? 'ATMOSPHERIC_AOD_CLOUDS' : 'MODIS_TRUE_COLOR_TERRAIN';
   const defaultAlt = wantsOpticalOr3D ? 1.28 : 1.35;
 
+  if (qLower.includes('south america') || qLower.includes('latin america')) {
+    return { name: 'South America', lat: -14.23, lon: -51.92, altitude: 2.15, layer: defaultLayer };
+  }
+  if (qLower.includes('north america')) {
+    return { name: 'North America', lat: 45.00, lon: -100.00, altitude: 2.15, layer: defaultLayer };
+  }
+  if (qLower.includes('africa')) {
+    return { name: 'Africa', lat: 1.65, lon: 17.66, altitude: 2.15, layer: defaultLayer };
+  }
+  if (qLower.includes('europe')) {
+    return { name: 'Europe', lat: 54.52, lon: 15.25, altitude: 2.05, layer: defaultLayer };
+  }
+  if (qLower.includes('asia')) {
+    return { name: 'Asia', lat: 34.04, lon: 100.61, altitude: 2.25, layer: defaultLayer };
+  }
+  if (qLower.includes('middle east')) {
+    return { name: 'Middle East', lat: 29.29, lon: 42.55, altitude: 1.95, layer: defaultLayer };
+  }
+  if (qLower.includes('brazil') || qLower.includes('brasil')) {
+    return { name: 'Brazil, South America', lat: -14.23, lon: -51.92, altitude: 1.85, layer: defaultLayer };
+  }
+  if (qLower.includes('argentina')) {
+    return { name: 'Argentina, South America', lat: -38.41, lon: -63.61, altitude: 1.85, layer: defaultLayer };
+  }
+  if (qLower.includes('chile')) {
+    return { name: 'Chile, South America', lat: -35.67, lon: -71.54, altitude: 1.85, layer: defaultLayer };
+  }
+  if (qLower.includes('colombia')) {
+    return { name: 'Colombia, South America', lat: 4.57, lon: -74.29, altitude: 1.85, layer: defaultLayer };
+  }
+  if (qLower.includes('peru')) {
+    return { name: 'Peru, South America', lat: -9.19, lon: -75.01, altitude: 1.85, layer: defaultLayer };
+  }
   if (qLower.includes('egypt') || qLower.includes('cairo') || qLower.includes('nile') || qLower.includes('aswan') || qLower.includes('suez')) {
     return { name: 'Egypt (Nile River & Delta)', lat: 26.82, lon: 30.80, altitude: 1.45, layer: defaultLayer };
   }
@@ -1101,15 +1134,17 @@ export default function App() {
       setActiveLayerMode('MODIS_TRUE_COLOR_TERRAIN');
     }
 
-    globeRef.current?.pointOfView(
-      {
-        lat: targetLat,
-        lng: targetLon,
-        altitude: targetAltitude,
-        label: cleanTargetTitle,
-      },
-      2000
-    );
+    if (!isChatOrGreeting && (geoTarget || matchedIncident || wantsOpticalOr3D)) {
+      globeRef.current?.pointOfView(
+        {
+          lat: targetLat,
+          lng: targetLon,
+          altitude: targetAltitude,
+          label: cleanTargetTitle,
+        },
+        2000
+      );
+    }
 
     const isFireQuery = q.toLowerCase().includes('fire') || q.toLowerCase().includes('wildfire') || q.toLowerCase().includes('heat') || q.toLowerCase().includes('thermal') || q.toLowerCase().includes('firms');
     const isRainOrStormQuery = q.toLowerCase().includes('rain') || q.toLowerCase().includes('storm') || q.toLowerCase().includes('cyclone') || q.toLowerCase().includes('flood');
@@ -1132,29 +1167,29 @@ export default function App() {
 
     const initialBriefing = isTimeQuery
       ? `The current local time in **${matchedIncident ? matchedIncident.title : q}** is **${immediateTimeStr}** (${isIndiaTarget ? 'Indian Standard Time, UTC+5:30' : 'UTC'}). Coordinates: ${Math.abs(targetLat).toFixed(2)}° ${targetLat >= 0 ? 'N' : 'S'}, ${Math.abs(targetLon).toFixed(2)}° ${targetLon >= 0 ? 'E' : 'W'}. Local satellite pass geometry locked.`
-      : selectedMetaModel === 'tri-agent-swarm'
-        ? `Meta AI Tri-Agent Swarm actively reasoning over atmospheric chemistry and satellite telemetry for "${q}"...`
-        : `Retrieving satellite coordinates and observations for "${q}"...`;
+      : '';
 
-    // Immediately display active Tri-Model Meta reasoning in the intelligence briefing
-    setLiveAiDispatchState({
-      targetName: cleanTargetTitle,
-      lat: targetLat,
-      lon: targetLon,
-      zoomAltitude: targetAltitude,
-      activeHeatSpots: matchedIncident ? (matchedIncident.category === 'Fire' ? 84 : 0) : 0,
-      layerType: isFireQuery ? 'VIIRS_NIGHT_THERMAL' : isRainOrStormQuery ? 'ATMOSPHERIC_AOD_CLOUDS' : 'MODIS_TRUE_COLOR_TERRAIN',
-      briefingLead: 'Observation Analysis:',
-      briefingBody: initialBriefing,
-      telemetry: {
-        viirsPoints: matchedIncident ? 42 : 0,
-        modisPoints: matchedIncident ? 28 : 0,
-        aodStatus: 'ELEVATED',
-        cloudCoverPct: matchedIncident?.category.includes('Storm') ? 85 : 0,
-      },
-      source: 'meta-reasoning',
-      latencyMs: 0,
-    });
+    // Only set immediate target state if this is an actual geographic location or incident, NOT on conversational greetings
+    if (!isChatOrGreeting && (geoTarget || matchedIncident)) {
+      setLiveAiDispatchState({
+        targetName: cleanTargetTitle,
+        lat: targetLat,
+        lon: targetLon,
+        zoomAltitude: targetAltitude,
+        activeHeatSpots: matchedIncident ? (matchedIncident.category === 'Fire' ? 84 : 0) : 0,
+        layerType: isFireQuery ? 'VIIRS_NIGHT_THERMAL' : isRainOrStormQuery ? 'ATMOSPHERIC_AOD_CLOUDS' : 'MODIS_TRUE_COLOR_TERRAIN',
+        briefingLead: 'Observation Analysis:',
+        briefingBody: initialBriefing,
+        telemetry: {
+          viirsPoints: matchedIncident ? 42 : 0,
+          modisPoints: matchedIncident ? 28 : 0,
+          aodStatus: 'ELEVATED',
+          cloudCoverPct: matchedIncident?.category.includes('Storm') ? 85 : 0,
+        },
+        source: 'meta-reasoning',
+        latencyMs: 0,
+      });
+    }
 
     try {
       const res = await fetch('/api/llama-reason', {

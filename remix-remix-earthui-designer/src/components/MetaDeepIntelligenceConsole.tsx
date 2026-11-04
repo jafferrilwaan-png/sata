@@ -53,6 +53,39 @@ export function resolveTargetGeospatial(query: string): { name: string; lat: num
   const defaultLayer = wantsThermal ? 'VIIRS_NIGHT_THERMAL' : wantsWeather ? 'ATMOSPHERIC_AOD_CLOUDS' : 'MODIS_TRUE_COLOR_TERRAIN';
   const defaultAlt = wantsOpticalOr3D ? 1.28 : 1.35;
 
+  if (qLower.includes('south america') || qLower.includes('latin america')) {
+    return { name: 'South America', lat: -14.23, lon: -51.92, altitude: 2.15, layer: defaultLayer };
+  }
+  if (qLower.includes('north america')) {
+    return { name: 'North America', lat: 45.00, lon: -100.00, altitude: 2.15, layer: defaultLayer };
+  }
+  if (qLower.includes('africa')) {
+    return { name: 'Africa', lat: 1.65, lon: 17.66, altitude: 2.15, layer: defaultLayer };
+  }
+  if (qLower.includes('europe')) {
+    return { name: 'Europe', lat: 54.52, lon: 15.25, altitude: 2.05, layer: defaultLayer };
+  }
+  if (qLower.includes('asia')) {
+    return { name: 'Asia', lat: 34.04, lon: 100.61, altitude: 2.25, layer: defaultLayer };
+  }
+  if (qLower.includes('middle east')) {
+    return { name: 'Middle East', lat: 29.29, lon: 42.55, altitude: 1.95, layer: defaultLayer };
+  }
+  if (qLower.includes('brazil') || qLower.includes('brasil')) {
+    return { name: 'Brazil, South America', lat: -14.23, lon: -51.92, altitude: 1.85, layer: defaultLayer };
+  }
+  if (qLower.includes('argentina')) {
+    return { name: 'Argentina, South America', lat: -38.41, lon: -63.61, altitude: 1.85, layer: defaultLayer };
+  }
+  if (qLower.includes('chile')) {
+    return { name: 'Chile, South America', lat: -35.67, lon: -71.54, altitude: 1.85, layer: defaultLayer };
+  }
+  if (qLower.includes('colombia')) {
+    return { name: 'Colombia, South America', lat: 4.57, lon: -74.29, altitude: 1.85, layer: defaultLayer };
+  }
+  if (qLower.includes('peru')) {
+    return { name: 'Peru, South America', lat: -9.19, lon: -75.01, altitude: 1.85, layer: defaultLayer };
+  }
   if (qLower.includes('tamil nadu') || qLower.includes('tamilnadu') || qLower.includes('tamild nadu')) {
     return { name: 'Tamil Nadu, India', lat: 11.13, lon: 78.66, altitude: 1.25, layer: defaultLayer };
   }
@@ -737,7 +770,11 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
           .then((r) => r.ok ? r.json() : null)
           .catch(() => null);
 
-        const [weatherData, fetchedMeta] = await Promise.all([weatherPromise, metaPromise]);
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 2500));
+        const [weatherData, fetchedMeta] = await Promise.all([
+          Promise.race([weatherPromise, timeoutPromise]),
+          Promise.race([metaPromise, timeoutPromise])
+        ]);
         metaData = fetchedMeta;
         liveWeather = weatherData?.current;
 
@@ -1066,7 +1103,7 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
           generatedImagery = undefined;
 
           if (!replyText.includes('1080p')) {
-            replyText += `\n\n### Live Satellite Video Stream Active\n- **Downlink Telemetry:** 1080p / 60 FPS • Bitrate: 12.4 Mbps • Downlink Frequency: X-Band 8.2 GHz\n- **Active Satellite Platform:** ${videoFeed.satellite} over ${resolvedTargetName}\n- **Status:** LIVE ORBITAL FEED synchronized with sensor reticle and UTC clock.`;
+            replyText += `\n\n### Live Satellite Video Stream Active\n- **Downlink Telemetry:** 1080p / 60 FPS   Bitrate: 12.4 Mbps   Downlink Frequency: X-Band 8.2 GHz\n- **Active Satellite Platform:** ${videoFeed.satellite} over ${resolvedTargetName}\n- **Status:** LIVE ORBITAL FEED synchronized with sensor reticle and UTC clock.`;
           }
         }
 
@@ -1219,83 +1256,6 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
         >
           <X className="w-4 h-4 stroke-[1.75]" />
         </button>
-      </div>
-
-      {/* 2. Stream Feeds Bar & Orbital Video Feeds */}
-      <div className="flex flex-col gap-2 pt-2 pb-2 border-b border-white/10 shrink-0">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-red-600/80 text-white font-sans text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md shadow-sm">
-              NOAA Satellite Stream Live
-            </span>
-            <span className="text-[10px] font-sans font-medium text-white/60">
-              0.28m Optical Stream
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1 text-[10.5px]">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveFeed('radar_ir');
-                onApplyLayer?.('VIIRS_NIGHT_THERMAL');
-              }}
-              className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
-                activeFeed === 'radar_ir'
-                  ? 'bg-white/25 text-white font-medium'
-                  : 'bg-white/[0.06] text-white/70 hover:text-white'
-              }`}
-            >
-              Thermal Sensor Scan
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveFeed('geocolor');
-                onApplyLayer?.('ATMOSPHERIC_AOD_CLOUDS');
-              }}
-              className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
-                activeFeed === 'geocolor'
-                  ? 'bg-white/25 text-white font-medium'
-                  : 'bg-white/[0.06] text-white/70 hover:text-white'
-              }`}
-            >
-              Weather Radar
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveFeed('optical');
-                onApplyLayer?.('MODIS_TRUE_COLOR_TERRAIN');
-              }}
-              className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
-                activeFeed === 'optical'
-                  ? 'bg-white/25 text-white font-medium'
-                  : 'bg-white/[0.06] text-white/70 hover:text-white'
-              }`}
-            >
-              High-Res Optical
-            </button>
-          </div>
-        </div>
-
-        {isFeedRequested && (
-          <div className="w-full pt-1">
-            <LiveSatelliteVideoPlayer
-              title={`Live Orbital Stream: ${targetName}`}
-              satelliteName={satelliteStreamLabel}
-              lat={lat}
-              lon={lon}
-              altitudeKm={508}
-              velocityKms={7.61}
-              resolution="1080p / 60 FPS"
-              bitrate="12.4 Mbps"
-              downlinkFreq="X-Band 8.2 GHz"
-              initialFeedType="orbital_canvas"
-              className="h-44 sm:h-52"
-            />
-          </div>
-        )}
       </div>
 
       {/* 3. Scrollable Content Area: Clean Text First, Video Stream, Observation Thread */}

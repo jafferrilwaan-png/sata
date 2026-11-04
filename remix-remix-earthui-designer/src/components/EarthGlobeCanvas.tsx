@@ -404,6 +404,7 @@ export const EarthGlobeCanvas = forwardRef<
           uCloudOffset: { value: 0.0 },
           uThermalIntensity: { value: 1.0 },
           uThermalPhase: { value: 0.0 },
+          uTerminatorActive: { value: 0.0 },
           uTerminatorSoftness: { value: initialTerminator.terminatorSoftness },
           uSunlitRadiance: { value: initialTerminator.sunlitRadiance },
           uNightShadowContrast: { value: initialTerminator.nightShadowContrast },
@@ -487,6 +488,7 @@ export const EarthGlobeCanvas = forwardRef<
           uniform float uCloudOffset;
           uniform float uThermalIntensity;
           uniform float uThermalPhase;
+          uniform float uTerminatorActive;
           uniform float uTerminatorSoftness;
           uniform float uSunlitRadiance;
           uniform float uNightShadowContrast;
@@ -1661,6 +1663,10 @@ export const EarthGlobeCanvas = forwardRef<
             termState.sunVector.y,
             termState.sunVector.z
           );
+          const isTerminatorLayer = activeLayerModeRef.current === 'DAY_NIGHT_TERMINATOR';
+          earthSurfaceMat.uniforms.uTerminatorActive.value = isTerminatorLayer ? 1.0 : 0.0;
+          if (innerAtmoMat.uniforms.uTerminatorActive) innerAtmoMat.uniforms.uTerminatorActive.value = isTerminatorLayer ? 1.0 : 0.0;
+          if (haloMat.uniforms.uTerminatorActive) haloMat.uniforms.uTerminatorActive.value = isTerminatorLayer ? 1.0 : 0.0;
           earthSurfaceMat.uniforms.uTerminatorSoftness.value =
             termState.terminatorSoftness;
           earthSurfaceMat.uniforms.uSunlitRadiance.value =
