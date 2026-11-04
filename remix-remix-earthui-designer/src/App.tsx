@@ -1089,22 +1089,7 @@ export default function App() {
     setIsAiReasoning(true);
 
     const qLower = q.toLowerCase();
-    const isGreeting =
-      qLower.startsWith('hi') ||
-      qLower.startsWith('hey') ||
-      qLower.startsWith('hello') ||
-      qLower === 'hi' ||
-      qLower === 'hello' ||
-      qLower === 'hey' ||
-      qLower.includes('meata') ||
-      qLower.includes('how are you') ||
-      qLower.includes('are you fine') ||
-      qLower.includes('fine') ||
-      qLower.includes('dude') ||
-      qLower.includes('bro') ||
-      qLower.includes('who are you') ||
-      qLower.includes('what can you do') ||
-      qLower.includes('help');
+    const isGreeting = /\b(hi|hello|hey|how are you|who are you|greetings|hola)\b/i.test(qLower);
 
     // Greeting routed to live AI reasoning
 
@@ -1128,11 +1113,7 @@ export default function App() {
     );
     const wantsOpticalOr3D = qLower.includes('high-res') || qLower.includes('high res') || qLower.includes('optical') || qLower.includes('3d') || qLower.includes('resolution') || qLower.includes('zoom') || qLower.includes('close') || qLower.includes('detail') || qLower.includes('pass') || qLower.includes('see');
 
-    const isChatOrGreeting =
-      isGreeting ||
-      q.length < 3 ||
-      /^(hi|hello|hey|how are you|good morning|good evening|who are you|what can you do|what model|which model|tell me|compare|why|is this|help|thanks|thank you|ok|okay)\b/i.test(q.trim()) ||
-      ['hi', 'hello', 'hey', 'dude', 'bro', 'ok', 'okay'].some(w => qLower.includes(w));
+    const isChatOrGreeting = isGreeting || q.length < 3 || /\b(hi|hello|hey|how are you|good morning|good evening|who are you|what can you do|what model|which model|tell me|compare|why|is this|help|thanks|thank you|ok|okay)\b/i.test(q.trim());
 
     if (isChatOrGreeting) {
       setCustomGeocodedPlace(null);

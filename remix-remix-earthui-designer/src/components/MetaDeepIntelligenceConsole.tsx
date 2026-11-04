@@ -418,12 +418,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     const initialTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const initialQuery = initialVoiceMessage?.transcript || userQuery || targetName || "Global Observation";
     const initialQLower = initialQuery.toLowerCase();
-    const isInitGreeting =
-      /^(hi|hello|hey|how are you|good morning|good evening|who are you|what can you do)\b/i.test(initialQuery.trim()) ||
-      ['hi', 'hello', 'hey', 'dude', 'bro'].some((w) => initialQLower.includes(w));
-    const initialReply = isInitGreeting
-      ? 'Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?'
-      : (briefingBody || briefingLead || 'Satellite telemetry synchronized.').replace(/^(?:Llama 4|Meta Muse|Meta AI):\s*/i, '');
+    const initialReply = (briefingBody || briefingLead || 'Satellite telemetry synchronized.').replace(/^(?:Llama 4|Meta Muse|Meta AI):\s*/i, '');
     const initialWantsVideo = (initialQLower.includes('video') || initialQLower.includes('stream') || initialQLower.includes('live feed')) && !initialQLower.includes('no video');
 
     return [
@@ -536,12 +531,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const userPrompt = userQuery || targetName;
     const userQLower = userPrompt.toLowerCase();
-    const isUserGreeting =
-      /^(hi|hello|hey|how are you|good morning|good evening|who are you|what can you do)\b/i.test(userPrompt.trim()) ||
-      ['hi', 'hello', 'hey', 'dude', 'bro'].some((w) => userQLower.includes(w));
-    const cleanBody = isUserGreeting
-      ? 'Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?'
-      : (briefingBody || briefingLead || 'Satellite telemetry synchronized.').replace(/^(?:Llama 4|Meta Muse|Meta AI):\s*/i, '');
+    const cleanBody = (briefingBody || briefingLead || 'Satellite telemetry synchronized.').replace(/^(?:Llama 4|Meta Muse|Meta AI):\s*/i, '');
 
     setMessages((prev) => {
       const userPrompt = userQuery || targetName;
@@ -640,7 +630,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     // Strict negative check: If user says "remove", "don't", "no", "fake", "stop", "hide", NEVER enable video feed
     
     const isTimeQuery = qLower.includes('time') || qLower.includes('clock') || qLower.includes('date');
-    const isGreeting = /\b(hi|hello|hey|greetings|hola|how are you|who are you|are you fine|how r u|good morning|good evening)\b/i.test(qLower) || ['how are you', 'are you fine', 'fine', 'hi', 'hello', 'hey', 'dude', 'bro'].some(w => qLower.includes(w));
+    const isGreeting = /\b(hi|hello|hey|greetings|hola|how are you|who are you|are you fine|how r u|good morning|good evening)\b/i.test(qLower);
 
     const isNegativeVideo = qLower.includes('remove') || qLower.includes('remov') || qLower.includes("don't") || qLower.includes('dont') || qLower.includes('fake') || qLower.includes('stop') || qLower.includes('hide') || qLower.includes('no video');
     const wantsVideo = !isNegativeVideo && (
@@ -918,8 +908,8 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
             `Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? 'N' : 'S'}, ${Math.abs(resolvedLon).toFixed(2)}° ${resolvedLon >= 0 ? 'E' : 'W'}\n` +
             `Solar Status: Real-time insolation synchronized with orbital pass geometry.\n\n` +
             (replyText || '');
-        } else if (isGreeting) {
-          if (qLower.includes('how are you') || qLower.includes('are you fine') || qLower.includes('fine')) {
+        } else if (!replyText && isGreeting) {
+          if (/\b(how are you|are you fine|how r u)\b/i.test(qLower)) {
             replyText = "I'm doing great, thank you for asking! I am Meta AI for SATA. All orbital telemetry, satellite constellations, and 3D Earth sensors are operating smoothly. How can I assist you with planetary data today?";
           } else {
             replyText = "Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?";
@@ -1038,7 +1028,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
           replyText = `${satLocationIntel}\n\n${replyText || ''}`;
         }
 
-        if (!replyText || replyText.length < 50) {
+        if (!replyText) {
           replyText = `### Autonomous Agent Action: ${actionTaken}
 Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? 'N' : 'S'}, ${Math.abs(resolvedLon).toFixed(2)}° ${resolvedLon >= 0 ? 'E' : 'W'} (${resolvedTargetName}). 3D Earth digital twin synchronized with submeter satellite pass.
 
