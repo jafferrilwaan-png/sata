@@ -28,7 +28,6 @@ import {
   computeGpuShaderLodAndDisplacement,
   computeDayNightTerminatorShaderState,
 } from '../utils/telemetryLogic';
-import type { PlanetarySimulationScenario } from '../data/planetarySimulations';
 
 export interface EarthGlobeHandle {
   pointOfView: (
@@ -49,7 +48,6 @@ interface EarthGlobeCanvasProps {
   adjustOrbitEnabled: boolean;
   targetPointOfView?: PointOfViewTarget | null;
   activeLayerMode?: NasaGibsLayerMode;
-  activeSimulation?: PlanetarySimulationScenario | null;
   minimalCloudOpacity?: number;
   cloudPhysicsParams?: {
     cloudCoverPct?: number;
@@ -71,7 +69,7 @@ interface EarthGlobeCanvasProps {
   labelsData?: HotspotNode[];
 }
 
-const GLOBE_LABEL_NODES: HotspotNode[] = [];
+const GLOBE_LABEL_NODES: HotspotNode[] = HOTSPOT_NODES;
 
 const CACHED_LABEL_VECTORS: THREE.Vector3[] = GLOBE_LABEL_NODES.map((node) => {
   const p = latLonToVector3(node.lat, node.lon, 1.004);
@@ -89,8 +87,7 @@ export const EarthGlobeCanvas = forwardRef<
       onZoomTelemetryChange,
       activeTab,
       targetPointOfView = null,
-      activeLayerMode = 'MODIS_TRUE_COLOR_TERRAIN',
-      activeSimulation = null,
+      activeLayerMode = 'VIIRS_NIGHT_THERMAL',
       minimalCloudOpacity = 0.65,
       cloudPhysicsParams,
       timelineDay = 28,
@@ -106,8 +103,6 @@ export const EarthGlobeCanvas = forwardRef<
     activeTabRef.current = activeTab;
 
     const activeLayerModeRef = useRef<NasaGibsLayerMode>(activeLayerMode);
-  const activeSimulationRef = useRef<PlanetarySimulationScenario | null>(activeSimulation);
-  activeSimulationRef.current = activeSimulation;
     activeLayerModeRef.current = activeLayerMode;
 
     const cloudPhysicsParamsRef = useRef(cloudPhysicsParams);
@@ -272,7 +267,7 @@ export const EarthGlobeCanvas = forwardRef<
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(40, width / height, 0.005, 100);
       cameraRef.current = camera;
-      camera.position.set(0, 0, 3.45);
+      camera.position.set(0, 0, 4.22);
       // True spherical optical centering without skewed projection
       camera.clearViewOffset();
 
@@ -429,13 +424,6 @@ export const EarthGlobeCanvas = forwardRef<
           uTsunamiSurge: { value: 0.0 },
           uRainStormIntensity: { value: 0.0 },
           uIrThermalMode: { value: 0.0 },
-          uRadarMode: { value: 0.0 },
-          uNdviMode: { value: 0.0 },
-          uSarMode: { value: 0.0 },
-          uSimCenter: { value: new THREE.Vector2(0.0, 0.0) },
-          uSimRadius: { value: 0.0 },
-          uSimIntensity: { value: 0.0 },
-          uSimType: { value: 0.0 },
         },
         vertexShader: `
           uniform sampler2D uDayMap;
@@ -513,13 +501,6 @@ export const EarthGlobeCanvas = forwardRef<
           uniform float uTsunamiSurge;
           uniform float uRainStormIntensity;
           uniform float uIrThermalMode;
-          uniform float uRadarMode;
-          uniform float uNdviMode;
-          uniform float uSarMode;
-          uniform vec2 uSimCenter;
-          uniform float uSimRadius;
-          uniform float uSimIntensity;
-          uniform float uSimType;
           varying vec2 vUv;
           varying vec3 vNormal;
           varying vec3 vLocalNormal;
@@ -807,23 +788,19 @@ export const EarthGlobeCanvas = forwardRef<
               waterMask;
 
             vec3 sunlitOcean = sunlitOceanBase + oceanSunSpecular;
-            // Physical ocean daylight attenuation:
-            // Day side: full radiant sapphire ocean with specular sheen and glint
-            // Night side: deep space ocean floor (#020611 to #040c1a) with subtle ambient starlight
-            float oceanDaylight = clamp(realTimeDaylight * uSunlitRadiance, 0.0, 1.0);
-            vec3 nightOcean = vec3(0.003, 0.008, 0.022);
             vec3 deepOcean = mix(
               nightOcean,
               sunlitOcean,
-              oceanDaylight
+              clamp(realTimeDaylight * uSunlitRadiance, 0.0, 1.0)
             );
             // Smooth Rayleigh & warm sunrise/sunset horizon scattering along the day/night terminator over oceans
             vec3 oceanTwilight = mix(
-              vec3(0.04, 0.16, 0.38),
-              vec3(0.32, 0.18, 0.08),
+              vec3(0.03, 0.13, 0.32),
+              vec3(0.22, 0.13, 0.08),
               smoothstep(-0.10, 0.12, sunDot)
             );
-            deepOcean += oceanTwilight * terminatorBand * 0.42;
+            deepOcean += oceanTwilight * terminatorBand * 0.34;
+            vec3 finalCol = deepOcean;
 
             // Enhance relief with high-resolution MODIS True Color displacement height
             float displacedRelief = relief * (1.0 + modisTerrainElev * (uDisplacementScale * 18.0 + uZoomDetail * 0.22));
@@ -834,33 +811,19 @@ export const EarthGlobeCanvas = forwardRef<
               (1.0 - smoothstep(0.40, 0.54, combinedLandField)) *
               uZoomDetail;
 
-            // Distinct, ultra-clean land & small-island surface relief separating night shadow and sunlit day
-            vec3 nightContinent = mix(
-              vec3(0.005, 0.011, 0.024),
-              vec3(0.016, 0.032, 0.062),
-              uZoomDetail * (0.55 + 0.45 * microTerrainNoise)
-            ) * displacedRelief;
-
-            // Day side: sunlit terrain with natural MODIS true-color vegetation and relief
-            float solarLandIllum = 0.85 + 0.35 * pow(sunDiffuse, 0.70);
-            vec3 sunlitTerrain = (uHasDay > 0.5 ? dayCol : vec3(0.22, 0.30, 0.24)) * displacedRelief * solarLandIllum;
-
-            // Land daytime mix based on real-time solar terminator
-            // Zoom inspection adds a subtle topographic lift so close-up land inspection remains clear
-            float zoomTopoLift = smoothstep(0.20, 0.65, uZoomDetail) * 0.15;
-            float landDaylight = clamp(realTimeDaylight * uSunlitRadiance + zoomTopoLift, 0.0, 1.0);
-            vec3 litLand = mix(nightContinent, sunlitTerrain, landDaylight);
-
-            // Crisp coastline rim highlight only on land & small-island boundaries when zoomed in
-            litLand += vec3(0.12, 0.40, 0.66) * coastlineBand * 0.72;
-
-            // Warm golden-amber & cobalt twilight refraction along the solar terminator on land
-            vec3 twilightTint = mix(vec3(0.10, 0.34, 0.70), vec3(0.68, 0.38, 0.12), smoothstep(-0.08, 0.14, sunDot));
-            litLand += twilightTint * terminatorBand * 0.32;
-
-            // Blend NASA VIIRS & Black Marble city lights on the darkened night hemisphere
             vec3 goldLight = vec3(0.0);
             if (uHasLights > 0.5) {
+              // Distinct, ultra-clean land & small-island surface relief separating night shadow and sunlit day
+              vec3 nightContinent = mix(
+                vec3(0.007, 0.015, 0.034),
+                vec3(0.022, 0.048, 0.086),
+                uZoomDetail * (0.55 + 0.45 * microTerrainNoise) + realTimeDaylight * 0.22
+              ) * displacedRelief;
+              finalCol = mix(deepOcean, nightContinent, landMask);
+
+              // Crisp coastline rim highlight only on land & small-island boundaries when zoomed in
+              finalCol += vec3(0.12, 0.40, 0.66) * coastlineBand * 0.72;
+
               // Blend SATA high-contrast arterial network (uNightMap) with VIIRS lights (uLightsMap)
               vec3 sataLights = uHasNight > 0.5 ? interpolateGpuTileTexture(uNightMap, vUv, invRes, uTileInterpMix) : lightsRaw;
               float emissionLights = max(0.0, max(lightsRaw.r, lightsRaw.g) - lightsRaw.b * 0.50);
@@ -883,23 +846,58 @@ export const EarthGlobeCanvas = forwardRef<
 
               // Modulate city light radiance across the day/night terminator so shadowed night regions glow richly
               // while sunlit daytime continents transition cleanly to natural solar irradiance
-              float terminatorNightBoost = mix(0.0, uNightShadowContrast * 1.65, pow(nightShadowMask, 1.30));
+              float terminatorNightBoost = mix(0.06, uNightShadowContrast, pow(nightShadowMask, 1.40));
 
               // Strictly mask thermal & city emissions to landMask so coastal waters stay 100% clean
               float landEmissionMask = mix(1.0, landMask, smoothstep(0.08, 0.32, uZoomDetail));
 
-              float cityZoomFade = 1.0 - smoothstep(0.12, 0.55, uZoomDetail);
+              float cityZoomFade = 1.0 - smoothstep(0.12, 0.48, uZoomDetail);
               goldLight =
-                (vec3(1.0, 0.60, 0.20) * cityHalo * 0.82 * haloScale * thermalBoost +
-                 vec3(1.0, 0.92, 0.70) * refinedCore * 1.75 * thermalBoost) *
+                (vec3(1.0, 0.56, 0.16) * cityHalo * 0.72 * haloScale * thermalBoost +
+                 vec3(1.0, 0.90, 0.64) * refinedCore * 1.48 * thermalBoost) *
                 landEmissionMask *
                 terminatorNightBoost *
                 cityZoomFade;
-              litLand += goldLight;
+              finalCol += goldLight;
             }
 
-            // Combine photorealistic diurnal ocean and land
-            vec3 finalCol = mix(deepOcean, litLand, landMask);
+            // Smooth transition between low-zoom orbital view and high-zoom NASA GIBS MODIS True Color terrain,
+            // modulated by the real-time UTC day/night terminator and zoom inspection level
+            if (uHasDay > 0.5) {
+              float zoomDayBoost = smoothstep(0.10, 0.55, uZoomDetail);
+              float effectiveDayMix = clamp(
+                max(max(uModisTrueColorBlend, realTimeDaylight * uSunlitRadiance), zoomDayBoost),
+                0.0,
+                0.98
+              );
+              // Restore natural emerald-olive canopy hue where Blue Marble has dark bluish atmospheric haze over tropical rainforests
+              float canopyMask = clamp((dayCol.b - dayCol.r) * 6.0, 0.0, 1.0) * landMask;
+              vec3 canopyCorrectedDay = mix(dayCol, vec3(dayCol.r * 1.12, max(dayCol.g * 1.28, dayCol.b * 0.88), dayCol.b * 0.68), canopyMask * 0.85);
+              // Soft filmic shoulder prevents high-albedo desert sands (Sahara/Arabia) from clipping
+              vec3 balancedDayCol = canopyCorrectedDay / (1.0 + max(canopyCorrectedDay.r, max(canopyCorrectedDay.g, canopyCorrectedDay.b)) * 0.42);
+              vec3 islandGreenTint = vec3(0.07, 0.22, 0.16) * (0.75 + 0.5 * microTerrainNoise);
+              vec3 hypsometricTint = mix(
+                balancedDayCol,
+                balancedDayCol * vec3(1.10, 1.05, 0.94) + vec3(0.03, 0.025, 0.015) * modisTerrainElev,
+                modisTerrainElev * uZoomDetail
+              );
+              // Multi-scale real-world satellite land synthesis on zoom:
+              // Resolves sub-kilometer topographical contours, river basins, and terrain relief on land only
+              float zoomLandFactor = smoothstep(0.08, 0.72, uZoomDetail);
+              float microTopo = (noise2DSurf(vUv * 720.0) * 0.50 + noise2DSurf(vUv * 1920.0) * 0.32 + noise2DSurf(vUv * 5120.0) * 0.18) - 0.50;
+              vec3 crispSatelliteLand = hypsometricTint * (1.0 + microTopo * 0.38 * zoomLandFactor);
+              vec3 landAlbedo = mix(crispSatelliteLand, max(crispSatelliteLand, islandGreenTint), clamp(islandField * 1.5, 0.0, 1.0) * uZoomDetail);
+              vec3 naturalTerrain = landAlbedo * displacedRelief * (0.72 + uZoomDetail * 0.24) + finalCol * 0.82;
+              float solarLandIllum = 0.50 + 0.56 * pow(sunDiffuse, 0.65);
+              vec3 sunlitTerrain =
+                landAlbedo * displacedRelief * solarLandIllum * (0.98 + uZoomDetail * 0.16) +
+                goldLight * 0.10;
+              vec3 daySurfaceLand = mix(naturalTerrain, sunlitTerrain, realTimeDaylight);
+              finalCol = mix(finalCol, daySurfaceLand, effectiveDayMix * landMask);
+              // Warm golden-amber & cobalt twilight refraction along the solar terminator on land
+              vec3 twilightTint = mix(vec3(0.10, 0.34, 0.70), vec3(0.58, 0.34, 0.14), smoothstep(-0.08, 0.14, sunDot));
+              finalCol += twilightTint * terminatorBand * 0.18 * landMask;
+            }
 
             // Subtle dark cloud drop-shadow offset on ocean/land directly beneath dense orbital cloud cover
             if (realTimeDaylight > 0.01 && uHasCloud > 0.5) {
@@ -931,109 +929,26 @@ export const EarthGlobeCanvas = forwardRef<
               }
             }
 
-            // Dynamic High-Resolution Satellite Surface & 3D Optical Contrast Blend
+            // Dynamic High-Resolution Satellite Surface Blend
             if (uHasHighRes > 0.5 && uHighResAlpha > 0.01) {
-              vec4 highResTex = texture2D(uHighResMap, vUv);
-              vec3 enhancedOptics = mix(highResTex.rgb, highResTex.rgb * 1.15 + vec3(0.015), 0.65);
-              finalCol = mix(finalCol, enhancedOptics, uHighResAlpha * 0.90);
+              vec2 dUv = (vUv - uHighResCenterUv) / max(uHighResRadius, 0.001);
+              if (abs(dUv.x) <= 0.5 && abs(dUv.y) <= 0.5) {
+                vec2 tileUv = clamp(dUv + 0.5, 0.0, 1.0);
+                vec4 highResTex = texture2D(uHighResMap, tileUv);
+                float edgeMask = smoothstep(0.50, 0.40, max(abs(dUv.x), abs(dUv.y)));
+                float blendAlpha = uHighResAlpha * edgeMask * highResTex.a;
+                finalCol = mix(finalCol, highResTex.rgb, blendAlpha);
+              }
             }
 
             if (uIrThermalMode > 0.01) {
-              // NASA VIIRS 375m & NOAA GOES False-Color Thermal Infrared (TIR 10.8µm) Spectrum
-              // Converts Earth surface into distinct satellite thermal infrared radiometry:
-              // - Ocean surface: Cool thermal marine indigo/cobalt gradient [18°C - 30°C]
-              // - Land surface: Radiant thermal skin emission (ironbow false-color: crimson -> amber -> golden)
+              // False-color Infrared / Thermal Radiometry Look (VIIRS / Sentinel-3 SLSTR)
               float lum = dot(finalCol, vec3(0.299, 0.587, 0.114));
-              vec3 oceanTir = mix(vec3(0.02, 0.06, 0.28), vec3(0.06, 0.18, 0.48), smoothstep(0.2, 0.8, vUv.y));
-              
-              vec3 landCool = vec3(0.65, 0.08, 0.22);
-              vec3 landWarm = vec3(0.92, 0.40, 0.08);
-              vec3 landHot  = vec3(1.0, 0.82, 0.25);
-              vec3 landTir  = mix(landCool, landWarm, smoothstep(0.18, 0.52, lum));
-              landTir       = mix(landTir, landHot, smoothstep(0.52, 0.88, lum));
-              
-              vec3 thermalComposite = mix(oceanTir, landTir, landMask);
-              float irScanline = 0.96 + 0.04 * sin(vUv.y * 1200.0);
-              thermalComposite *= irScanline;
-              
-              finalCol = mix(finalCol, thermalComposite, uIrThermalMode * 0.90);
-            }
-
-            if (uRadarMode > 0.01) {
-              // NOAA / INSAT Doppler Weather Radar Composite Reflectivity (dBZ)
-              float radarNoise = sin(vUv.x * 120.0 + uCloudOffset * 8.0) * cos(vUv.y * 120.0 - uCloudOffset * 6.0);
-              float rainCell = smoothstep(0.35, 0.85, radarNoise * 0.5 + 0.5);
-              
-              vec3 dbzGreen  = vec3(0.05, 0.92, 0.20);
-              vec3 dbzYellow = vec3(0.98, 0.85, 0.05);
-              vec3 dbzRed    = vec3(0.95, 0.12, 0.08);
-              vec3 radarCol  = mix(dbzGreen, dbzYellow, smoothstep(0.4, 0.7, rainCell));
-              radarCol       = mix(radarCol, dbzRed, smoothstep(0.7, 0.95, rainCell));
-              
-              float radarSweep = sin(vUv.x * 6.28318 + uCloudOffset * 10.0);
-              float sweepLine  = smoothstep(0.96, 1.0, radarSweep) * 0.35;
-              
-              finalCol = mix(finalCol, radarCol + vec3(sweepLine), rainCell * uRadarMode * 0.75);
-            }
-
-            if (uNdviMode > 0.01) {
-              // Landsat-9 / ASTER False-Color Near-Infrared Chlorophyll Vegetation Index
-              float greenRatio = clamp((finalCol.g - finalCol.r) / max(finalCol.g + finalCol.r, 0.01), 0.0, 1.0);
-              vec3 ndviCol = mix(vec3(0.72, 0.55, 0.32), vec3(0.08, 0.92, 0.35), smoothstep(0.05, 0.45, greenRatio));
-              finalCol = mix(finalCol, ndviCol, uNdviMode * 0.85);
-            }
-
-            if (uSarMode > 0.01) {
-              // ISRO RISAT-1A / Sentinel-1 C-Band Synthetic Aperture Radar (SAR) Microwave Backscatter
-              float lum = dot(finalCol, vec3(0.299, 0.587, 0.114));
-              float noise = fract(sin(dot(vUv, vec2(12.9898, 78.233))) * 43758.5453);
-              vec3 sarCol = vec3(pow(lum, 1.35) * (0.85 + 0.15 * noise));
-              finalCol = mix(finalCol, sarCol, uSarMode * 0.90);
-            }
-
-            
-            // Dynamic Autonomous Planetary Simulation Shaders (30 Possibilities)
-            if (uSimIntensity > 0.005) {
-              vec2 dSim = fragLatLon - uSimCenter;
-              float distDeg = length(dSim);
-              if (distDeg < uSimRadius) {
-                float simMask = smoothstep(uSimRadius, uSimRadius * 0.20, distDeg) * uSimIntensity;
-                if (abs(uSimType - 1.0) < 0.2) {
-                  // Type 1: Snowfall & Cryo-freeze (e.g. Thar Desert snowfall, Polar freeze)
-                  // High-albedo procedural crystalline snow blanket with specular sparkle
-                  float snowNoise = sin(vUv.x * 3200.0) * cos(vUv.y * 3200.0) * 0.08;
-                  vec3 snowColor = vec3(0.94, 0.96, 0.99) * (0.96 + snowNoise);
-                  float snowGlint = pow(max(dot(normal, halfVec), 0.0), 28.0) * 0.55;
-                  vec3 frozenSurface = (snowColor + vec3(snowGlint)) * (0.80 + 0.35 * sunDiffuse);
-                  finalCol = mix(finalCol, frozenSurface, simMask * landMask * 0.94);
-                } else if (abs(uSimType - 2.0) < 0.2) {
-                  // Type 2: Oceanic thermal surge / Marine heatwave (e.g. Bay of Bengal, Mediterranean, Reef)
-                  float heatPulse = 0.80 + 0.20 * sin(uCloudOffset * 15.0 - distDeg * 0.6);
-                  vec3 thermalOceanGlow = vec3(1.0, 0.25, 0.05) * heatPulse;
-                  finalCol = mix(finalCol, finalCol + thermalOceanGlow * 0.90, simMask * waterMask);
-                } else if (abs(uSimType - 3.0) < 0.2) {
-                  // Type 3: Megadrought / Canopy desiccation (e.g. Amazon megadrought, Sahel)
-                  vec3 parchedSoil = vec3(0.52, 0.38, 0.22) * (0.85 + 0.25 * microTerrainNoise);
-                  finalCol = mix(finalCol, parchedSoil * (0.70 + 0.30 * sunDiffuse), simMask * landMask * 0.85);
-                } else if (abs(uSimType - 4.0) < 0.2) {
-                  // Type 4: Volcanic ash / Stratospheric aerosol veil (e.g. Yellowstone, Pinatubo, Afar)
-                  float ashPattern = sin(vUv.x * 600.0 + uCloudOffset * 10.0) * cos(vUv.y * 600.0) * 0.5 + 0.5;
-                  vec3 ashColor = vec3(0.26, 0.24, 0.22) * (0.85 + 0.30 * ashPattern);
-                  finalCol = mix(finalCol, ashColor, simMask * 0.88);
-                } else if (abs(uSimType - 5.0) < 0.2) {
-                  // Type 5: Biosphere re-greening / Algal bloom (e.g. Sahara re-greening, Baltic Sea)
-                  vec3 lushCanopy = vec3(0.10, 0.42, 0.16) * (0.88 + 0.25 * microTerrainNoise);
-                  finalCol = mix(finalCol, lushCanopy * (0.75 + 0.30 * sunDiffuse), simMask * landMask * 0.90);
-                } else if (abs(uSimType - 6.0) < 0.2) {
-                  // Type 6: Inundation deluge / Megaflood (e.g. California ARkStorm, Indus GLOF, Atacama, Sundarbans)
-                  vec3 floodTone = vec3(0.06, 0.22, 0.36) * (0.85 + 0.15 * sin(uCloudOffset * 12.0));
-                  finalCol = mix(finalCol, floodTone, simMask * landMask * 0.82);
-                } else if (abs(uSimType - 7.0) < 0.2) {
-                  // Type 7: Toxic dust / Hyper-arid sandstorm plume (e.g. Lake Chad, Sistan Basin, Aral Sea)
-                  vec3 toxicDust = vec3(0.85, 0.74, 0.54) * (0.90 + 0.20 * microTerrainNoise);
-                  finalCol = mix(finalCol, toxicDust, simMask * 0.82);
-                }
-              }
+              vec3 thermalWarm = vec3(1.0, 0.42, 0.12) * smoothstep(0.35, 0.85, lum) * 1.4;
+              vec3 thermalCool = vec3(0.08, 0.22, 0.45) * smoothstep(0.40, 0.0, lum);
+              vec3 thermalMid = vec3(0.15, 0.65, 0.45) * smoothstep(0.15, 0.55, lum) * (1.0 - smoothstep(0.55, 0.85, lum));
+              vec3 irRgb = thermalCool + thermalMid + thermalWarm;
+              finalCol = mix(finalCol, irRgb, uIrThermalMode * 0.85);
             }
 
             gl_FragColor = vec4(finalCol, 1.0);
@@ -1070,12 +985,6 @@ export const EarthGlobeCanvas = forwardRef<
           uTsunamiWavePhase: { value: 0.0 },
           uTsunamiSurge: { value: 0.0 },
           uRainStormIntensity: { value: 0.0 },
-          uIrThermalMode: { value: 0.0 },
-          uRadarMode: { value: 0.0 },
-          uSimCenter: { value: new THREE.Vector2(0.0, 0.0) },
-          uSimRadius: { value: 0.0 },
-          uSimIntensity: { value: 0.0 },
-          uSimType: { value: 0.0 },
         },
         vertexShader: `
           varying vec2 vUv;
@@ -1101,12 +1010,6 @@ export const EarthGlobeCanvas = forwardRef<
           uniform vec3 uSunDir;
           uniform vec2 uTsunamiCenter;
           uniform float uRainStormIntensity;
-          uniform float uIrThermalMode;
-          uniform float uRadarMode;
-          uniform vec2 uSimCenter;
-          uniform float uSimRadius;
-          uniform float uSimIntensity;
-          uniform float uSimType;
           varying vec2 vUv;
           varying vec3 vNormal;
           varying vec3 vLocalNormal;
@@ -1189,21 +1092,12 @@ export const EarthGlobeCanvas = forwardRef<
             float twilightGlow = exp(-pow((sunDot - 0.02) / 0.18, 2.0));
             float rimLight = pow(1.0 - viewDot, 2.5);
 
-            vec3 nightCloudCol = vec3(0.04, 0.07, 0.14);
-            vec3 twilightCloudCol = vec3(0.98, 0.78, 0.58);
+            vec3 nightCloudCol = vec3(0.06, 0.10, 0.18);
+            vec3 twilightCloudCol = vec3(0.98, 0.85, 0.72);
             vec3 dayCloudCol = vec3(1.0, 1.0, 1.0);
 
-            float cloudDayIllum = clamp(sunLit + rimLight * 0.25, 0.08, 1.0);
-            vec3 cloudCol = mix(nightCloudCol, dayCloudCol, cloudDayIllum);
-            cloudCol = mix(cloudCol, twilightCloudCol, twilightGlow * 0.40);
-
-            if (uIrThermalMode > 0.01) {
-              // High tropospheric cold cloud tops (-40°C to -80°C) in Thermal IR:
-              // Convective storm cores radiate intense brilliant white-cyan
-              vec3 irCloudCol = mix(vec3(0.35, 0.75, 1.0), vec3(1.0, 1.0, 1.0), smoothstep(0.3, 0.75, rawCloudDensity));
-              cloudCol = mix(cloudCol, irCloudCol, uIrThermalMode * 0.90);
-              cloudAlpha = mix(cloudAlpha, min(1.0, cloudAlpha * 1.35), uIrThermalMode);
-            }
+            vec3 cloudCol = mix(nightCloudCol, dayCloudCol, max(sunLit, rimLight * 0.45));
+            cloudCol = mix(cloudCol, twilightCloudCol, twilightGlow * 0.32);
 
             float finalAlpha = cloudAlpha * uCloudOpacity * horizonFade * poleFade;
             finalAlpha = min(finalAlpha, uMaxFragmentAlpha);
@@ -1887,56 +1781,13 @@ export const EarthGlobeCanvas = forwardRef<
           (gpuLod.tileInterpMix - earthSurfaceMat.uniforms.uTileInterpMix.value) * 0.18;
         earthSurfaceMat.uniforms.uDisplacementScale.value +=
           (gpuLod.displacementScale - earthSurfaceMat.uniforms.uDisplacementScale.value) * 0.14;
-        
-        // Drive Dynamic Planetary Simulation Shader State (30 Possibilities)
-        if (activeSimulationRef.current && isSearchSubmitted) {
-          const sim = activeSimulationRef.current;
-          const [simLat, simLon] = sim.shaderParams.center;
-          earthSurfaceMat.uniforms.uSimCenter.value.set(simLat, simLon);
-          earthSurfaceMat.uniforms.uSimRadius.value = sim.shaderParams.radiusDeg;
-          earthSurfaceMat.uniforms.uSimType.value = sim.shaderParams.simulationType;
-          earthSurfaceMat.uniforms.uSimIntensity.value +=
-            (sim.shaderParams.intensity - earthSurfaceMat.uniforms.uSimIntensity.value) * 0.12;
-
-          cloudShellMat.uniforms.uSimCenter.value.set(simLat, simLon);
-          cloudShellMat.uniforms.uSimRadius.value = sim.shaderParams.radiusDeg;
-          cloudShellMat.uniforms.uSimType.value = sim.shaderParams.simulationType;
-          cloudShellMat.uniforms.uSimIntensity.value = earthSurfaceMat.uniforms.uSimIntensity.value;
-        } else {
-          earthSurfaceMat.uniforms.uSimIntensity.value = 0.0;
-          cloudShellMat.uniforms.uSimIntensity.value = 0.0;
-        }
-
         earthSurfaceMat.uniforms.uModisTrueColorBlend.value +=
           (gpuLod.modisTrueColorBlend - earthSurfaceMat.uniforms.uModisTrueColorBlend.value) * 0.14;
 
         // Smooth GPU False-Color Infrared / Thermal Radiometry transition (VIIRS / Sentinel-3 SLSTR)
-        const targetIr = (mode === 'VIIRS_NIGHT_THERMAL') ? 1.0 : 0.0;
+        const targetIr = mode === 'VIIRS_NIGHT_THERMAL' ? 1.0 : 0.0;
         earthSurfaceMat.uniforms.uIrThermalMode.value +=
-          (targetIr - earthSurfaceMat.uniforms.uIrThermalMode.value) * 0.20;
-        if (cloudShellMat?.uniforms?.uIrThermalMode) {
-          cloudShellMat.uniforms.uIrThermalMode.value = earthSurfaceMat.uniforms.uIrThermalMode.value;
-        }
-
-        // Smooth GPU Doppler Weather Radar Composite Reflectivity transition
-        const targetRadar = (mode === 'ATMOSPHERIC_AOD_CLOUDS') ? 1.0 : 0.0;
-        earthSurfaceMat.uniforms.uRadarMode.value +=
-          (targetRadar - earthSurfaceMat.uniforms.uRadarMode.value) * 0.20;
-        if (cloudShellMat?.uniforms?.uRadarMode) {
-          cloudShellMat.uniforms.uRadarMode.value = earthSurfaceMat.uniforms.uRadarMode.value;
-        }
-
-        const targetNdvi = (mode === 'NDVI_VEGETATION') ? 1.0 : 0.0;
-        if (earthSurfaceMat.uniforms.uNdviMode) {
-          earthSurfaceMat.uniforms.uNdviMode.value +=
-            (targetNdvi - earthSurfaceMat.uniforms.uNdviMode.value) * 0.20;
-        }
-
-        const targetSar = (mode === 'SAR_MICROWAVE') ? 1.0 : 0.0;
-        if (earthSurfaceMat.uniforms.uSarMode) {
-          earthSurfaceMat.uniforms.uSarMode.value +=
-            (targetSar - earthSurfaceMat.uniforms.uSarMode.value) * 0.20;
-        }
+          (targetIr - earthSurfaceMat.uniforms.uIrThermalMode.value) * 0.15;
 
         // Drive high-resolution satellite alpha as camera approaches Earth
         const highResAlpha = Math.max(0.0, Math.min(1.0, (2.6 - camDist) / 1.4));
@@ -2182,8 +2033,7 @@ export const EarthGlobeCanvas = forwardRef<
             tmpViewDir.copy(camWorldPos).sub(tmpWorld).normalize();
             const facing = tmpNorm.dot(tmpViewDir);
 
-            const isInvalidLabel = !povAnim.label || ['hi', 'hello', 'hey', 'dudue', 'dude', 'bro', 'overview', 'global'].includes(povAnim.label.toLowerCase().trim());
-            if (facing > 0.18 && !isInvalidLabel) {
+            if (facing > 0.18) {
               tmpWorld.project(camera);
               const sx = (tmpWorld.x * 0.5 + 0.5) * width;
               const sy = (-tmpWorld.y * 0.5 + 0.5) * height;
@@ -2281,63 +2131,54 @@ export const EarthGlobeCanvas = forwardRef<
 
         renderer.render(scene, camera);
 
-        // Zero-Lag Analytical Contrast Check for bottom-row text elements (Scheduled off-render-frame to eliminate layout thrashing)
+        // Zero-Lag Analytical Contrast Check for bottom-row text elements (Throttled to 1000ms to eliminate layout thrashing)
         if (!isSearchSubmittedRef.current && now - lastContrastCheckMs > 2500) {
           lastContrastCheckMs = now;
-          const runContrastAsync = () => {
-            if (disposed) return;
-            const adaptiveNodes = document.querySelectorAll<HTMLElement>(
-              '[data-adaptive-text="true"]'
-            );
-            if (!adaptiveNodes.length) return;
-            const sunVec = earthSurfaceMat.uniforms.uSunDir.value;
-            for (let i = 0; i < adaptiveNodes.length; i++) {
-              const node = adaptiveNodes[i];
-              const r = node.getBoundingClientRect();
-              if (r.width === 0 || r.height === 0) continue;
-              const cx = r.left + r.width * 0.5;
-              const cy = r.top + r.height * 0.5;
-              contrastNdc.set((cx / Math.max(1, width)) * 2 - 1, -(cy / Math.max(1, height)) * 2 + 1);
-              contrastRaycaster.setFromCamera(contrastNdc, camera);
-              const ray = contrastRaycaster.ray;
-              // Analytical ray-sphere intersection (sphere centered at origin with radius 1.0)
-              const b = ray.origin.dot(ray.direction);
-              const c = ray.origin.lengthSq() - 1.0;
-              const disc = b * b - c;
-              let isBrightBackground = false;
-              if (disc > 0) {
-                const tHit = -b - Math.sqrt(disc);
-                if (tHit > 0) {
-                  contrastHitLocal
-                    .copy(ray.origin)
-                    .addScaledVector(ray.direction, tHit);
-                  earthGroup.worldToLocal(contrastHitLocal);
-                  contrastHitLocal.normalize();
-                  const sunDot = contrastHitLocal.dot(sunVec);
-                  if (hasEmissionGrid) {
-                    const lat = Math.asin(Math.max(-1, Math.min(1, contrastHitLocal.y)));
-                    const lon = Math.atan2(-contrastHitLocal.z, contrastHitLocal.x);
-                    const u = ((lon / (Math.PI * 2)) + 0.5 + 1.0) % 1.0;
-                    const v = 0.5 - lat / Math.PI;
-                    const gx = Math.min(emissionGridW - 1, Math.max(0, Math.floor(u * emissionGridW)));
-                    const gy = Math.min(emissionGridH - 1, Math.max(0, Math.floor(v * emissionGridH)));
-                    const cityEmission = emissionGrid[gy * emissionGridW + gx];
-                    if (sunDot < 0.05 && cityEmission > 0.34) {
-                      isBrightBackground = true;
-                    }
+          const adaptiveNodes = document.querySelectorAll<HTMLElement>(
+            '[data-adaptive-text="true"]'
+          );
+          const sunVec = earthSurfaceMat.uniforms.uSunDir.value;
+          for (let i = 0; i < adaptiveNodes.length; i++) {
+            const node = adaptiveNodes[i];
+            const r = node.getBoundingClientRect();
+            if (r.width === 0 || r.height === 0) continue;
+            const cx = r.left + r.width * 0.5;
+            const cy = r.top + r.height * 0.5;
+            contrastNdc.set((cx / Math.max(1, width)) * 2 - 1, -(cy / Math.max(1, height)) * 2 + 1);
+            contrastRaycaster.setFromCamera(contrastNdc, camera);
+            const ray = contrastRaycaster.ray;
+            // Analytical ray-sphere intersection (sphere centered at origin with radius 1.0)
+            const b = ray.origin.dot(ray.direction);
+            const c = ray.origin.lengthSq() - 1.0;
+            const disc = b * b - c;
+            let isBrightBackground = false;
+            if (disc > 0) {
+              const tHit = -b - Math.sqrt(disc);
+              if (tHit > 0) {
+                contrastHitLocal
+                  .copy(ray.origin)
+                  .addScaledVector(ray.direction, tHit);
+                earthGroup.worldToLocal(contrastHitLocal);
+                contrastHitLocal.normalize();
+                const sunDot = contrastHitLocal.dot(sunVec);
+                if (hasEmissionGrid) {
+                  const lat = Math.asin(Math.max(-1, Math.min(1, contrastHitLocal.y)));
+                  const lon = Math.atan2(-contrastHitLocal.z, contrastHitLocal.x);
+                  const u = ((lon / (Math.PI * 2)) + 0.5 + 1.0) % 1.0;
+                  const v = 0.5 - lat / Math.PI;
+                  const gx = Math.min(emissionGridW - 1, Math.max(0, Math.floor(u * emissionGridW)));
+                  const gy = Math.min(emissionGridH - 1, Math.max(0, Math.floor(v * emissionGridH)));
+                  const cityEmission = emissionGrid[gy * emissionGridW + gx];
+                  if (sunDot < 0.05 && cityEmission > 0.34) {
+                    isBrightBackground = true;
                   }
                 }
               }
-              const nextMode = isBrightBackground ? 'dark' : 'light';
-              if (node.getAttribute('data-contrast-mode') !== nextMode) {
-                node.setAttribute('data-contrast-mode', nextMode);
-              }
             }
-          };
-          if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-            (window as any).requestIdleCallback(runContrastAsync, { timeout: 1000 });
-          } else {
-            setTimeout(runContrastAsync, 0);
+            const nextMode = isBrightBackground ? 'dark' : 'light';
+            if (node.getAttribute('data-contrast-mode') !== nextMode) {
+              node.setAttribute('data-contrast-mode', nextMode);
+            }
           }
         }
 
@@ -2350,26 +2191,17 @@ export const EarthGlobeCanvas = forwardRef<
 
       tick();
 
-      let resizeRaf: number | null = null;
       const onResize = () => {
         if (!container) return;
-        if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
-        resizeRaf = requestAnimationFrame(() => {
-          resizeRaf = null;
-          if (!container || disposed) return;
-          const newW = container.clientWidth || window.innerWidth;
-          const newH = container.clientHeight || window.innerHeight;
-          if (newW === width && newH === height) return;
-          width = newW;
-          height = newH;
-          camera.aspect = width / height;
-          const isDesktop = width >= 640;
-          targetShiftRef.current = isSearchSubmittedRef.current && isDesktop
-            ? -Math.round(Math.min(540, width * 0.36) / 2)
-            : 0;
-          camera.updateProjectionMatrix();
-          renderer.setSize(width, height);
-        });
+        width = container.clientWidth || window.innerWidth;
+        height = container.clientHeight || window.innerHeight;
+        camera.aspect = width / height;
+        const isDesktop = width >= 640;
+        targetShiftRef.current = isSearchSubmittedRef.current && isDesktop
+          ? -Math.round(Math.min(540, width * 0.36) / 2)
+          : 0;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
       };
       window.addEventListener('resize', onResize);
       const resizeObserver =
@@ -2382,7 +2214,6 @@ export const EarthGlobeCanvas = forwardRef<
         disposed = true;
         if (zoomSectorDebounceRef.current) window.clearTimeout(zoomSectorDebounceRef.current);
         if (zoomTelemetryDebounceRef.current) window.clearTimeout(zoomTelemetryDebounceRef.current);
-        if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
         resizeObserver?.disconnect();
         window.removeEventListener('resize', onResize);
         window.removeEventListener('wheel', onWindowWheel);

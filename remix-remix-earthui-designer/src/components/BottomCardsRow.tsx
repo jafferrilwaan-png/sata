@@ -8,19 +8,17 @@ import {
 } from '../utils/telemetryLogic';
 
 interface BottomCardsRowProps {
-  releases?: ReleaseItem[];
+  releases: ReleaseItem[];
   sensors: TelemetrySensorRow[];
   liveIncidents?: LiveIncidentItem[];
   onSelectIncident?: (incident: LiveIncidentItem) => void;
-  showReleases?: boolean;
 }
 
-export const BottomCardsRow = React.memo<BottomCardsRowProps>(({
-  releases = [],
+export const BottomCardsRow: React.FC<BottomCardsRowProps> = ({
+  releases,
   sensors,
   liveIncidents = [],
   onSelectIncident,
-  showReleases = true,
 }) => {
   const displayIncidents =
     liveIncidents.length > 0
@@ -49,11 +47,7 @@ export const BottomCardsRow = React.memo<BottomCardsRowProps>(({
         ];
 
   return (
-    <div
-      className={`grid grid-cols-1 ${
-        showReleases ? 'md:grid-cols-3' : 'md:grid-cols-2'
-      } gap-3 sm:gap-2.5 lg:gap-4 w-full`}
-    >
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-2.5 lg:gap-4 w-full">
       {/* Card 1: LIVE GLOBAL DISASTERS (NASA EONET v3 + Unique Genuine Satellite Imagery) */}
       <section
         aria-label="Live Global Hazards"
@@ -136,69 +130,67 @@ export const BottomCardsRow = React.memo<BottomCardsRowProps>(({
       </section>
 
       {/* Card 2: RELEASES (Original Pristine Design) */}
-      {showReleases && (
-        <section
-          aria-label="Upcoming Releases"
-          className="sata-glass-card rounded-[20px] lg:rounded-[22px] px-3.5 sm:px-2.5 xl:px-4 pt-3 sm:pt-2.5 lg:pt-3.5 pb-3 sm:pb-2.5 lg:pb-3.5 flex flex-col justify-between min-w-0 overflow-hidden"
-        >
-          <div className="flex items-center justify-between pb-1.5 lg:pb-2 border-b border-white/10 gap-1">
-            <h2 className="text-[12px] sm:text-[clamp(11px,0.95vw,14.5px)] font-normal tracking-[0.06em] text-[#e4e4e7] uppercase truncate">
-              RELEASES
-            </h2>
-            <button
-              type="button"
-              aria-label="Releases Action"
-              className="sata-arrow-btn w-[26px] h-[26px] sm:w-[clamp(24px,2.1vw,32px)] sm:h-[clamp(24px,2.1vw,32px)] rounded-full flex items-center justify-center text-[#d4d4d8] hover:text-white transition-colors cursor-pointer shrink-0"
+      <section
+        aria-label="Upcoming Releases"
+        className="sata-glass-card rounded-[20px] lg:rounded-[22px] px-3.5 sm:px-2.5 xl:px-4 pt-3 sm:pt-2.5 lg:pt-3.5 pb-3 sm:pb-2.5 lg:pb-3.5 flex flex-col justify-between min-w-0 overflow-hidden"
+      >
+        <div className="flex items-center justify-between pb-1.5 lg:pb-2 border-b border-white/10 gap-1">
+          <h2 className="text-[12px] sm:text-[clamp(11px,0.95vw,14.5px)] font-normal tracking-[0.06em] text-[#e4e4e7] uppercase truncate">
+            RELEASES
+          </h2>
+          <button
+            type="button"
+            aria-label="Releases Action"
+            className="sata-arrow-btn w-[26px] h-[26px] sm:w-[clamp(24px,2.1vw,32px)] sm:h-[clamp(24px,2.1vw,32px)] rounded-full flex items-center justify-center text-[#d4d4d8] hover:text-white transition-colors cursor-pointer shrink-0"
+          >
+            <ArrowUpRight className="w-[13px] h-[13px] sm:w-[clamp(12px,1.05vw,16px)] sm:h-[clamp(12px,1.05vw,16px)] stroke-[1.75]" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 sm:gap-1.5 xl:gap-2.5 mt-2.5 sm:mt-2 lg:mt-3 flex-1 w-full">
+          {releases.map((rel: ReleaseItem, idx: number) => (
+            <div
+              key={rel.id}
+              className="flex flex-col justify-between group min-w-0 overflow-hidden"
             >
-              <ArrowUpRight className="w-[13px] h-[13px] sm:w-[clamp(12px,1.05vw,16px)] sm:h-[clamp(12px,1.05vw,16px)] stroke-[1.75]" />
-            </button>
-          </div>
+              <div className="min-w-0">
+                <span className="inline-block sata-date-pill px-2.5 sm:px-2 lg:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[clamp(8.5px,0.7vw,11px)] font-normal text-[#f0f7ff] whitespace-nowrap">
+                  {rel.dateBadge}
+                </span>
 
-          <div className="grid grid-cols-3 gap-2 sm:gap-1.5 xl:gap-2.5 mt-2.5 sm:mt-2 lg:mt-3 flex-1 w-full">
-            {releases.map((rel: ReleaseItem, idx: number) => (
-              <div
-                key={rel.id}
-                className="flex flex-col justify-between group min-w-0 overflow-hidden"
-              >
-                <div className="min-w-0">
-                  <span className="inline-block sata-date-pill px-2.5 sm:px-2 lg:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[clamp(8.5px,0.7vw,11px)] font-normal text-[#f0f7ff] whitespace-nowrap">
-                    {rel.dateBadge}
-                  </span>
-
-                  {/* Subtle divider line under date pill */}
-                  <div className="relative h-[1px] w-full bg-white/10 my-1.5 lg:my-2">
-                    {idx === 1 && (
-                      <span
-                        className="absolute left-1.5 -top-[1px] w-6 h-[2px] rounded-full bg-white/80"
-                        style={{ boxShadow: '0 0 8px rgba(255,255,255,0.8)' }}
-                      />
-                    )}
-                  </div>
-
-                  <div
-                    data-adaptive-text="true"
-                    data-contrast-mode="light"
-                    className="min-w-0"
-                  >
-                    <p className="sata-adaptive-primary text-[11px] sm:text-[clamp(8.8px,0.72vw,11px)] leading-[1.25] tracking-[-0.02em] text-[#e4e4e7] font-normal break-words">
-                      {rel.providerLine1}
-                    </p>
-                    <p className="sata-adaptive-secondary text-[10px] sm:text-[clamp(8.5px,0.68vw,11px)] leading-[1.25] tracking-[-0.01em] text-[#a1a1aa] font-normal mt-0.5 truncate">
-                      {rel.providerLine2}
-                    </p>
-                  </div>
+                {/* Subtle divider line under date pill */}
+                <div className="relative h-[1px] w-full bg-white/10 my-1.5 lg:my-2">
+                  {idx === 1 && (
+                    <span
+                      className="absolute left-1.5 -top-[1px] w-6 h-[2px] rounded-full bg-white/80"
+                      style={{ boxShadow: '0 0 8px rgba(255,255,255,0.8)' }}
+                    />
+                  )}
                 </div>
 
-                <div className="mt-2 sm:mt-1.5 lg:mt-2 min-w-0">
-                  <span className="inline-flex items-center max-w-full sata-status-pill px-2 sm:px-1.5 xl:px-2.5 py-0.5 rounded-full text-[9.5px] sm:text-[clamp(8px,0.66vw,10.5px)] tracking-[-0.015em] text-[#e8f3ff] whitespace-nowrap">
-                    {rel.statusText}
-                  </span>
+                <div
+                  data-adaptive-text="true"
+                  data-contrast-mode="light"
+                  className="min-w-0"
+                >
+                  <p className="sata-adaptive-primary text-[11px] sm:text-[clamp(8.8px,0.72vw,11px)] leading-[1.25] tracking-[-0.02em] text-[#e4e4e7] font-normal break-words">
+                    {rel.providerLine1}
+                  </p>
+                  <p className="sata-adaptive-secondary text-[10px] sm:text-[clamp(8.5px,0.68vw,11px)] leading-[1.25] tracking-[-0.01em] text-[#a1a1aa] font-normal mt-0.5 truncate">
+                    {rel.providerLine2}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+
+              <div className="mt-2 sm:mt-1.5 lg:mt-2 min-w-0">
+                <span className="inline-flex items-center max-w-full sata-status-pill px-2 sm:px-1.5 xl:px-2.5 py-0.5 rounded-full text-[9.5px] sm:text-[clamp(8px,0.66vw,10.5px)] tracking-[-0.015em] text-[#e8f3ff] whitespace-nowrap">
+                  {rel.statusText}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Card 3: SENSOR TELEMETRY (Original Pristine Design) */}
       <section
@@ -229,7 +221,7 @@ export const BottomCardsRow = React.memo<BottomCardsRowProps>(({
                 <span className="sata-adaptive-primary text-[#e4e4e7] font-normal truncate flex-1 min-w-0">
                   {row.sensorName}
                 </span>
-                <span className="sata-adaptive-primary text-[#f4f4f5] font-normal tabular-nums shrink-0 px-1 font-sans font-medium text-[10.5px]">
+                <span className="sata-adaptive-primary text-[#f4f4f5] font-normal tabular-nums shrink-0 px-1 font-mono text-[10.5px]">
                   {row.valueText}
                 </span>
                 <span className="sata-adaptive-secondary text-right text-[#a1a1aa] font-medium tracking-wider uppercase shrink-0 text-[9.5px]">
@@ -264,4 +256,4 @@ export const BottomCardsRow = React.memo<BottomCardsRowProps>(({
       </section>
     </div>
   );
-});
+};

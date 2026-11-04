@@ -1226,7 +1226,7 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full bg-red-600/80 text-white font-sans text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md shadow-sm">
-              NOAA Satellite Stream • Live
+              NOAA Satellite Stream Live
             </span>
             <span className="text-[10px] font-sans font-medium text-white/60">
               0.28m Optical Stream
