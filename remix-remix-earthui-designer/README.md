@@ -1,8 +1,10 @@
+<div align="center">
+
 # SATA Sentinel (SataQuery Sentinel)
 ### Autonomous Multi-Agent Planetary Intelligence & 3D Earth Digital Twin
 
 [![Meta Global AI Hackathon 2026](https://img.shields.io/badge/Meta_Global_AI_Hackathon-2026_Official_Submission-0668E1?style=for-the-badge&logo=meta&logoColor=white)](https://devpost.com)
-[![Meta AI Models](https://img.shields.io/badge/Meta_AI_Models-Llama_4_%7C_Muse_Spark_1.3_%7C_Muse_Wonder_1.0-8A2BE2?style=for-the-badge&logo=meta&logoColor=white)](https://meta.ai)
+[![Meta AI Models](https://img.shields.io/badge/Meta_AI_Models-Llama_4_%7C_Muse_Spark_1.3_%7C_Muse_Wonder_1.0_%7C_Muse_Code-8A2BE2?style=for-the-badge&logo=meta&logoColor=white)](https://meta.ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-white.svg?style=for-the-badge)](LICENSE)
 
 <p align="center">
@@ -16,6 +18,22 @@
   <img src="https://img.shields.io/badge/ESA_Copernicus-003247?style=for-the-badge&logo=european-space-agency&logoColor=white" alt="ESA Copernicus" />
   <img src="https://img.shields.io/badge/ISRO_Cartosat--3-FF9933?style=for-the-badge&logo=spacex&logoColor=white" alt="ISRO Cartosat-3" />
 </p>
+
+</div>
+
+---
+
+## Official 3-Minute Demo Video
+
+An automated, high-definition end-to-end platform demonstration showcasing real-time planetary tracking, natural conversational queries, submeter optical passes, and multi-temporal synthesis.
+
+- **Direct Repository Video**: [Watch / Download sata_sentinel_demo.webm](docs/videos/sata_sentinel_demo.webm)
+- **Demo Highlights**:
+  - `00:00 - 00:25`: Physically grounded WebGL 3D globe with real-time solar declination, Rayleigh twilight scattering, and nocturnal city lights.
+  - `00:25 - 00:55`: Natural conversational Meta AI omnibar interaction (*"HI MEATA"*) with zero accidental globe repositioning.
+  - `00:55 - 01:35`: Autonomous multi-temporal flight and 74-year synthesis (*Egypt 1952 vs 2026 Nile Delta hydrology and urban expansion*).
+  - `01:35 - 02:15`: Submeter satellite pass (ISRO Cartosat-3 0.28m GSD), SGP4 orbital kinematics, and autonomous radiometric anomaly screening.
+  - `02:15 - 02:35`: Real-time multi-spectral sensor overlay switching (VIIRS Thermal Night, MODIS True Color, Atmospheric AOD).
 
 ---
 
@@ -64,7 +82,7 @@ Planetary Earth observation data is currently siloed across fragmented space age
 
 ## Meta AI Autonomous Tri-Agent Swarm Architecture
 
-SATA Sentinel rejects single-model hallucinations. Every query is processed through a parallel consensus swarm of three specialized Meta AI models running concurrently:
+SATA Sentinel rejects single-model hallucinations. Every query is processed through a parallel consensus swarm of specialized Meta AI models running concurrently:
 
 ```
                               +-------------------------------------------+
@@ -103,14 +121,6 @@ SATA Sentinel leverages the entire official Meta AI model family across each lay
 | **Meta Muse Spark 1.2** | **Tactical Synthesis & Emergency Protocol Agent** | Autonomous anomaly screening, ground safety threshold verification, multi-sensor consensus scoring |
 | **Meta Llama 4 (Llama-4-Maverick-17B)** | **Planetary Deep Intelligence & Historical Analysis** | Multi-temporal comparisons (e.g. Egypt 1952 vs 2026 Nile Delta hydrology), natural language conversational omnibar |
 | **Meta Muse Code** | **Algorithmic Orbital Mechanics & GLSL Shaders** | SGP4 orbital kinematics implementation, WebGL custom Rayleigh scattering shaders, real-time telemetry ingestion pipelines |
-
-### Tri-Agent Model Breakdown
-
-| Meta AI Model | Specialized Sub-Agent Role | Primary Responsibilities |
-| :--- | :--- | :--- |
-| **Meta Muse Spark 1.3** | **Geospatial & Orbital Kinematics Agent** | Ingests raw place names, natural language descriptors, and coordinates. Solves forward and inverse geodetic coordinates, maps ground tracks, and determines optimal nadir satellite pass altitudes. |
-| **Meta Muse Wonder 1.0** | **Atmospheric & Planetary Physics Agent** | Ingests multi-spectral radiance data (NASA GIBS, MODIS, VIIRS, Open-Meteo). Solves radiative transfer equations, aerosol optical depth, sea surface temperature, and thermal fire radiative power. |
-| **Meta Muse Spark 1.2 / Llama 4** | **Tactical Synthesis & Emergency Swarm Agent** | Correlates outputs from the other two agents, compares historical baselines, and generates structured operational intelligence dossiers with concrete tactical protocols. |
 
 ---
 
