@@ -1093,7 +1093,10 @@ export default function App() {
       qLower === 'hi' ||
       qLower === 'hello' ||
       qLower === 'hey' ||
-      qLower.includes('dudue') ||
+      qLower.includes('meata') ||
+      qLower.includes('how are you') ||
+      qLower.includes('are you fine') ||
+      qLower.includes('fine') ||
       qLower.includes('dude') ||
       qLower.includes('bro') ||
       qLower.includes('who are you') ||
@@ -1220,7 +1223,8 @@ export default function App() {
 
       if (res.ok) {
         const payload = await res.json();
-        if (payload?.success && typeof payload.lat === 'number' && typeof payload.lon === 'number') {
+        if (payload?.success) {
+          const isPayloadGreeting = isChatOrGreeting || (payload.lat === 0 && payload.lon === 0);
           const lead = payload.briefingLead || (payload.briefingSummary?.startsWith('Llama 4:') ? 'Llama 4:' : 'Meta Muse:');
           const body = payload.briefingSummary
             ? payload.briefingSummary.replace(/^(Meta Muse|Llama 4):\s*/i, '')
@@ -1294,15 +1298,17 @@ export default function App() {
           }
           
 
-          globeRef.current?.pointOfView(
-            {
-              lat: payload.lat,
-              lng: payload.lon,
-              altitude: payload.zoomAltitude || 1.8,
-              label: cleanTargetTitle,
-            },
-            2000
-          );
+          if (!isPayloadGreeting && (payload.lat !== 0 || payload.lon !== 0)) {
+            globeRef.current?.pointOfView(
+              {
+                lat: payload.lat,
+                lng: payload.lon,
+                altitude: payload.zoomAltitude || 1.8,
+                label: cleanTargetTitle,
+              },
+              2000
+            );
+          }
         }
       }
     } catch (fetchErr) {
@@ -1909,7 +1915,7 @@ export default function App() {
             zoomAltitude: altitude,
             layerType: layer,
             briefingLead: 'Mission Dossier Restored:',
-            briefingBody: 'Restored archived satellite observation for ' + name + ' [' + Math.abs(lat).toFixed(2) + '°, ' + Math.abs(lon).toFixed(2) + '°]. Digital twin telemetry and sensor layers synchronized.',
+            briefingBody: 'Satellite observation and sensor telemetry synchronized for ' + name + '.',
             activeHeatSpots: 0,
             telemetry: {
               viirsPoints: 0,

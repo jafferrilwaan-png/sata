@@ -217,10 +217,7 @@ export const LiveSatelliteVideoPlayer: React.FC<LiveSatelliteVideoPlayerProps> =
 
       // Active target pulse
       const pulseRadius = 3 + Math.abs(Math.sin(angle * 6)) * 2;
-      ctx.fillStyle = '#38bdf8';
-      ctx.beginPath();
-      ctx.arc(crossX, crossY, pulseRadius, 0, Math.PI * 2);
-      ctx.fill();
+      // Center dot eliminated for pure crosshair reticle
 
       animationFrameRef.current = requestAnimationFrame(render);
     };

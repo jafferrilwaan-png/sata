@@ -356,7 +356,7 @@ async function startServer() {
       const META_BASE_URL = process.env.META_BASE_URL || 'https://api.meta.ai/v1';
 
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 15000);
+      const timer = setTimeout(() => controller.abort(), 25000);
 
       try {
         const metaRes = await fetch(`${META_BASE_URL}/chat/completions`, {
@@ -388,10 +388,7 @@ If the user asks about geography, locations, weather, climate, comparisons (e.g.
           const text = metaJson.choices?.[0]?.message?.content || '';
           return res.json({
             success: true,
-            briefingLead: 'Meta AI Satellite Observation Intelligence:',
-            briefingSummary: text,
-            model: actualModel,
-            query
+            briefingLead: 'Meta AI:', briefingSummary: text, model: actualModel, query, lat: 0, lon: 0
           });
         }
       } catch (e) {
@@ -409,11 +406,11 @@ If the user asks about geography, locations, weather, climate, comparisons (e.g.
         /\b(hi|hello|hey|how are you|who are you|are you fine|how r u|good morning|good evening)\b/i.test(qLower) ||
         ['how are you', 'are you fine', 'fine', 'hi', 'hello', 'hey'].some(w => qLower.includes(w))
       ) {
-        summaryText = "I'm doing great, thank you! I am Meta AI for SATA. All orbital telemetry, satellite constellations, and 3D Earth sensors are operating smoothly. How can I assist you with planetary data today?";
+        summaryText = "Hello! I am Meta AI for SATA. All orbital telemetry, satellite constellations, and 3D Earth sensors are operating smoothly. How can I assist you with planetary data today?";
       } else if (false) {
         summaryText = 'Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?';
       } else {
-        summaryText = `Orbital observation channels active for "${query}". Satellite constellations synchronized across visible, infrared, and radar passes.`;
+        summaryText = `Meta AI observation intelligence active for ${query}. Satellite telemetry channels, multi-spectral sensors, and orbital passes are fully synchronized.`;
       }
 
       return res.json({
