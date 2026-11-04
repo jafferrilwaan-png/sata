@@ -51,3 +51,4 @@ yarn-error.log*
 Thumbs.db
 !docs/images/*.png
 !docs/videos/*.webm
+!docs/videos/*.mp4

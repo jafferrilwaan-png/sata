@@ -27,7 +27,7 @@
 
 An automated, high-definition end-to-end platform demonstration showcasing real-time planetary tracking, natural conversational queries, submeter optical passes, and multi-temporal synthesis.
 
-- **Direct Repository Video**: [Watch / Download sata_sentinel_demo.webm](docs/videos/sata_sentinel_demo.webm)
+- **Direct Repository Video**: [Watch / Download sata_sentinel_official_demo.mp4 (HD 720p with Tenor Voiceover)](docs/videos/sata_sentinel_official_demo.mp4)
 - **Demo Highlights**:
   - `00:00 - 00:25`: Physically grounded WebGL 3D globe with real-time solar declination, Rayleigh twilight scattering, and nocturnal city lights.
   - `00:25 - 00:55`: Natural conversational Meta AI omnibar interaction (*"HI MEATA"*) with zero accidental globe repositioning.
