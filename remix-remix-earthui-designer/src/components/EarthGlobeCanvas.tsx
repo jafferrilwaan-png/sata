@@ -1806,13 +1806,10 @@ export const EarthGlobeCanvas = forwardRef<
         earthSurfaceMat.uniforms.uIrThermalMode.value +=
           (targetIr - earthSurfaceMat.uniforms.uIrThermalMode.value) * 0.15;
 
-        // Drive high-resolution satellite alpha as camera approaches Earth
-        const highResAlpha = Math.max(0.0, Math.min(1.0, (2.6 - camDist) / 1.4));
-        earthSurfaceMat.uniforms.uHighResAlpha.value = highResAlpha;
-        if (earthSurfaceMat.uniforms.uHasHighRes.value < 0.5 && earthDayTex) {
-          earthSurfaceMat.uniforms.uHighResMap.value = earthDayTex;
-          earthSurfaceMat.uniforms.uHasHighRes.value = 1.0;
-        }
+        // High-resolution localized satellite tile overlay is strictly gated to genuine sub-meter tiles
+        // Prevents full-planet texture from stamping duplicate miniature world maps over (0.5, 0.5) / Lagos
+        earthSurfaceMat.uniforms.uHighResAlpha.value = 0.0;
+        earthSurfaceMat.uniforms.uHasHighRes.value = 0.0;
 
         // Real-Time Atmospheric Cloud Circulation Physics modulated by satellite telemetry
         const cloudPhysics = computeAtmosphericCloudPhysics({
