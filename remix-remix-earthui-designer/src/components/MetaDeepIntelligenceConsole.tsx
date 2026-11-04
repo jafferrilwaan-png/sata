@@ -1,4 +1,4 @@
-import { saveMissionChatToArchive } from '../utils/missionArchiveStorage';
+﻿import { saveMissionChatToArchive } from '../utils/missionArchiveStorage';
 
 export interface SatelliteSensorTool {
   id: string;
@@ -379,7 +379,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [activeSelectedTool, setActiveSelectedTool] = useState<SatelliteSensorTool | null>(null);
   const [selectedToolCategory, setSelectedToolCategory] = useState<string>('All');
-  const [isAgentExecuting, setIsAgentExecuting] = useState<boolean>(false);
+  const [isAgentExecuting, setIsAgentExecuting] = useState<boolean>(true);
   const chatVoiceRecorder = useVoiceRecorder();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -413,13 +413,10 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     },
   ];
 
-  // Conversation history: initialized with the active search prompt and Meta AI response
+  // Conversation history: starts with only user message; spinner shows first, AI reply appended after delay
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const initialTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const initialQuery = initialVoiceMessage?.transcript || userQuery || targetName || "Global Observation";
-    const initialQLower = initialQuery.toLowerCase();
-    const initialReply = (briefingBody || briefingLead || 'Satellite telemetry synchronized.').replace(/^(?:Llama 4|Meta Muse|Meta AI):\s*/i, '');
-    const initialWantsVideo = (initialQLower.includes('video') || initialQLower.includes('stream') || initialQLower.includes('live feed')) && !initialQLower.includes('no video');
 
     return [
       {
@@ -430,28 +427,50 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
         audioDuration: initialVoiceMessage?.duration,
         timestamp: initialTime,
       },
-      {
-        id: 'initial-meta-msg',
-        sender: 'meta',
-        text: initialReply,
-        thinkingSteps: thinkingSteps && thinkingSteps.length > 0 ? thinkingSteps : undefined,
-        recommendations: recommendations && recommendations.length > 0 ? recommendations : undefined,
-        videoFeed: initialWantsVideo ? {
-          title: `Live Satellite Stream (${targetName})`,
-          satellite: isAmericas ? 'NOAA GOES-18' : isIndiaRegion ? 'ISRO Cartosat-3 / INSAT-3DR' : 'ESA Sentinel-3',
-          lat,
-          lon,
-          altitudeKm: 508,
-          velocityKms: 7.61,
-          resolution: '1080p / 60 FPS',
-          bitrate: '12.4 Mbps',
-          downlink: 'X-Band 8.2 GHz',
-          initialFeedType: 'orbital_canvas',
-        } : undefined,
-        timestamp: initialTime,
-      },
     ];
   });
+  // On first mount: append the AI reply after a short delay so spinner is visible first
+  const _initialReplyInjected = useRef(false);
+  useEffect(() => {
+    if (_initialReplyInjected.current) return;
+    _initialReplyInjected.current = true;
+    const initialQuery = initialVoiceMessage?.transcript || userQuery || targetName || "Global Observation";
+    const initialQLower = initialQuery.toLowerCase();
+    const initialReply = (briefingBody || briefingLead || 'Satellite telemetry synchronized.').replace(/^(?:Llama 4|Meta Muse|Meta AI):\s*/i, '');
+    const initialWantsVideo = (initialQLower.includes('video') || initialQLower.includes('stream') || initialQLower.includes('live feed')) && !initialQLower.includes('no video');
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const timer = setTimeout(() => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === 'initial-meta-msg')) return prev;
+        return [
+          ...prev,
+          {
+            id: 'initial-meta-msg',
+            sender: 'meta' as const,
+            text: initialReply,
+            thinkingSteps: thinkingSteps && thinkingSteps.length > 0 ? thinkingSteps : undefined,
+            recommendations: recommendations && recommendations.length > 0 ? recommendations : undefined,
+            videoFeed: initialWantsVideo ? {
+              title: `Live Satellite Stream (${targetName})`,
+              satellite: isAmericas ? 'NOAA GOES-18' : isIndiaRegion ? 'ISRO Cartosat-3 / INSAT-3DR' : 'ESA Sentinel-3',
+              lat,
+              lon,
+              altitudeKm: 508,
+              velocityKms: 7.61,
+              resolution: '1080p / 60 FPS',
+              bitrate: '12.4 Mbps',
+              downlink: 'X-Band 8.2 GHz',
+              initialFeedType: 'orbital_canvas' as const,
+            } : undefined,
+            timestamp: timeStr,
+          },
+        ];
+      });
+      setIsAgentExecuting(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Sync initial voice message if it arrives with media URL
   useEffect(() => {
     if (initialVoiceMessage?.audioUrl) {
