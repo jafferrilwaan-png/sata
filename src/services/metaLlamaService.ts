@@ -57,12 +57,12 @@ export async function dispatchOrbitalReasoning(
     subsolarLon = ((((subsolarLon + 180) % 360) + 360) % 360) - 180;
     const subsolarLat = (declRad * 180) / Math.PI;
 
-    const subsolarLatStr = ${Math.abs(subsolarLat).toFixed(2)}° ;
-    const subsolarLonStr = ${Math.abs(subsolarLon).toFixed(2)}° ;
+    const subsolarLatStr = `${Math.abs(subsolarLat).toFixed(2)}° ${subsolarLat >= 0 ? 'N' : 'S'}`;
+    const subsolarLonStr = `${Math.abs(subsolarLon).toFixed(2)}° ${subsolarLon >= 0 ? 'E' : 'W'}`;
     const utcIso = now.toISOString();
 
     const lstHours = (utcHours + subsolarLon / 15 + 24) % 24;
-    const lstFormatted = ${Math.floor(lstHours).toString().padStart(2, '0')}: LST;
+    const lstFormatted = `${Math.floor(lstHours).toString().padStart(2, '0')}:${Math.floor((lstHours % 1) * 60).toString().padStart(2, '0')} LST`;
 
     return {
       targetName: 'Diurnal Solar Terminator & Planetary Day/Night Horizon',
@@ -71,27 +71,23 @@ export async function dispatchOrbitalReasoning(
       zoomAltitude: 2.2,
       activeHeatSpots: 0,
       layerType: 'DAY_NIGHT_TERMINATOR',
-      briefingSummary: Llama 4: Real-time astronomical day/night diurnal simulation active across the 3D planetary digital twin.
-
- +
-        Subsolar Zenith Coordinates: ,  | Solar Declination (δ): ° | Equation of Time:  min | Subsolar Solar Time: 12:00 LST (Zenith).
-
- +
-        Astronomical Solar Terminator Line: The great circle 90.0° from the subsolar point divides planet Earth into illuminated daylight (1,361 W/m² solar constant) and nocturnal shadow. Rayleigh twilight dispersion (~18° penumbra) refracts golden-amber dawn to cobalt dusk across the horizon, with NASA VIIRS Black Marble city lights actively glowing across the darkened night hemisphere.,
+      briefingSummary: `Llama 4: Real-time astronomical day/night diurnal simulation active across the 3D planetary digital twin.\n\n` +
+        `Subsolar Zenith Coordinates: ${subsolarLatStr}, ${subsolarLonStr} | Solar Declination (δ): ${subsolarLat.toFixed(2)}° | Equation of Time: ${eqTimeMin.toFixed(1)} min | Subsolar Solar Time: 12:00 LST (Zenith).\n\n` +
+        `Astronomical Solar Terminator Line: The great circle 90.0° from the subsolar point divides planet Earth into illuminated daylight (1,361 W/m² solar constant) and nocturnal shadow. Rayleigh twilight dispersion (~18° penumbra) refracts golden-amber dawn to cobalt dusk across the horizon, with NASA VIIRS Black Marble city lights actively glowing across the darkened night hemisphere.`,
       thinkingSteps: [
-        Meta Muse Spark 1.3 (Orbital Geometry): Solar ephemeris calculated for UTC . Subsolar point locked at (, ) with solar declination δ = °. Great circle terminator path resolved at 90.0° solar zenith angle.,
-        Meta Muse Wonder 1.0 (Atmospheric & Radiation Physics): Rayleigh twilight dispersion band (~18° astronomical twilight) computed with wavelength-dependent scattering (440nm sapphire to 580nm golden-amber twilight horizon). Diurnal surface solar flux calibrated to 1361 W/m².,
-        Meta Muse Spark 1.2 (Planetary Observation Protocol): Real-time diurnal shader synchronization engaged. High-contrast NASA VIIRS nocturnal city lights arterial grid activated across the night hemisphere with zero day-side light pollution.,
+        `Meta Muse Spark 1.3 (Orbital Geometry): Solar ephemeris calculated for UTC ${utcIso}. Subsolar point locked at (${subsolarLatStr}, ${subsolarLonStr}) with solar declination δ = ${subsolarLat.toFixed(2)}°. Great circle terminator path resolved at 90.0° solar zenith angle.`,
+        `Meta Muse Wonder 1.0 (Atmospheric & Radiation Physics): Rayleigh twilight dispersion band (~18° astronomical twilight) computed with wavelength-dependent scattering (440nm sapphire to 580nm golden-amber twilight horizon). Diurnal surface solar flux calibrated to 1361 W/m².`,
+        `Meta Muse Spark 1.2 (Planetary Observation Protocol): Real-time diurnal shader synchronization engaged. High-contrast NASA VIIRS nocturnal city lights arterial grid activated across the night hemisphere with zero day-side light pollution.`,
       ],
       recommendations: [
-        { category: 'Terminator Tracking', action: Observe the day/night boundary sweeping westward at ~1,670 km/h (465 m/s) at the equator across the rotating planetary sphere. },
+        { category: 'Terminator Tracking', action: 'Observe the day/night boundary sweeping westward at ~1,670 km/h (465 m/s) at the equator across the rotating planetary sphere.' },
         { category: 'Nocturnal City Radiance', action: 'Inspect the night-side hemisphere where high-resolution VIIRS Black Marble city lights reveal human settlement and infrastructure grids.' },
-        { category: 'Solar Zenith Calibration', action: Subsolar zenith point at ,  provides maximum solar elevation (90°) and zero solar shadow. },
+        { category: 'Solar Zenith Calibration', action: `Subsolar zenith point at ${subsolarLatStr}, ${subsolarLonStr} provides maximum solar elevation (90°) and zero solar shadow.` },
       ],
       telemetry: {
         viirsPoints: 120,
         modisPoints: 0,
-        aodStatus: 'NOMINAL',
+        aodStatus: 'STABLE',
         cloudCoverPct: 50,
         precipitationMm: 0.0,
         windSpeedKmh: 16,
@@ -104,7 +100,7 @@ export async function dispatchOrbitalReasoning(
         cloudCoverPct: 50,
         cloudVorticity: 0.45,
         thermalRadiativeMw: 0,
-        severity: 'LOW',
+        severity: 'STABLE',
         tacticalProtocol: 'Real-time diurnal planetary day/night synchronization active on 3D Earth digital twin.',
         targetLat: subsolarLat,
         targetLon: subsolarLon,

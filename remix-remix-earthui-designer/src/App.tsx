@@ -1525,7 +1525,7 @@ export default function App() {
           {isModelMenuOpen && (
             <div
               onMouseDown={(e) => e.stopPropagation()}
-              className={`absolute right-0 ${isSearchSubmitted ? "top-full mt-2" : "bottom-full mb-2"} w-[230px] rounded-[22px] border border-white/12 bg-white/[0.06] backdrop-blur-[45px] p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.25)] z-50 flex flex-col gap-1 text-white`}
+              className="absolute right-0 bottom-full mb-2 w-[230px] rounded-[22px] border border-white/15 bg-black/60 backdrop-blur-2xl p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.25)] z-50 flex flex-col gap-1 text-white"
             >
               {[
                 { id: 'tri-agent-swarm', label: 'Multi-Sensor Consensus', desc: 'Parallel multi-spectral analysis' },

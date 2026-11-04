@@ -753,11 +753,11 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
         if (isDayNightQueryMatch) {
           const now = new Date();
           const term = computeDayNightTerminatorShaderState(now.getTime());
-          const subsolarLatStr = ${Math.abs(term.subsolarLat).toFixed(2)}° ;
-          const subsolarLonStr = ${Math.abs(term.subsolarLon).toFixed(2)}° ;
+          const subsolarLatStr = `${Math.abs(term.subsolarLat).toFixed(2)}° ${term.subsolarLat >= 0 ? 'N' : 'S'}`;
+          const subsolarLonStr = `${Math.abs(term.subsolarLon).toFixed(2)}° ${term.subsolarLon >= 0 ? 'E' : 'W'}`;
           const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
           const lstHours = (utcHours + term.subsolarLon / 15 + 24) % 24;
-          const lstFormatted = ${Math.floor(lstHours).toString().padStart(2, '0')}: LST;
+          const lstFormatted = `${Math.floor(lstHours).toString().padStart(2, '0')}:${Math.floor((lstHours % 1) * 60).toString().padStart(2, '0')} LST`;
 
           resolvedTargetName = 'Planetary Day/Night Solar Terminator & Diurnal Horizon';
           resolvedLat = Number((term.subsolarLat * 0.35).toFixed(2));
@@ -765,20 +765,20 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
           onApplyLayer?.('DAY_NIGHT_TERMINATOR');
           onNavigateTo?.(resolvedTargetName, resolvedLat, resolvedLon, 2.2);
 
-          replyText = ### Meta AI Tri-Agent Swarm: Real-Time Diurnal Day/Night Planetary Briefing\n\n +
-            | Planetary Metric | Real-Time Live Value | Astronomical Reference & Physics |\n +
-            | :--- | :--- | :--- |\n +
-            | **Solar Subsolar Point (Zenith)** | **, ** | Direct 90.0° solar incidence angle (zero ground shadow) |\n +
-            | **Solar Declination (δ)** | **°** | Angle between celestial equator and Sun-Earth orbital vector |\n +
-            | **Local Solar Time (LST)** | **** | Solar hour angle synchronized with UTC (Z) |\n +
-            | **Day/Night Terminator Arc** | **Great Circle (90° offset)** | Sweeping westward at ~1,670 km/h (465 m/s) at equator |\n +
-            | **Diurnal Solar Irradiance** | **1,361 W/m² (Zenith TSI)** | Top-of-Atmosphere (TOA) solar constant insolation flux |\n +
-            | **Rayleigh Twilight Penumbra** | **~18° Astronomical Band** | Wavelength-dependent atmospheric scattering (440nm to 580nm) |\n +
-            | **Nocturnal Anthropogenic Lights** | **NASA VIIRS Black Marble** | Calibrated 500m night-side city and arterial infrastructure grid |\n\n +
-            - **Astronomical Solar Ephemeris & Subsolar Point:** The instantaneous subsolar point is locked at **, **. The solar declination of **°** dictates the diurnal planetary solar trajectory, generating the dynamic shadow divide between the Northern and Southern Hemispheres.\n +
-            - **Day/Night Solar Terminator Geometry:** The terminator line forms a dynamic spherical great circle located exactly 90.0° angular distance from the subsolar point. Along this boundary, the Sun transitions between daytime zenith and night horizon, projecting golden-amber and cobalt twilight refraction along coastal and continental edges.\n +
-            - **Planetary Illumination & Nocturnal City Radiance:** The day-side hemisphere reflects full-spectrum NASA Blue Marble & MODIS multi-spectral surface albedo. As the terminator sweeps westward, shadowed continents transition seamlessly into NASA VIIRS Black Marble night radiance, highlighting metropolitan urban filaments without daytime light contamination.\n +
-            - **3D Earth Digital Twin State:** Real-time solar position, dynamic directional sunlight, realistic shadow terminator, and night city lights are actively updating every second across the 3D globe.;
+          replyText = `### Meta AI Tri-Agent Swarm: Real-Time Diurnal Day/Night Planetary Briefing\n\n` +
+            `| Planetary Metric | Real-Time Live Value | Astronomical Reference & Physics |\n` +
+            `| :--- | :--- | :--- |\n` +
+            `| **Solar Subsolar Point (Zenith)** | **${subsolarLatStr}, ${subsolarLonStr}** | Direct 90.0° solar incidence angle (zero ground shadow) |\n` +
+            `| **Solar Declination (δ)** | **${term.subsolarLat.toFixed(2)}°** | Angle between celestial equator and Sun-Earth orbital vector |\n` +
+            `| **Local Solar Time (LST)** | **${lstFormatted}** | Solar hour angle synchronized with UTC (Z) |\n` +
+            `| **Day/Night Terminator Arc** | **Great Circle (90° offset)** | Sweeping westward at ~1,670 km/h (465 m/s) at equator |\n` +
+            `| **Diurnal Solar Irradiance** | **1,361 W/m² (Zenith TSI)** | Top-of-Atmosphere (TOA) solar constant insolation flux |\n` +
+            `| **Rayleigh Twilight Penumbra** | **~18° Astronomical Band** | Wavelength-dependent atmospheric scattering (440nm to 580nm) |\n` +
+            `| **Nocturnal Anthropogenic Lights** | **NASA VIIRS Black Marble** | Calibrated 500m night-side city and arterial infrastructure grid |\n\n` +
+            `- **Astronomical Solar Ephemeris & Subsolar Point:** The instantaneous subsolar point is locked at **${subsolarLatStr}, ${subsolarLonStr}**. The solar declination of **${term.subsolarLat.toFixed(2)}°** dictates the diurnal planetary solar trajectory, generating the dynamic shadow divide between the Northern and Southern Hemispheres.\n` +
+            `- **Day/Night Solar Terminator Geometry:** The terminator line forms a dynamic spherical great circle located exactly 90.0° angular distance from the subsolar point. Along this boundary, the Sun transitions between daytime zenith and night horizon, projecting golden-amber and cobalt twilight refraction along coastal and continental edges.\n` +
+            `- **Planetary Illumination & Nocturnal City Radiance:** The day-side hemisphere reflects full-spectrum NASA Blue Marble & MODIS multi-spectral surface albedo. As the terminator sweeps westward, shadowed continents transition seamlessly into NASA VIIRS Black Marble night radiance, highlighting metropolitan urban filaments without daytime light contamination.\n` +
+            `- **3D Earth Digital Twin State:** Real-time solar position, dynamic directional sunlight, realistic shadow terminator, and night city lights are actively updating every second across the 3D globe.`;
         } else if (isModelQuery) {
           replyText = "SATA Sentinel operates exclusively as an **Autonomous Multi-Agent Consensus Swarm powered by Meta AI**. Every single observation response is synthesized in parallel consensus across all specialized Meta AI models:\n\n" +
             "- **Meta Muse Spark 1.3 (Geospatial Lock):** Computes submeter orbital coordinates, digital elevation models, and nadir camera geometry.\n" +
@@ -1193,7 +1193,7 @@ Target Coordinates: ${Math.abs(resolvedLat).toFixed(2)}° ${resolvedLat >= 0 ? '
     <aside
       aria-label="Satellite Intelligence Dossier"
       style={{ transform: 'translateZ(0)', willChange: 'transform' }}
-      className="pointer-events-auto w-full h-full sm:min-h-0 rounded-[28px] p-4 sm:p-5 flex flex-col overflow-hidden border border-white/20 bg-black/45 backdrop-blur-[36px] saturate-[170%] shadow-[0_32px_80px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.25)] text-white"
+      className="pointer-events-auto w-full h-full sm:min-h-0 rounded-[28px] p-4 sm:p-5 flex flex-col overflow-hidden border border-white/14 bg-black/45 backdrop-blur-[36px] saturate-[170%] shadow-[0_32px_80px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.25)] text-white"
     >
       {/* 1. Header: Ultra-Clean Minimal Title & Coordinates (Zero Jargon, Zero Clutter) */}
       <div className="flex items-start justify-between pb-3 border-b border-white/10 shrink-0 gap-3">

@@ -1,4 +1,4 @@
-export type LayerType = "THERMAL" | "CRYO" | "STORM" | "ORBITAL" | "TRUE_COLOR" | "TERRAIN";
+export type LayerType = "THERMAL" | "CRYO" | "STORM" | "ORBITAL" | "TRUE_COLOR" | "TERRAIN" | "DAY_NIGHT_TERMINATOR";
 
 export type EventPhenomenon =
   | "CYCLONE_RAIN"
@@ -7,7 +7,8 @@ export type EventPhenomenon =
   | "WILDFIRE"
   | "DEFORESTATION"
   | "CRYO_MELT"
-  | "THERMAL";
+  | "THERMAL"
+  | "DAY_NIGHT_TERMINATOR";
 
 export interface EnvironmentalPhysics {
   phenomenon: EventPhenomenon;
