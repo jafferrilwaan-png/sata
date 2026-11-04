@@ -92,6 +92,18 @@ SATA Sentinel rejects single-model hallucinations. Every query is processed thro
                               +-------------------------------------------+
 ```
 
+### Comprehensive Meta AI Model Suite Utilization
+
+SATA Sentinel leverages the entire official Meta AI model family across each layer of the platform:
+
+| Meta Model | System Function & Architectural Role | Capabilities Utilized |
+| :--- | :--- | :--- |
+| **Meta Muse Spark 1.3** | **Geospatial & Orbital Kinematics Engine** | Forward/inverse geodetic coordinates, SGP4 nadir target alignment, 0.28m optical pass ground track calculation |
+| **Meta Muse Wonder 1.0** | **Atmospheric & Multi-Spectral Physics Engine** | Planck blackbody radiative transfer, Aerosol Optical Depth (AOD), VIIRS thermal fire radiative power, SST calculations |
+| **Meta Muse Spark 1.2** | **Tactical Synthesis & Emergency Protocol Agent** | Autonomous anomaly screening, ground safety threshold verification, multi-sensor consensus scoring |
+| **Meta Llama 4 (Llama-4-Maverick-17B)** | **Planetary Deep Intelligence & Historical Analysis** | Multi-temporal comparisons (e.g. Egypt 1952 vs 2026 Nile Delta hydrology), natural language conversational omnibar |
+| **Meta Muse Code** | **Algorithmic Orbital Mechanics & GLSL Shaders** | SGP4 orbital kinematics implementation, WebGL custom Rayleigh scattering shaders, real-time telemetry ingestion pipelines |
+
 ### Tri-Agent Model Breakdown
 
 | Meta AI Model | Specialized Sub-Agent Role | Primary Responsibilities |
@@ -186,7 +198,7 @@ The Meta AI endpoint is verified live against official endpoints:
 
 ```bash
 curl -X POST https://api.meta.ai/v1/chat/completions \
-  -H "Authorization: Bearer LLM_2207748566818315_UsqKa7V6H8nCNmeOK-9i03yjt9k" \
+  -H "Authorization: Bearer YOUR_META_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "muse-spark-1.3",
