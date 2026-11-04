@@ -1,0 +1,327 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 230" width="920" height="230" fill="none">
+  <defs>
+    <!-- Brushed Silver Titanium Base Gradient -->
+    <linearGradient id="silverOuter" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f1f5f9" />
+      <stop offset="22%" stop-color="#cbd5e1" />
+      <stop offset="48%" stop-color="#94a3b8" />
+      <stop offset="72%" stop-color="#e2e8f0" />
+      <stop offset="100%" stop-color="#64748b" />
+    </linearGradient>
+
+    <linearGradient id="silverFace" x1="0%" y1="15%" x2="100%" y2="85%">
+      <stop offset="0%" stop-color="#d8dee6" />
+      <stop offset="30%" stop-color="#a6aeb8" />
+      <stop offset="55%" stop-color="#cfd6df" />
+      <stop offset="80%" stop-color="#7c8591" />
+      <stop offset="100%" stop-color="#9aa3ae" />
+    </linearGradient>
+
+    <linearGradient id="silverRecess" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7a828c" />
+      <stop offset="50%" stop-color="#9ca4b0" />
+      <stop offset="100%" stop-color="#5d646e" />
+    </linearGradient>
+
+    <!-- Anodized Cobalt Steel Blue Gradient for First 'A' -->
+    <linearGradient id="blueOuter" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#93c5fd" />
+      <stop offset="25%" stop-color="#4b83b8" />
+      <stop offset="55%" stop-color="#2b5682" />
+      <stop offset="80%" stop-color="#6098ce" />
+      <stop offset="100%" stop-color="#193554" />
+    </linearGradient>
+
+    <linearGradient id="blueRecess" x1="15%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#3c6e9e" />
+      <stop offset="45%" stop-color="#274e78" />
+      <stop offset="100%" stop-color="#162f4c" />
+    </linearGradient>
+
+    <linearGradient id="blueInnerBevel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7ab3e8" />
+      <stop offset="50%" stop-color="#3b6f9c" />
+      <stop offset="100%" stop-color="#1c3b5e" />
+    </linearGradient>
+
+    <!-- Subtle 3D Drop Shadow -->
+    <filter id="logoShadow" x="-8%" y="-8%" width="116%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.85" />
+    </filter>
+  </defs>
+
+  <g filter="url(#logoShadow)">
+    <!-- ==================== LETTER 1: S (Brushed Silver with Circuit + Star Etchings) ==================== -->
+    <g transform="translate(10, 0)">
+      <!-- Outer 3D Bevel Silhouette -->
+      <path
+        d="M 225 18
+           H 84
+           C 38 18, 12 42, 12 76
+           C 12 110, 38 128, 82 131
+           L 158 135
+           C 178 136, 188 144, 188 156
+           C 188 168, 178 175, 156 175
+           H 14
+           V 212
+           H 160
+           C 208 212, 236 190, 236 154
+           C 236 118, 210 100, 162 97
+           L 86 93
+           C 66 92, 56 85, 56 73
+           C 56 61, 66 54, 88 54
+           H 225
+           Z"
+        fill="url(#silverOuter)"
+        stroke="#f8fafc"
+        stroke-width="1.5"
+      />
+      <!-- Inner Recessed Track of S -->
+      <path
+        d="M 216 26
+           H 85
+           C 45 26, 22 46, 22 76
+           C 22 104, 44 120, 84 122
+           L 159 126
+           C 185 128, 198 139, 198 156
+           C 198 173, 184 183, 158 183
+           H 23
+           V 203
+           H 159
+           C 201 203, 226 184, 226 154
+           C 226 124, 203 108, 160 106
+           L 85 102
+           C 60 100, 46 89, 46 73
+           C 46 57, 60 46, 86 46
+           H 216
+           Z"
+        fill="url(#silverRecess)"
+        stroke="#2d333b"
+        stroke-width="2"
+      />
+      <!-- Circuit Board Etchings in Top-Right & Bottom-Left of S -->
+      <g stroke="#2b3038" stroke-width="1.6" fill="none" opacity="0.85">
+        <!-- Top Bar Circuitry -->
+        <path d="M 140 28 V 44 M 152 28 V 38 H 175 V 44 M 164 28 H 212 M 182 34 H 212 M 195 40 H 214" />
+        <rect x="198" y="30" width="12" height="8" fill="#475569" />
+        <rect x="156" y="31" width="14" height="5" fill="#475569" />
+        <!-- Left Curve Circuitry -->
+        <path d="M 26 62 H 42 M 24 72 H 38 V 95 M 31 54 V 88 H 46" />
+        <!-- Bottom Bar Circuitry -->
+        <path d="M 26 188 H 95 V 200 M 35 195 H 82 M 105 185 V 201 M 118 185 V 194 H 148 V 201 M 165 186 H 206" />
+        <rect x="42" y="187" width="18" height="6" fill="#475569" />
+        <rect x="126" y="187" width="14" height="5" fill="#475569" />
+      </g>
+      <!-- Constellation Star-Map Lines in Center Spine of S -->
+      <g stroke="#333942" stroke-width="1.1" opacity="0.85">
+        <line x1="62" y1="92" x2="115" y2="112" />
+        <line x1="115" y1="112" x2="168" y2="118" />
+        <line x1="168" y1="118" x2="205" y2="146" />
+        <line x1="95" y1="104" x2="132" y2="120" />
+        <circle cx="62" cy="92" r="2.2" fill="#f8fafc" />
+        <circle cx="115" cy="112" r="2.5" fill="#1e293b" />
+        <circle cx="168" cy="118" r="2.2" fill="#f8fafc" />
+        <circle cx="205" cy="146" r="2.5" fill="#1e293b" />
+      </g>
+    </g>
+
+    <!-- ==================== LETTER 2: A (Anodized Cobalt Blue Metallic with Stepped Circuit Frame) ==================== -->
+    <g transform="translate(242, 0)">
+      <!-- Outer Metallic Blue Body (Rounded Apex like reference) -->
+      <path
+        d="M 118 16
+           C 138 16, 152 28, 162 50
+           L 236 212
+           H 182
+           L 164 170
+           H 72
+           L 54 212
+           H 0
+           L 74 50
+           C 84 28, 98 16, 118 16
+           Z"
+        fill="url(#blueOuter)"
+        stroke="#93c5fd"
+        stroke-width="1.6"
+      />
+      <!-- Recessed Inner Blue Channel -->
+      <path
+        d="M 118 28
+           C 132 28, 143 37, 151 54
+           L 218 202
+           H 190
+           L 170 158
+           H 66
+           L 46 202
+           H 18
+           L 85 54
+           C 93 37, 104 28, 118 28
+           Z"
+        fill="url(#blueRecess)"
+        stroke="#0f233d"
+        stroke-width="2.2"
+      />
+      <!-- Stepped Inner Bevel Frame & Triangle Cutout -->
+      <path
+        d="M 118 46
+           L 172 164
+           H 64
+           Z"
+        fill="none"
+        stroke="url(#blueInnerBevel)"
+        stroke-width="8"
+        stroke-linejoin="round"
+      />
+      <!-- True Background Cutout Triangle of First A -->
+      <path
+        d="M 118 68
+           L 148 136
+           H 88
+           Z"
+        fill="#030712"
+        stroke="#7dd3fc"
+        stroke-width="1.5"
+      />
+      <!-- Circuit Board Traces on Blue 'A' -->
+      <g stroke="#7dd3fc" stroke-width="1.5" opacity="0.65" fill="none">
+        <path d="M 32 196 L 68 116 H 78" />
+        <path d="M 48 182 L 82 104" />
+        <path d="M 204 196 L 168 116 H 158" />
+        <path d="M 188 182 L 154 104" />
+        <path d="M 78 150 H 158" />
+        <path d="M 92 158 H 144" />
+        <circle cx="68" cy="116" r="2.5" fill="#93c5fd" />
+        <circle cx="168" cy="116" r="2.5" fill="#93c5fd" />
+      </g>
+    </g>
+
+    <!-- ==================== LETTER 3: T (Brushed Silver with Pointed Base & Constellation Etching) ==================== -->
+    <g transform="translate(462, 0)">
+      <!-- Outer Silver Bevel Frame with subtle V-tip at bottom -->
+      <path
+        d="M 0 18
+           H 220
+           V 64
+           H 134
+           V 194
+           L 110 214
+           L 86 194
+           V 64
+           H 0
+           Z"
+        fill="url(#silverOuter)"
+        stroke="#f8fafc"
+        stroke-width="1.5"
+      />
+      <!-- Inner Recessed Silver Panel -->
+      <path
+        d="M 10 28
+           H 210
+           V 54
+           H 124
+           V 189
+           L 110 202
+           L 96 189
+           V 54
+           H 10
+           Z"
+        fill="url(#silverFace)"
+        stroke="#2d333b"
+        stroke-width="2"
+      />
+      <!-- Constellation Star-Map & Circuit Etchings inside T -->
+      <g stroke="#2b3038" stroke-width="1.3" fill="none" opacity="0.88">
+        <!-- Constellation Lines -->
+        <line x1="28" y1="36" x2="76" y2="46" />
+        <line x1="76" y1="46" x2="112" y2="35" />
+        <line x1="112" y1="35" x2="148" y2="48" />
+        <line x1="112" y1="35" x2="108" y2="88" />
+        <line x1="108" y1="88" x2="116" y2="132" />
+        <line x1="116" y1="132" x2="104" y2="176" />
+        <!-- Star Nodes -->
+        <circle cx="28" cy="36" r="2" fill="#1e293b" />
+        <circle cx="76" cy="46" r="2.5" fill="#1e293b" />
+        <circle cx="112" cy="35" r="3" fill="#0f172a" />
+        <circle cx="108" cy="88" r="3" fill="#0f172a" />
+        <circle cx="116" cy="132" r="2.5" fill="#1e293b" />
+        <!-- Top-Right Circuit Block in T Crossbar -->
+        <path d="M 156 28 V 52 M 168 28 V 44 H 206 M 180 35 H 206" />
+        <rect x="184" y="30" width="16" height="6" fill="#475569" />
+        <!-- Stem Circuitry -->
+        <path d="M 98 118 H 108 V 182 M 120 98 V 168 H 112" />
+      </g>
+    </g>
+
+    <!-- ==================== LETTER 4: A (Brushed Silver Titanium with Right-Wing Circuitry) ==================== -->
+    <g transform="translate(658, 0)">
+      <!-- Outer Silver Bevel Silhouette -->
+      <path
+        d="M 122 16
+           C 142 16, 156 28, 166 50
+           L 242 212
+           H 184
+           L 166 170
+           H 76
+           L 58 212
+           H 2
+           L 78 50
+           C 88 28, 102 16, 122 16
+           Z"
+        fill="url(#silverOuter)"
+        stroke="#f8fafc"
+        stroke-width="1.5"
+      />
+      <!-- Brushed Titanium Inner Face -->
+      <path
+        d="M 122 26
+           C 138 26, 149 36, 157 53
+           L 226 202
+           H 191
+           L 172 160
+           H 70
+           L 51 202
+           H 16
+           L 85 53
+           C 93 36, 106 26, 122 26
+           Z"
+        fill="url(#silverFace)"
+        stroke="#333a42"
+        stroke-width="1.8"
+      />
+      <!-- Inner Triangle Cutout -->
+      <path
+        d="M 122 60
+           L 156 138
+           H 88
+           Z"
+        fill="#030712"
+        stroke="#cbd5e1"
+        stroke-width="2"
+      />
+      <!-- Right-Leg Recessed Tech Cutout Panel (matching reference) -->
+      <path
+        d="M 148 56
+           L 174 44
+           L 222 148
+           L 182 148
+           Z"
+        fill="url(#silverRecess)"
+        stroke="#2b3038"
+        stroke-width="1.8"
+      />
+      <!-- Circuit & Constellation Etchings on Right Wing of 2nd A -->
+      <g stroke="#2b3038" stroke-width="1.4" fill="none" opacity="0.85">
+        <path d="M 158 56 L 178 98 H 198 M 168 52 L 188 92 M 176 112 H 204 M 184 126 H 210" />
+        <rect x="172" y="64" width="10" height="14" transform="rotate(-25 172 64)" fill="#475569" />
+        <!-- Constellation Star Lines on Lower Right Leg -->
+        <line x1="82" y1="120" x2="112" y2="152" />
+        <line x1="112" y1="152" x2="178" y2="166" />
+        <line x1="178" y1="166" x2="208" y2="194" />
+        <circle cx="82" cy="120" r="2.2" fill="#1e293b" />
+        <circle cx="112" cy="152" r="2.5" fill="#1e293b" />
+        <circle cx="178" cy="166" r="2.8" fill="#0f172a" />
+        <circle cx="208" cy="194" r="2.2" fill="#1e293b" />
+      </g>
+    </g>
+  </g>
+</svg>

@@ -49,6 +49,8 @@ yarn-error.log*
 # OS metadata
 .DS_Store
 Thumbs.db
+!public/**
+!remix-remix-earthui-designer/public/**
 !docs/images/*.png
 !docs/videos/*.webm
 !docs/videos/*.mp4
