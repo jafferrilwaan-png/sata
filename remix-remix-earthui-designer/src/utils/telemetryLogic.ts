@@ -1846,13 +1846,31 @@ export function evaluateObservationQuery(
     }
   }
 
+  // Conversational greeting check -> Pure, friendly natural response
+  const isGreetingQuery =
+    /^(hi|hello|hey|greetings|hola|how are you|who are you|good morning|good evening)\b/i.test(normalized) ||
+    ['hi', 'hello', 'hey', 'dude', 'bro'].some((w) => normalized.split(/\s+/).includes(w));
+
+  if (isGreetingQuery) {
+    return {
+      activeHeatSpots: 0,
+      aiInsightLead: 'Meta AI:',
+      aiInsightBody:
+        'Hello! I am Meta AI for SATA. How can I assist you with real-time planetary observations, satellite tracking, or environmental data today?',
+      matchedReleases: RELEASES_LIST,
+      matchedSensors: SENSOR_TELEMETRY_ROWS,
+      targetPointOfView: null,
+      activeHotspotId: null,
+    };
+  }
+
   // 2. Empty query -> Default reference state
   if (!normalized && !customGeocodedPlace) {
     return {
       activeHeatSpots: adjustOrbitEnabled ? 84 : 79,
       aiInsightLead: 'Meta Muse:',
       aiInsightBody:
-        'Real-time VIIRS & MODIS orbital scan detects active thermal anomalies. SGP4 telemetry synchronized across all orbital passes.',
+        'Satellite telemetry synchronized. Ready to track any planetary sector, satellite pass, or climate phenomenon on request.',
       matchedReleases: RELEASES_LIST,
       matchedSensors: SENSOR_TELEMETRY_ROWS,
       targetPointOfView: null,
@@ -1967,7 +1985,7 @@ export function evaluateObservationQuery(
       activeHeatSpots: 84,
       aiInsightLead: 'Meta Muse:',
       aiInsightBody:
-        'Real-time VIIRS & MODIS orbital scan detects active thermal anomalies. SGP4 telemetry synchronized across all orbital passes.',
+        'Satellite telemetry synchronized. Ready to track any planetary sector, satellite pass, or climate phenomenon on request.',
       matchedReleases: RELEASES_LIST,
       matchedSensors: SENSOR_TELEMETRY_ROWS,
       targetPointOfView: {
@@ -2124,7 +2142,7 @@ export function evaluateObservationQuery(
     activeHeatSpots: 84,
     aiInsightLead: 'Meta Muse:',
     aiInsightBody:
-      'Real-time VIIRS & MODIS orbital scan detects active thermal anomalies. SGP4 telemetry synchronized across all orbital passes.',
+      'Satellite telemetry synchronized. Ready to track any planetary sector, satellite pass, or climate phenomenon on request.',
     matchedReleases: RELEASES_LIST,
     matchedSensors: SENSOR_TELEMETRY_ROWS,
     targetPointOfView: null,

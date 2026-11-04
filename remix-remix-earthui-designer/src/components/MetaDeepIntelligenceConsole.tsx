@@ -640,7 +640,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
     // Strict negative check: If user says "remove", "don't", "no", "fake", "stop", "hide", NEVER enable video feed
     
     const isTimeQuery = qLower.includes('time') || qLower.includes('clock') || qLower.includes('date');
-    const isGreeting = /^(hi|hello|hey|greetings|hola)\b/i.test(qLower.trim());
+    const isGreeting = /^(hi|hello|hey|greetings|hola|how are you|who are you)\b/i.test(qLower.trim()) || ['hi', 'hello', 'hey', 'dude', 'bro'].some(w => qLower.trim().split(/\s+/).includes(w));
 
     const isNegativeVideo = qLower.includes('remove') || qLower.includes('remov') || qLower.includes("don't") || qLower.includes('dont') || qLower.includes('fake') || qLower.includes('stop') || qLower.includes('hide') || qLower.includes('no video');
     const wantsVideo = !isNegativeVideo && (
@@ -683,7 +683,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
       onApplyLayer?.('MODIS_TRUE_COLOR_TERRAIN');
     }
 
-    if (instantGeo) {
+    if (!isGreeting && instantGeo) {
       resolvedLat = instantGeo.lat;
       resolvedLon = instantGeo.lon;
       resolvedTargetName = instantGeo.name;
@@ -904,7 +904,7 @@ export const MetaDeepIntelligenceConsole: React.FC<MetaDeepIntelligenceConsolePr
         }
 
         // AUTONOMOUS AGENT ACTION: Fly camera & zoom 3D globe to resolved target
-        if (metaData && typeof metaData.lat === 'number' && typeof metaData.lon === 'number' && (metaData.lat !== 0 || metaData.lon !== 0)) {
+        if (!isGreeting && metaData && typeof metaData.lat === 'number' && typeof metaData.lon === 'number' && (metaData.lat !== 0 || metaData.lon !== 0)) {
           const userAskedForCal = qLower.includes('california') || qLower.includes('menlo park') || qLower.includes('san francisco');
           const isHallucinatedMenlo = !userAskedForCal && (metaData.targetName?.toLowerCase().includes('menlo park') || (metaData.lat >= 37.35 && metaData.lat <= 37.65 && metaData.lon >= -122.35 && metaData.lon <= -122.0));
           

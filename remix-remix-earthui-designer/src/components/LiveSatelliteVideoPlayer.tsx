@@ -288,12 +288,11 @@ export const LiveSatelliteVideoPlayer: React.FC<LiveSatelliteVideoPlayerProps> =
           
           {/* Authentic Optical Reticle Crosshair */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="relative w-28 h-28 border border-sky-400/40 rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 bg-sky-400 rounded-full shadow-[0_0_8px_#38bdf8]" />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-3 bg-sky-400/70" />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-3 bg-sky-400/70" />
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 h-px w-3 bg-sky-400/70" />
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 h-px w-3 bg-sky-400/70" />
+            <div className="relative w-28 h-28 border border-white/30 rounded-full flex items-center justify-center">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-4 bg-white/60" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-4 bg-white/60" />
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 h-px w-4 bg-white/60" />
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 h-px w-4 bg-white/60" />
             </div>
           </div>
         </div>
@@ -303,7 +302,7 @@ export const LiveSatelliteVideoPlayer: React.FC<LiveSatelliteVideoPlayerProps> =
       <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none z-20">
         <div className="flex items-center gap-1.5 pointer-events-auto">
           {/* Authentic Live Streaming Indicator Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-sky-500/20 text-sky-200 border border-sky-400/30 font-sans text-[10px] sm:text-[10.5px] font-semibold tracking-wider uppercase backdrop-blur-md select-none shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-white/10 text-white/90 border border-white/20 font-sans text-[10px] sm:text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md select-none shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
             <span>LIVE ORBITAL FEED</span>
           </div>
 
@@ -341,13 +340,13 @@ export const LiveSatelliteVideoPlayer: React.FC<LiveSatelliteVideoPlayerProps> =
       <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-end justify-between gap-2 pointer-events-none z-20">
         <div className="flex flex-col gap-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/15 font-sans font-medium text-[9px] sm:text-[10px] text-cyan-300 font-semibold">
+            <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/15 font-sans font-medium text-[9px] sm:text-[10px] text-white/90 font-medium">
               {resolution}
             </span>
-            <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/15 font-sans font-medium text-[9px] sm:text-[10px] text-emerald-300">
+            <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/15 font-sans font-medium text-[9px] sm:text-[10px] text-white/80">
               {bitrate}
             </span>
-            <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/15 font-sans font-medium text-[9px] sm:text-[10px] text-amber-300">
+            <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/15 font-sans font-medium text-[9px] sm:text-[10px] text-white/70">
               {downlinkFreq}
             </span>
           </div>

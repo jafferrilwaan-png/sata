@@ -87,7 +87,7 @@ export const LiquidTimeline = React.memo<LiquidTimelineProps>(({
           {/* Scrub Thumb Knob */}
           <div
             style={{ left: `${temporal.thumbPct}%` }}
-            className="absolute -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border border-sky-300 pointer-events-none z-10 transition-all duration-150 shadow-[0_0_12px_rgba(255,255,255,0.9)]"
+            className="absolute -translate-x-1/2 w-1.5 h-4 rounded-sm bg-white border border-white/60 pointer-events-none z-10 transition-all duration-150 shadow-[0_0_8px_rgba(255,255,255,0.7)]"
           />
         </div>
       </div>

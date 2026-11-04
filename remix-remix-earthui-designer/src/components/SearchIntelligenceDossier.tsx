@@ -96,7 +96,7 @@ export const SearchIntelligenceDossier: React.FC<SearchIntelligenceDossierProps>
                 
                 <span>{lonStr}</span>
                 
-                <span className="text-emerald-400 font-sans">0.28m SGP4 Verified</span>
+                <span className="text-white/60 font-sans">0.28m SGP4 Verified</span>
               </div>
             </div>
           </div>

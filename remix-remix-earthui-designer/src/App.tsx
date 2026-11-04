@@ -1757,9 +1757,9 @@ export default function App() {
                 <MetaDeepIntelligenceConsole
                   userQuery={searchQuery}
                   initialVoiceMessage={activeVoiceMessage || undefined}
-                  targetName={liveAiDispatchState?.targetName || customGeocodedPlace?.name || 'Global Observation'}
-                  lat={liveAiDispatchState?.lat ?? customGeocodedPlace?.lat ?? 20}
-                  lon={liveAiDispatchState?.lon ?? customGeocodedPlace?.lon ?? 78}
+                  targetName={liveAiDispatchState?.targetName || customGeocodedPlace?.name || (/^(hi|hello|hey|how are you)\b/i.test(searchQuery.trim()) ? 'Global Earth Overview' : 'Global Observation')}
+                  lat={liveAiDispatchState?.lat ?? customGeocodedPlace?.lat ?? (/^(hi|hello|hey|how are you)\b/i.test(searchQuery.trim()) ? 0 : 20)}
+                  lon={liveAiDispatchState?.lon ?? customGeocodedPlace?.lon ?? (/^(hi|hello|hey|how are you)\b/i.test(searchQuery.trim()) ? 0 : 78)}
                   briefingLead={liveAiDispatchState?.briefingLead || displayObservationData.aiInsightLead}
                   briefingBody={liveAiDispatchState?.briefingBody || displayObservationData.aiInsightBody}
                   thinkingSteps={liveAiDispatchState?.thinkingSteps}

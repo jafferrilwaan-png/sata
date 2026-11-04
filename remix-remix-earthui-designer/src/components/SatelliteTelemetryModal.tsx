@@ -183,10 +183,10 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
             transition={{ type: 'spring', damping: 28, stiffness: 340 }}
-            className="relative z-10 w-full max-w-2xl rounded-[28px] p-5 sm:p-6 border border-white/25 bg-white/[0.08] backdrop-blur-[45px] saturate-[180%] shadow-[0_24px_70px_rgba(0,0,0,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.35)] text-white overflow-hidden flex flex-col gap-3.5"
+            className="relative z-10 w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-[28px] p-5 sm:p-6 border border-white/25 bg-white/[0.08] backdrop-blur-[45px] saturate-[180%] shadow-[0_24px_70px_rgba(0,0,0,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.35)] text-white flex flex-col gap-3.5 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
           >
             {/* Header: Pure Typography */}
-            <div className="flex items-start justify-between pb-3 border-b border-white/10 gap-3">
+            <div className="flex items-start justify-between pb-3 border-b border-white/10 gap-3 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
                   <Satellite className="w-5 h-5 text-white" />
@@ -215,7 +215,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
             </div>
 
             {/* Mode Switcher Tabs: Real Nadir Ground Track | Orbital Ephemeris | Constellation Compare */}
-            <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/[0.04] border border-white/12 self-start">
+            <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/[0.04] border border-white/12 self-start shrink-0">
               <button
                 type="button"
                 onClick={() => setActiveTab('groundtrack')}
@@ -269,7 +269,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
                   {/* Top Badges */}
                   <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none z-10">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-200 border border-sky-400/35 text-[10.5px] font-semibold tracking-wider uppercase backdrop-blur-md">
+                      <span className="px-2.5 py-1 rounded-xl bg-white/10 text-white/90 border border-white/20 text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md">
                         LIVE SATELLITE PASS
                       </span>
                       <span className="px-2 py-0.5 rounded-full bg-black/50 text-white/90 border border-white/15 text-[10px] font-sans">
@@ -277,7 +277,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="px-2.5 py-1 rounded-full bg-black/60 text-emerald-300 border border-emerald-400/30 text-[10.5px] font-medium tracking-wide backdrop-blur-md">
+                      <span className="px-2.5 py-1 rounded-xl bg-black/60 text-white/90 border border-white/20 text-[10px] font-medium tracking-wide backdrop-blur-md">
                         Next Refresh: {Math.floor(countdownSec / 60).toString().padStart(2, '0')}:{(countdownSec % 60).toString().padStart(2, '0')}
                       </span>
                     </div>
@@ -285,12 +285,11 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
 
                   {/* Reticle Crosshair in Center */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="relative w-32 h-32 border border-sky-400/40 rounded-full flex items-center justify-center">
-                      <div className="w-2.5 h-2.5 bg-sky-400 rounded-full shadow-[0_0_10px_#38bdf8]" />
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-4 bg-sky-400/80" />
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-4 bg-sky-400/80" />
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 h-px w-4 bg-sky-400/80" />
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-px w-4 bg-sky-400/80" />
+                    <div className="relative w-32 h-32 border border-white/30 rounded-full flex items-center justify-center">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-5 bg-white/60" />
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-5 bg-white/60" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 h-px w-5 bg-white/60" />
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-px w-5 bg-white/60" />
                     </div>
                   </div>
 
@@ -318,7 +317,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
                 {/* 5-Min Storage Sync Banner */}
                 <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/12 text-[11px] text-white/80">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    
                     <span>SATA Local Storage: Synchronized (5-Min Pass Archive Active)</span>
                   </div>
                   <span className="text-white/60 text-[10px]">
@@ -332,7 +331,7 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
                     <span className="text-[10.5px] uppercase font-sans font-semibold tracking-wider text-white/80">
                       Meta AI Autonomous Anomaly Detection
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[9.5px] font-medium tracking-wide">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-white/10 text-white/90 border border-white/15 text-[9.5px] font-medium tracking-wide">
                       STATUS: NOMINAL (Zero Thermal or Storm Anomalies Detected)
                     </span>
                   </div>
@@ -341,17 +340,17 @@ export const SatelliteTelemetryModal: React.FC<SatelliteTelemetryModalProps> = (
                     <div className="p-2 rounded-xl bg-white/[0.03] border border-white/8">
                       <div className="text-white/50 text-[9.5px]">Thermal Radiative Flux</div>
                       <div className="text-white font-medium mt-0.5">14.2 W/m²/sr</div>
-                      <div className="text-emerald-400 text-[8.5px]">Nominal Background</div>
+                      <div className="text-white/60 text-[8.5px]">Nominal Background</div>
                     </div>
                     <div className="p-2 rounded-xl bg-white/[0.03] border border-white/8">
                       <div className="text-white/50 text-[9.5px]">Atmospheric AOD</div>
                       <div className="text-white font-medium mt-0.5">0.24 AOD</div>
-                      <div className="text-sky-400 text-[8.5px]">Stable Boundary</div>
+                      <div className="text-white/60 text-[8.5px]">Stable Boundary</div>
                     </div>
                     <div className="p-2 rounded-xl bg-white/[0.03] border border-white/8">
                       <div className="text-white/50 text-[9.5px]">Surface Albedo</div>
                       <div className="text-white font-medium mt-0.5">0.18 NIR</div>
-                      <div className="text-emerald-400 text-[8.5px]">Natural Reflectance</div>
+                      <div className="text-white/60 text-[8.5px]">Natural Reflectance</div>
                     </div>
                     <div className="p-2 rounded-xl bg-white/[0.03] border border-white/8">
                       <div className="text-white/50 text-[9.5px]">Orbital Velocity</div>
